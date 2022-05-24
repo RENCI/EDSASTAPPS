@@ -1,0 +1,62 @@
+export PYTHONPATH=/projects/sequence_analysis/vol1/prediction_work/AST:/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS
+export RUNTIMEDIR=./JUNK
+
+python run_get_observation.py --stoptime '2022-02-20 00:00:00' --data_source 'NOAA' --data_product 'water_level' 
+
+python run_get_observation.py --stoptime '2022-02-20 00:00:00' --data_source 'CONTRAILS' --data_product 'river_water_level' --config_name ./secrets/contrails.yml
+
+python run_get_observation.py --stoptime '2022-05-10 00:00:00' --data_source 'NDBC' --data_product 'wave_height'
+
+
+## Scenario 1
+## Fetching station WL values from ADCIRC (fort.61.nc)
+## This approach builds URLs using a url_framework.yml and specification of the grid, instance, and ensemble names
+##
+
+python run_get_adcirc_data_yaml.py --stoptime '2022-02-20 00:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-nam-bob-2021' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml'
+
+# Normal run change default ndays value
+python run_get_adcirc_data_yaml.py --stoptime '2022-02-02 00:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-nam-bob-2021' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+
+# Change up the ensemble
+python run_get_adcirc_data_yaml.py --stoptime '2022-02-02 00:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-nam-bob-2021' --ensemble 'namforecast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+
+# Try a different grid available with the hatteras machine name
+python run_get_adcirc_data_yaml.py --stoptime '2022-04-21 00:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-da-nowcast' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+
+# Try a different grid that was executed at PSC
+python run_get_adcirc_data_yaml.py --stoptime '2022-04-22 12:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-psc' --ensemble 'nowcast' --config_file './secrets/url_framework_psc.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1 
+
+# Data availble from BOTH systems. Do a comparison
+
+# Hatteras
+python run_get_adcirc_data_yaml.py --stoptime '2022-04-22 06:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-da-nowcast' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+# PSC
+python run_get_adcirc_data_yaml.py --stoptime '2022-04-22 06:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-psc' --ensemble 'nowcast' --config_file './secrets/url_framework_psc.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+
+# Test building a Hurricane url. NOTE because of the very different url nomenclature for hurricanes you must utilize the additional CLI varibles. Also, Time inputs (stoptime) is polymorpjic. So for hurricanes, 
+# the stoptime woulds be the stop ADVISORY number. The number of URL (advisories) generated assumes a 6 hour step
+
+python run_get_adcirc_data_yaml.py --stoptime 11 --data_source 'ASGS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-al09-bob' --ensemble 'nhcOfcl' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml'  --hurricane_year='2021' --hurricane_source='al09' --ndays -1
+
+python run_get_adcirc_data_yaml.py --stoptime 11 --data_source 'ASGS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-al09-bob' --ensemble 'nhcOfcl' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml'  --hurricane_year='2021' --hurricane_source='al09' --ndays -1
+
+
+## Scenario 2
+## Fetching station WL values from ADCIRC (fort.61.nc)
+## This approach builds URLs using a template url and user specified ensemble names
+## (grid,and instance are derived from the template)
+##
+
+python run_get_adcirc_data_url_template.py --stoptime '2022-04-22 06:00:00' --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022020200/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.61.nc" --ensemble 'nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -2
+
+# Demonstration that the DATE word is arbitrary (given the proper formatting) and that we can change the ensemble
+python run_get_adcirc_data_url_template.py --stoptime '2022-04-22 06:00:00' --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2022/nam/1900000000/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.61.nc" --ensemble 'namforecast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -2
+
+
+# Grab a hurricane WL dataset
+# NOTE: DO NOT need the extra hurricane variables
+
+python run_get_adcirc_data_url_template.py --stoptime 11 --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.61.nc" --ensemble 'nhcOfcl' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -2 
+
+

@@ -1,0 +1,20 @@
+serial_nr,stationid,location,state
+# Short list of Easy Coast buoys
+1,41013,Frying Pan Shoals, NC
+2,44088,Virginia Beach Offshore,VA
+3,44009,DELAWARE BAY 26 NM Southeast of Cape May,NJ
+4,44008,NANTUCKET 54 NM Southeast of Nantucket,
+5,41001,EAST HATTERAS - 150 NM East of Cape Hatteras,
+6,44100,Duck FRF 26m,NC
+7,44095,Oregon Inlet,NC
+8,41004,EDISTO - 41 NM Southeast of Charleston,SC
+9,41008,GRAYS REEF - 40 NM Southeast of Savannah,GA
+10,41010,CANAVERAL EAST - 120NM East of Cape Canaveral,
+11,41009,CANAVERAL 20 NM East of Cape Canaveral,FL
+12,42036,WEST TAMPA - 112 NM WNW of Tampa,FL
+13,42409,GULF OF MEXICO - 247 NM South of New Orleans,LA
+14,42020,CORPUS CHRISTI TX - 60NM SSE of Corpus Christi,TX
+15,44402,SOUTHEAST BLOCK CANYON - 130 NM SE of Fire Island,
+16,44150,La Have Bank,
+17,44037,Buoy M01 - Jordan Basin,
+18,44011,GEORGES BANK 170 NM East of Hyannis,MA

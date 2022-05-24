@@ -1,0 +1,252 @@
+Interpretation and usage information
+
+The run_harvester codes use the AST/harvester classes to fetch observation and model data. These codes are generally designed to
+be executed as a cron job for incrementally adding "daily" files to a local filesystem. A separate application (ingester) 
+will read these files and upload them to a database.
+
+These codes are excellent examples of how a user can utilize the AST/harvester codes.
+
+##
+## Observational data (NOAA, NDBC and CONTRAILS) 
+##
+
+The invocation of the run_get_observations.py code is to create two files. The product data file and the associated metadata.
+These data are then saved to disk. The nomenclature of the saved files (see below) is expressive to facilitate downstream 
+ingestors upload to a database.
+
+# Running the code. 
+# The run_get_observations.py code supports the following arguments.
+
+if __name__ == '__main__':
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+    parser.add_argument('--ndays', action='store', dest='ndays', default=-2, type=int,
+                        help='Number of look-back days from stoptime (or now): default -2')
+    parser.add_argument('--stoptime', action='store', dest='stoptime', default=None, type=str,
+                        help='Desired stoptime YYYY-mm-dd HH:MM:SS. Default=now')
+    parser.add_argument('--sources', action='store_true',
+                        help='List currently supported data sources')
+    parser.add_argument('--data_source', action='store', dest='data_source', default=None, type=str,
+                        help='choose supported data source (case independant) eg NOAA or CONTRAILS')
+    parser.add_argument('--data_product', action='store', dest='data_product', default=None, type=str,
+                        help='choose supported data product eg river_water_level: Only required for Contrails')
+    parser.add_argument('--station_list', action='store', dest='station_list', default=None, type=str,
+                        help='Choose a non-default location/filename for a stationlist')
+    parser.add_argument('--config_name', action='store', dest='config_name', default=None, type=str,
+                        help='Choose a non-default contrails auth config_name')
+
+1) config_name is only required for Contrails data.
+   and would generally be found in ./secrets/contrails.yml
+
+# Launching the run_get_observations.py app
+Several examples of launching the app are possible. Depending on the source, one or more of the following files
+must be present
+
+./supporting_data/noaa_stations.csv
+./supporting_data/contrails_stations_rivers.csv
+./supporting_data/contrails_stations_coastal.csv
+./supporting_data/ndbc_buoys.csv
+./secrets/contrail.yml
+
+Rivers and Coastal sites are treated differently by Contrails and so the user must choose by proper selection of the 
+data_product: 'river_water_level' or 'coastal_water_level'
+
+# Execution
+# Setup the local environment
+
+export PYTHONPATH=~/AST:~/EDSASTAPPS
+export RUNTIMEDIR=./OUTPUTS
+All outputs files will be deposited into $RUNTIMEDIR
+
+# NOAA data site using default ndays lookback of -2 days
+python run_get_observation.py --stoptime '2022-02-20 00:00:00' --data_source 'NOAA' --data_product 'water_level'
+
+# Contrails River data. using a default lookback of -2 days
+python run_get_observation.py --stoptime '2022-02-20 00:00:00' --data_source 'CONTRAILS' --data_product 'river_water_level' --config_name ./secrets/contrails.yml
+
+# Contrails Coastal data. using a default lookback of -2 days
+python run_get_observation.py --stoptime '2022-02-20 00:00:00' --data_source 'CONTRAILS' --data_product 'river_water_level' --config_name ./secrets/contrails.yml
+
+# NOAA with a complete specification and looking back -4 days 
+python run_get_observation.py --stoptime '2022-02-20 00:00:00' --ndays -4 --data_source 'NOAA' --data_product 'water_level' --station_list = './supporting_data/noaa_stations.csv
+
+# NDBC data site using default ndays lookback of -2 days. Can only look back 45 days. So update times accordingly
+python run_get_observation.py --stoptime '2022-05-10 00:00:00' --data_source 'NDBC' --data_product 'wave_height'
+
+
+# Output results
+#
+#Outputs for any of these runs consist of two file. One is the data and one is the metadata
+#As a concrete example after running the job:
+# python run_get_observation.py --stoptime '2022-02-20 00:00:00' --data_source 'NOAA' --data_product 'water_level'
+#
+# The final data will consist of products sampled every 15mins for each found station in the station_list. Data will be inteprolated to fit the sampling.
+# nans are replaced by -99999 values
+#
+# The two outputs files will be:
+
+    $RUNTIMEDIR/noaa_stationdata_water_level_2022-02-20T00:00:00.csv
+    $RUNTIMEDIR/noaa_stationdata_meta_water_level_2022-02-20T00:00:00.csv
+
+The product data set will have a "melted" format of:
+    TIME,STATION,WATER_LEVEL
+    2022-02-18T00:00:00,8410140,-2.324
+    2022-02-18T00:15:00,8410140,-2.006
+    2022-02-18T00:30:00,8410140,-1.76
+    ...
+
+While the metadata will be:
+    STATION,LAT,LON,NAME,UNITS,TZ,OWNER,STATE,COUNTY
+    2695540,32.373306,-64.703306,"Bermuda, St. Georges Island",meters,gmt,NOAA/NOS,Bermuda,-99999
+    8410140,44.904598,-66.982903,Eastport,meters,gmt,NOAA/NOS,ME,-99999
+    ...
+
+# Cron and other utility jobs
+# run_daily_observations.sh
+#     A slurm script to run a fixed length of days. For example as a catchup to backfill a database. This script. processes each day 
+#     individually to mimic the outputs of a daily run cron job
+#
+# daily_observation_update.sh
+#     A script to be executed by cron. It uses a stoptime as "now" with the expectation the cron is run daily (see below)
+#     
+
+##
+## ADCIRC Model data
+##
+
+The invocation of the "run" codes for adcirc consist of two possibilites: run_get_adcirc_data_url_template.py and run_get_adcirc_data_yaml.py. Each possibility results in two output files: The product data file and the associated metadata. These data are then saved to disk. The nomenclature of the saved files (see below) is expressive to facilitate downstream
+ingestors upload to a database.
+The two different codes reflect the two possible ways to specify access to an ADCIRC data set. The run_get_adcirc_data_url_template.py code build an ADCIRC url from an input template url. The grid, instance, site are determined from the template url. The ensemble may also grabbed from the url or provided by the user at runtime. The run_get_adcirc_data_yaml.py build the ADCIRC url from a url_framework.yml. In this case the caller must provide the grid, instance, etc information. 
+
+
+# Running the code.
+# The run_get_adcirc_data_url_template.py code supports the following arguments.
+
+if __name__ == '__main__':
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+    parser.add_argument('--ndays', action='store', dest='ndays', default=-2, type=int,
+                        help='Number of look-back days from stoptime: default -2')
+    parser.add_argument('--stoptime', action='store', dest='stoptime', default=None, type=str,
+                        help='Desired stoptime YYYY-mm-dd HH:MM:SS')
+    parser.add_argument('--sources', action='store_true',
+                        help='List currently supported data sources')
+    parser.add_argument('--data_source', action='store', dest='data_source', default='ASGS', type=str,
+                        help='choose supported data source: default = ASGS')
+    parser.add_argument('--data_product', action='store', dest='data_product', default='water_level', type=str,
+                        help='choose supported data product: default is water_level')
+    parser.add_argument('--map_file', action='store', dest='map_file', default=None, type=str,
+                        help='Location of the grid_to_stationfile_maps.yml data')
+    parser.add_argument('--url', action='store', dest='url', default=None, type=str,
+                        help='ASGS url to fetcb ADCIRC data')
+    parser.add_argument('--ensemble', action='store',dest='ensemble', default='nowcast',
+                        help='str: Select appropriate ensemble Default is nowcast')
+
+# The run_get_adcirc_data_yaml.py code supports the following arguments.
+# --hurricane_source and --hurricane_year are only required if choosing to build a hurricane url.
+
+if __name__ == '__main__':
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+    parser.add_argument('--ndays', action='store', dest='ndays', default=-2, type=int,
+                        help='Number of look-back days from stoptime : default -2')
+    parser.add_argument('--stoptime', action='store', dest='stoptime', default=None, type=str,
+                        help='Desired stoptime YYYY-mm-dd HH:MM:SS')
+    parser.add_argument('--sources', action='store_true',
+                        help='List currently supported data sources')
+    parser.add_argument('--data_source', action='store', dest='data_source', default='ASGS', type=str,
+                        help='choose supported data source: default = ASGS')
+    parser.add_argument('--data_product', action='store', dest='data_product', default='water_level', type=str,
+                        help='choose supported data product: default is water_level')
+    parser.add_argument('--map_file', action='store', dest='map_file', default=None, type=str,
+                        help='Location of the grid_to_stationfile_maps.yml data')
+    parser.add_argument('--config_file', action='store', dest='config_file', default=None, type=str,
+                        help='Location of the url_framework.yml data')
+    parser.add_argument('--instance_name', action='store', dest='instance_name', default=None,
+                        help='String: instance name')
+    parser.add_argument('--hurricane_source', action='store',dest='hurricane_source', default=None,
+                        help='str: Only needed for Hurricanes AND if using YAML to specify urls')
+    parser.add_argument('--hurricane_year', action='store',dest='hurricane_year', default=None,
+                        help='str: Only needed for Hurricanes AND if using YAML to specify urls')
+    parser.add_argument('--grid_name', action='store',dest='grid_name', default=None,
+                        help='str: Select appropriate grid_name')
+    parser.add_argument('--ensemble', action='store',dest='ensemble', default='nowcast',
+                        help='str: Select appropriate ensemble Default is nowcast')
+
+
+# Launching the run_get_observations.py app
+Several examples of launching the app are possible. Depending on the source, one or more of the following files
+must be present
+
+./supporting_data/adcirc_stations_noaa_contrails.csv
+./supporting_data/grid_to_stationfile_maps.yml
+./secrets/url_framework.yml
+
+# Execution
+# Setup the local environment
+
+export PYTHONPATH=~/AST:~/EDSASTAPPS
+export RUNTIMEDIR=./OUTPUTS
+All outputs files will be deposited into $RUNTIMEDIR
+
+# Example invocations - YAML construction type
+# So now, the lookback of -1 days should generate a url list 
+
+python run_get_adcirc_data_yaml.py --stoptime '2022-02-20 00:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-nam-bob-2021' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml'
+
+# Normal run change default ndays value
+python run_get_adcirc_data_yaml.py --stoptime '2022-02-02 00:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-nam-bob-2021' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+
+# Change up the ensemble
+python run_get_adcirc_data_yaml.py --stoptime '2022-02-02 00:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-nam-bob-2021' --ensemble 'namforecast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+
+# Try a different grid available with the hatteras machine name
+python run_get_adcirc_data_yaml.py --stoptime '2022-04-21 00:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-da-nowcast' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+
+# Try a different grid that was executed at PSC
+python run_get_adcirc_data_yaml.py --stoptime '2022-04-22 12:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-psc' --ensemble 'nowcast' --config_file './secrets/url_framework_psc.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+
+# Data availble from BOTH systems. Do a comparison
+# Hatteras
+python run_get_adcirc_data_yaml.py --stoptime '2022-04-22 06:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-da-nowcast' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+# PSC
+python run_get_adcirc_data_yaml.py --stoptime '2022-04-22 06:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-psc' --ensemble 'nowcast' --config_file './secrets/url_framework_psc.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+
+# Test building a Hurricane url. NOTE because of the very different url nomenclature for hurricanes you must utilize the additional CLI varibles. Also, Time inputs (stoptime) is polymorpjic. So for hurricanes,
+# the stoptime woulds be the stop ADVISORY number. The number of URL (advisories) generated assumes a 6 hour step
+
+python run_get_adcirc_data_yaml.py --stoptime 11 --data_source 'ASGS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-al09-bob' --ensemble 'nhcOfcl' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml'  --hurricane_year='2021' --hurricane_source='al09' --ndays -1
+
+python run_get_adcirc_data_yaml.py --stoptime 11 --data_source 'ASGS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-al09-bob' --ensemble 'nhcOfcl' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml'  --hurricane_year='2021' --hurricane_source='al09' --ndays -1
+
+
+# Example invocations - url_template construction type
+# So now, the lookback of -2 days should generate a url list 
+
+python run_get_adcirc_data_url_template.py --stoptime '2022-04-22 06:00:00' --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022020200/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.61.nc" --ensemble 'nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -2
+
+# Demonstration that the DATE word is arbitrary (given the proper formatting) and that we can change the ensemble
+python run_get_adcirc_data_url_template.py --stoptime '2022-04-22 06:00:00' --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2022/nam/1900000000/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.61.nc" --ensemble 'namforecast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -2
+
+
+# Grab a hurricane WL dataset
+# NOTE: DO NOT need the extra hurricane variables
+
+python run_get_adcirc_data_url_template.py --stoptime 11 --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.61.nc" --ensemble 'nhcOfcl' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -2
+
+# The two outputs files have a more complex nomenclature than the observations files. 
+    $RUNTIMEDIR/adcirc_stationdata_RENCI_NHCOFCL_HSOFS_FORECAST_11_2021-08-27T06:00:00_2021-09-02T12:00:00.csv
+    $RUNTIMEDIR/adcirc_stationdata_meta_RENCI_NHCOFCL_HSOFS_FORECAST_11_2021-08-27T06:00:00_2021-09-02T12:00:00.csv
+
+    Generally using '_' delimited words, the various terms are:
+    site, ensemble, grid, class(*), time/adv, starttime, endtime
+    (*) either NOWCAST or FORECAST
+
+
+##
+## CRON tabs. Some basic daily/6-hourly runs can be performed using the below entries.
+##
+
+0 0 * * * ~/EDSASTAPPS/run_harvester/daily_observation_update.sh
+5 */6 * * * ~/EDSASTAPPS/run_harvester/daily_adcirc_update.s
+

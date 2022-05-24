@@ -1,0 +1,25 @@
+# Set of stations usually used for Contrails. These are RIVER guages requiring class=20. From the file /projects/sequence_analysis/vol1/prediction_work/RIVERS_Contrails/PRELIMINARY_INFO/FIMAN_siter_coastalStatus.csv
+30006
+30033
+WNRN7
+30003
+30050
+30009
+GTNN7
+30032
+30011
+30016
+WSNN7
+HSWN7
+30010
+30031
+30060
+30062
+WHSN7
+30061
+30017
+STYN7
+STON7
+RMBN7
+TRTN7
+30007

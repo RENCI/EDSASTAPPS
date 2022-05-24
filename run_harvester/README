@@ -1,0 +1,48 @@
+##
+## Examples of running the data harvestor code
+##
+
+
+usage: run_get_observations.py [-h] [--ndays NDAYS] [--stoptime STOPTIME] [--sources]
+                       [--data_source DATA_SOURCE]
+                       [--data_product DATA_PRODUCT]
+                       [--station_list STATION_LIST]
+                       [--config_name CONFIG_NAME]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --ndays NDAYS         Number of look-back days from stoptime (or now):
+                        default -2
+  --stoptime STOPTIME   Desired stoptime YYYY-mm-dd HH:MM:SS. Default=now
+  --sources             List currently supported data sources
+  --data_source DATA_SOURCE
+                        choose supported data source (case independant) eg
+                        NOAA or CONTRAILS
+  --data_product DATA_PRODUCT
+                        choose supported data product eg river_water_level:
+                        Only required for Contrails
+  --station_list STATION_LIST
+                        Choose a non-default location/filename for a
+                        stationlist
+  --config_name CONFIG_NAME
+                        Choose a non-default contrails auth config_name
+
+
+# NOAA station list defaults to: ./supporting_data/noaa_stations.csv
+# CONTRAILS list defaults to either ./supporting_data/contrails_stations_rivers.txt or ./supporting_data/contrails_stations_coastal.txt
+
+# ndays defaults to -2
+python run_get_observation.py --stoptime '2022-02-20 00:00:00' --data_source 'NOAA' --data_product 'water_level' 
+
+# Reset ndays
+python run_get_observation.py --stoptime '2022-02-20 00:00:00' --data_source 'CONTRAILS' --data_product 'coastar_level' --config_name ./secrets/contrails.yml  --ndays -10
+
+# Get some buoy data
+python run_get_observation.py --stoptime '2022-05-10 00:00:00' --data_source 'NDBC' --data_product 'wave_height'
+
+
+
+
+
+
+

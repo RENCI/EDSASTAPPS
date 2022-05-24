@@ -1,0 +1,8 @@
+DEFAULT: &default
+  RDIR: $RUNTIMEDIR   
+  LOGGING: true
+  LOGLEVEL: DEBUG
+
+DESCRIPTION: &description
+   DESCRIBE: 'An EDS-DataAssembler configuration file'
+

@@ -1,0 +1,49 @@
+##
+## Examples of how one might launch the python app
+##
+
+export PYTHONPATH=/projects/sequence_analysis/vol1/prediction_work/AST:/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS
+export RUNTIMEDIR=./JUNK
+
+python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022011600/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.61.nc"  --ndays -4  --return_sample_min 60 --gridname 'hsofs' --ensemble='nowcast'  --map_file './supporting_data/grid_to_stationfile_maps.yml'
+
+# For comparison to old apsviz2 obs/mod
+
+python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2021/nam/2021052318/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'hsofs' --ensemble='nowcast'  --map_file './supporting_data/grid_to_stationfile_maps.yml'
+
+python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2021/nam/2021120100/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'hsofs' --ensemble='nowcast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --fort63_style
+
+# Try an alternative:
+
+python apsviz_station_products.py --url "http://tds.renci.org:80/thredds/fileServer/2022/nam/2022042612/ec95d/bridges2.psc.edu/ec95d-nam-bob-psc/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'ec95d' --ensemble='nowcast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --fort63_style
+
+# Include contrails
+python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2021/nam/2021120100/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'hsofs' --ensemble='nowcast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml
+
+
+# Can we apply this to a hurricane?
+
+python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.61.nc" --ndays -4  --return_sample_min 60 --gridname 'hsofs' --ensemble='nowcast'  --map_file './supporting_data/grid_to_stationfile_maps.yml'
+
+
+# Can we get buoy data ? 
+
+python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022042712/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'hsofs' --ensemble='nowcast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml
+
+##
+## Example of how APSVIZ2 supervisor should invoke the "OBSMOD" app using ther script wrapper.
+##
+
+URL="http://tds.renci.org/thredds/dodsC/2022/nam/2022042712/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/namforecast/fort.63.nc"
+GRID="hsofs"
+FINALDIR="./EXAMPLE"
+
+export CONTRAILS_KEY="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+./execute_APSVIZ_pipeline.sh $URL $GRID $FINALDIR
+
+# The below invocation is the analogous python launching approach
+#python ../apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022042712/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'hsofs' --ensemble='nowcast'  --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --contrails_auth ../secrets/contrails.yml --finalDIR "./HEY"
+
+
+
