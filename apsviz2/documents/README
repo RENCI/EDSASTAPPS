@@ -40,7 +40,10 @@ FINALDIR="./EXAMPLE"
 
 export CONTRAILS_KEY="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 
-./execute_APSVIZ_pipeline.sh $URL $GRID $FINALDIR
+mkdir TEST
+cd TEST
+
+../execute_APSVIZ_pipeline.sh $URL $GRID $FINALDIR
 
 # The below invocation is the analogous python launching approach
 #python ../apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022042712/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'hsofs' --ensemble='nowcast'  --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --contrails_auth ../secrets/contrails.yml --finalDIR "./HEY"
