@@ -1,0 +1,13 @@
+*~
+*.log
+*.pyc
+.idea/
+__pycache__/
+*.pkl
+*.csv
+contrails.yml
+url_framework.yml
+work/
+*.swp
+
+
