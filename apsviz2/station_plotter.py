@@ -298,7 +298,7 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
         state = station_names[station]['STATE']
         # Build fig
         plt.close()
-        fig = plt.figure(figsize=(6, 2))
+        fig = plt.figure(figsize=(6, 4))
         create_station_specific_plot(fig, station, station_name, df_concat, (tmin,tmax) )
         plt.subplots_adjust(bottom=0.25)
         filename=outputdir+'/'+station+'_WL.png'
