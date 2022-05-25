@@ -49,7 +49,7 @@ sed -i 's/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/'"$CONTRAILS_KEY"'/g' ../secrets/
 # We only need to supply the proper URL to start the job
 #
 
-python ../apsviz_station_products.py --url "$URL" --ndays -4  --return_sample_min 60 --gridname "$GRID" --ensemble='nowcast'  --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --contrails_auth ../secrets/contrails.yml --finalDIR "$FINALDIR" 
+python ./apsviz_station_products.py --url "$URL" --ndays -4  --return_sample_min 60 --gridname "$GRID" --ensemble='nowcast'  --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --finalDIR "$FINALDIR" 
 
 echo "Finished"
 
