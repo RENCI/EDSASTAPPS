@@ -1,0 +1,8 @@
+pip install numpy>=1.19.4
+pip install pandas==1.1.3
+pip install netCDF4==1.5.7
+pip install xarray==0.14.1
+pip install siphon==0.9
+pip install xmltodict==0.13.0
+pip install noaa-coops
+pip install pyyaml
