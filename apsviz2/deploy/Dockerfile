@@ -20,45 +20,41 @@ RUN conda update conda && \
 RUN conda init bash
 
 ## create the non-root user
-#RUN useradd -m -d /home/nru -u 1000 nru
+RUN useradd -m -d /home/nru -u 1000 nru
 
 ## make sure everything is read/write
-#RUN chmod 777 -R /home/nru
+RUN chmod 777 -R /home/nru
 
-## make a directory for the repos and go there
-#RUN mkdir /home/nru/repo
-#WORKDIR /home/nru/repo
-WORKDIR /repo
+# make a directory for the repos and go there
+RUN mkdir /home/nru/repo
+WORKDIR /home/nru/repo
+#WORKDIR /repo
 
 # get the AST repo - needs to be made public first
 RUN git clone https://github.com/RENCI/AST.git
 RUN git clone https://github.com/RENCI/EDSASTAPPS.git
                
-## move to the deploy directory
-#WORKDIR /home/nru/repo/EDSASTAPPS/apsviz2/deploy
-WORKDIR /repo/EDSASTAPPS/apsviz2/deploy
+# move to the deploy directory
+WORKDIR /home/nru/repo/EDSASTAPPS/apsviz2/deploy
+#WORKDIR /repo/EDSASTAPPS/apsviz2/deploy
                                 
 # install the pip requirements
 RUN pip install -r pip_requirements.txt
 
-# make a temporary directory for the output.
-# this should eventually point a common PV
-# RUN mkdir /home/nru/repo/EDSASTAPPS/apsviz2/temp
+# make sure everything is read/write
+RUN chmod 777 -R /home/nru
 
-## make sure everything is read/write
-#RUN chmod 777 -R /home/nru
-
-## switch to the non-root user
-#USER nru
+# switch to the non-root user
+USER nru
                         
-## change to the apsviz2 pipelines directory                        
-#WORKDIR /home/nru/repo/EDSASTAPPS/apsviz2
-WORKDIR /repo/EDSASTAPPS/apsviz2
+# change to the apsviz2 pipelines directory                        
+WORKDIR /home/nru/repo/EDSASTAPPS/apsviz2
+#WORKDIR /repo/EDSASTAPPS/apsviz2
 
 
 ## set the python path
-#ENV PYTHONPATH=/home/nru/repo/AST:/home/nru/repo/EDSASTAPPS
-ENV PYTHONPATH=/repo/AST:/repo/EDSASTAPPS
+ENV PYTHONPATH=/home/nru/repo/AST:/home/nru/repo/EDSASTAPPS
+#ENV PYTHONPATH=/repo/AST:/repo/EDSASTAPPS
 
 # set the location of the output directory
 #ENV RUNTIMEDIR=/data
