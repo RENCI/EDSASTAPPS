@@ -53,7 +53,7 @@ RUN pip install -r pip_requirements.txt
                         
 ## change to the apsviz2 pipelines directory                        
 #WORKDIR /home/nru/repo/EDSASTAPPS/apsviz2
-WORKDIR /repo/EDSASTAPPS
+WORKDIR /repo/EDSASTAPPS/apsviz2
 
 
 ## set the python path
