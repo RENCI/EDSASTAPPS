@@ -8,10 +8,6 @@
 #
 # The git repo that downloads station and grid data muct be handled here
 #
-
-export PYTHONPATH=/projects/sequence_analysis/vol1/prediction_work/AST:/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS
-export RUNTIMEDIR=./JUNK
-
 # Check environment
 
 if [ -z "${PYTHONPATH:-}" ]; then
@@ -43,7 +39,7 @@ git clone https://github.com/RENCI/AST_gridstations.git
 # Where is Contrails authentication yml. Grab the secrets key from $CONTRAILS_KEY. Update the local secrets file
 #
 
-sed -i 's/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/'"$CONTRAILS_KEY"'/g' ../secrets/contrails.yml
+sed -i 's/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/'"$CONTRAILS_KEY"'/g' ./secrets/contrails.yml
 
 #
 # We only need to supply the proper URL to start the job
