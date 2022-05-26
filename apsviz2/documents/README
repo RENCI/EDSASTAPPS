@@ -43,10 +43,30 @@ export CONTRAILS_KEY="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 mkdir TEST
 cd TEST
 
-../execute_APSVIZ_pipeline.sh $URL $GRID $FINALDIR
+./execute_APSVIZ_pipeline.sh $URL $GRID $FINALDIR
 
 # The below invocation is the analogous python launching approach
 #python ../apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022042712/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'hsofs' --ensemble='nowcast'  --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --contrails_auth ../secrets/contrails.yml --finalDIR "./HEY"
 
+##
+## Example of trying to manually process a Hurricane"
+##
+
+python ./apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'hsofs' --ensemble='nhcOfcl'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --finalDIR "./HEY3"
+
+##
+## Example of trying to script process a Hurricane"
+##
+
+URL="http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.63.nc"
+GRID="hsofs"
+FINALDIR="./EXAMPLE-HURRICANE"
+
+export CONTRAILS_KEY="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+mkdir TEST
+cd TEST
+
+./execute_APSVIZ_pipeline.sh $URL $GRID $FINALDIR
 
 
