@@ -246,6 +246,9 @@ def find_widest_timerange(outputs_dict):
     This method identifies the global minimum and maximum times on the dataframe regardless of missingness
     Then, this range is passed to the plotter routine. This way all plots have the same width (x length)
     
+    It is possible for a specific df to be completely empty and have NO time indexes. Especially, eg, 
+        if grabbing old NDBC data. So we add a trap here to catch this scenario. Passing the all-nans data 
+        forward is okay since the plotting routine will filter them out
     Parameter
         outputs_dict: dict of dfs, one for each source
 
@@ -254,11 +257,13 @@ def find_widest_timerange(outputs_dict):
     time_mins = list()
     time_maxes = list()
     for key,df in outputs_dict.items():
-        time_mins.append(min(df.index))
-        time_maxes.append(max(df.index))
-    print('TIMES')
-    print(time_mins)
-    print(time_maxes)
+        try:
+            time_mins.append(min(df.index))
+            time_maxes.append(max(df.index))
+        except ValueError:
+            # This would usually only happen to a completely empty dfs. Just skip and move on
+            print('find_widest_timerange: Contains dfs with no data. Skip time range acquisition: Key ={}'.format(key))
+            pass
     tmin = min(time_mins)
     tmax = max(time_maxes)
     return tmin,tmax
@@ -278,7 +283,6 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
 
     stations_union_source_list = union_all_source_stations(outputs_dict, station_id_list = station_id_list)
     station_names = union_station_names( outputs_meta_dict, station_id_list=station_id_list)
-
     print('VIZ stations {}',format(station_names)) 
 
     tmin,tmax = find_widest_timerange(outputs_dict)
@@ -286,11 +290,9 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
 
     data_dict=dict()
     for station in station_names.keys(): # Only want stations thatg have known ID names. 
-        print('start station {}'.format(station))
         df_concat = build_source_concat_dataframe(outputs_dict, station)
         # Remove completely nan remaining stations
         df_concat.dropna(axis=1, how='all', inplace=True)
-        print('station {} df_concat {}'.format(station, df_concat))
         print('After NAN reduction remaining sources is {}.{}'.format(station, df_concat.shape[1]))
         station_name = station_names[station]['NAME']
         lon = station_names[station]['LON']
