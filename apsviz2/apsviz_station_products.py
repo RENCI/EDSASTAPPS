@@ -230,7 +230,6 @@ def main(args):
 ##
 ## Perform the error computations
 ##
-
     comp_err = compute_error_field.compute_error_field(data_obs_smoothed, data_now_adc, meta_obs) # All default params
     comp_err._intersection_stations()
     comp_err._intersection_times()
@@ -238,7 +237,6 @@ def main(args):
 
     outputs_dict['Difference']=comp_err.diff
     utilities.log.info('Finished with Compute Errors')
-
 ##
 ## Select from RUNTIMEDIR, where to write these files
 ##
