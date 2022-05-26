@@ -13,7 +13,7 @@ export RUNTIMEDIR=/projects/ees/TDS/DataHarvesting/DAILY_HARVESTING
 
 # ADCIRC
 
-for MONTHS in 04; do
+for MONTHS in 01 02 03 04; do
     for DAYS in  01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 31; do
         for HOURS in 00 06 12 18 ; do
             stoptime="2022-$MONTHS-$DAYS $HOURS:00:00" 
