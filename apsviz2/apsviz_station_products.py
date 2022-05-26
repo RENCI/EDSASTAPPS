@@ -242,12 +242,6 @@ def main(args):
 ##
 ## Select from RUNTIMEDIR, where to write these files
 ##
-
-    print('POOP')
-    print(config['DEFAULT']['RDIR'])
-    print(type(config['DEFAULT']['RDIR']))
-    print(args.finalDIR)
-
     if args.finalDIR is None:
         rootdir=io_utilities.construct_base_rootdir(config['DEFAULT']['RDIR'], base_dir_extra=None)
     else:
@@ -297,7 +291,7 @@ if __name__ == '__main__':
                         help='choose supported data product eg water_level')
     parser.add_argument('--return_sample_min', action='store', dest='return_sample_min', default=60, type=int,
                         help='return_sample_min is the time stepping in the final data objects. (mins)')
-    parser.add_argument('--ndays', default=-4, action='store', dest='ndays',help='Day lag (usually < 0)', type=int)
+    parser.add_argument('--ndays', default=-2, action='store', dest='ndays',help='Day lag (usually < 0)', type=int)
     parser.add_argument('--config_name', action='store', dest='config_name', default=None,
                         help='String: yml config which contains URL structural information')
     parser.add_argument('--contrails_auth', action='store', dest='contrails_auth', default=None, type=str,
