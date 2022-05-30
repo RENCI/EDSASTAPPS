@@ -97,14 +97,14 @@ def union_station_names( outputs_meta_dict, station_id_list=None) ->dict:
                 s_metadata[station]={'LON':lon,'LAT':lat,'NAME': name, 'STATE':state}
         except KeyError:
             pass
-        if len(s_metadata)==0:
-            print('No station names found at all {}. Abort'.format(outputs_meta_dict))
-            sys.exit(1)
-        print('Total number of station names found is {}'.format(len(s_metadata)))
-        if station_id_list is not None:
-            station_metadata = { station: s_metadata[station] for station in s_metadata.keys() if station in station_id_list }
-        else:
-            station_metadata = s_metadata
+    if len(s_metadata)==0:
+        print('No station names found at all {}. Abort'.format(outputs_meta_dict))
+        sys.exit(1)
+    print('Total number of station names found is {}'.format(len(s_metadata)))
+    if station_id_list is not None:
+        station_metadata = { station: s_metadata[station] for station in s_metadata.keys() if station in station_id_list }
+    else:
+        station_metadata = s_metadata
     return station_metadata
 
 def get_bounds(df)->tuple:
