@@ -96,7 +96,7 @@ def main(args):
 
     rpl = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
                 station_list_file=station_file, 
-                knockout_file=None, fort63_style=fort63_style )
+                knockout_dict=None, fort63_style=fort63_style )
 
     # Convert URLs to desired fort type
     if fort63_style:
@@ -174,7 +174,7 @@ def main(args):
 
     obs = get_obs_stations.get_obs_stations(source='NOAA', product='water_level',
                 contrails_yamlname='None',
-                knockout_file=None, station_list_file=station_file)
+                knockout_dict=None, station_list_file=station_file)
     # Get data at highest resolution
     data_obs,meta_obs=obs.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=0, interval='None' )
     data_obs.replace('-99999',np.nan,inplace=True)
