@@ -42,16 +42,16 @@ WORKDIR /home/nru/repo/EDSASTAPPS/apsviz2/deploy
 # install the pip requirements
 RUN pip install -r pip_requirements.txt
 
-# Build buoypy for the NDBC stuff
-WORKDIR /home/nru/repo/buoypy
-RUN python setup.py build
-
 # make sure everything is read/write
 RUN chmod 777 -R /home/nru
 
 # switch to the non-root user
 USER nru
                         
+# Build buoypy for the NDBC stuff
+WORKDIR /home/nru/repo/buoypy
+RUN python setup.py build --user
+
 # change to the apsviz2 pipelines directory                        
 WORKDIR /home/nru/repo/EDSASTAPPS/apsviz2
 #WORKDIR /repo/EDSASTAPPS/apsviz2
