@@ -33,13 +33,18 @@ WORKDIR /home/nru/repo
 # get the AST repo - needs to be made public first
 RUN git clone https://github.com/RENCI/AST.git
 RUN git clone https://github.com/RENCI/EDSASTAPPS.git
-               
+RUN git clone https://github.com/nickc1/buoypy.git
+
 # move to the deploy directory
 WORKDIR /home/nru/repo/EDSASTAPPS/apsviz2/deploy
 #WORKDIR /repo/EDSASTAPPS/apsviz2/deploy
                                 
 # install the pip requirements
 RUN pip install -r pip_requirements.txt
+
+# Build buoypy for the NDBC stuff
+WORKDIR /home/nru/repo/buoypy
+RUN python setup.py install --user
 
 # make sure everything is read/write
 RUN chmod 777 -R /home/nru
@@ -50,7 +55,6 @@ USER nru
 # change to the apsviz2 pipelines directory                        
 WORKDIR /home/nru/repo/EDSASTAPPS/apsviz2
 #WORKDIR /repo/EDSASTAPPS/apsviz2
-
 
 ## set the python path
 ENV PYTHONPATH=/home/nru/repo/AST:/home/nru/repo/EDSASTAPPS
