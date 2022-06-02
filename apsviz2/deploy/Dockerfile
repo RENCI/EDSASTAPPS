@@ -44,7 +44,7 @@ RUN pip install -r pip_requirements.txt
 
 # Build buoypy for the NDBC stuff
 WORKDIR /home/nru/repo/buoypy
-RUN python setup.py install --user
+RUN python setup.py build
 
 # make sure everything is read/write
 RUN chmod 777 -R /home/nru
