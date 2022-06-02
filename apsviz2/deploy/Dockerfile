@@ -50,7 +50,7 @@ USER nru
                         
 # Build buoypy for the NDBC stuff
 WORKDIR /home/nru/repo/buoypy
-RUN python setup.py build --user
+RUN python setup.py build 
 
 # change to the apsviz2 pipelines directory                        
 WORKDIR /home/nru/repo/EDSASTAPPS/apsviz2
