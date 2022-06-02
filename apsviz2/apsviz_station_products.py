@@ -81,7 +81,7 @@ def main(args):
 ##
     adc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
                 station_list_file=station_file,
-                knockout_file=None, fort63_style=fort63_style )
+                knockout_dict=None, fort63_style=fort63_style )
     data_adc,meta_adc=adc.fetch_station_product( [input_url] , return_sample_min=args.return_sample_min, fort63_style=fort63_style  )
     # Revert Harvester filling of nans to -99999 back to nans
     data_adc.replace('-99999',np.nan,inplace=True)
@@ -108,7 +108,7 @@ def main(args):
     print(now_urls)
     nowadc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
                 station_list_file=station_file,
-                knockout_file=None, fort63_style=fort63_style )
+                knockout_dict=None, fort63_style=fort63_style )
     data_now_adc,meta_now_adc=nowadc.fetch_station_product(now_urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style  )
     data_now_adc.replace('-99999',np.nan,inplace=True)
     meta_now_adc.replace('-99999',np.nan,inplace=True)
