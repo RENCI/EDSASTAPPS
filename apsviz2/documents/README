@@ -69,4 +69,10 @@ cd TEST
 
 ./execute_APSVIZ_pipeline.sh $URL $GRID $FINALDIR
 
+##
+## Try a new hurricane from PSC
+##
+
+python ./apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2022/al01/06/ec95d/bridges2.psc.edu/ec95d-al01-bob-psc/namforecast/fort.61.nc" --ndays -4  --return_sample_min 60 --gridname 'ec95d' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --finalDIR "./HEY3"
+
 
