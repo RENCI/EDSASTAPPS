@@ -39,6 +39,21 @@ dashdict['Contrails']=(1,1)
 dashdict['NDBC']=(2,2)
 dashdict['misc']=(3,2)
 
+##
+## Define mappings for y-axis plot titles
+## Build more informative plots by better annotating the Legends
+##
+
+LEGENDS_MAP={
+     'NOAA Tidal': 'NOAA Tidal: Water level',
+     'NOAA NOS': 'NOAA NOS: Water level',
+     'NDBC': 'NDBC: Wave height(WVHT)',
+     'SWAN': 'SWAN: Wavew height',
+     'Contrails': 'Contrails: Water elevation(Stage)',
+     'Forecast': 'Forecast: Water level',
+     'Difference': 'Difference: Water level',
+     'Nowcast': 'Nowcast: Water level'}
+
 def union_all_source_stations(outputs_dict, station_id_list=None)->list:
     """
     The input dictionary contains a list of dataframes that are times x stations for the given source
@@ -109,10 +124,13 @@ def union_station_names( outputs_meta_dict, station_id_list=None) ->dict:
 
 def get_bounds(df)->tuple:
     """
-    The inut dataset is expected tobe for a single station and be a concatenation
-    of all data sources that contribute. Here we try to find a good PRODUCT range for
+    The input dataset is expected to be for a single station and be a concatenation
+    of all data sources that contributed. Here we try to find a good PRODUCT range for
     plotting. Most sources are periodic and range approx about zero. So we want a symmetric range
     Looks into every source to find their global min and global max
+
+    We never expect NOAA/Contrails/ADCIRC water_levels (vs MSL) to be mixed with NDBC/SWAN
+    wave_heights (vs 0). So try to adjust ymin for NDBC/SWAN to be zero
 
     Parameters
         df: time x station-sources (eg Nowcast, Forecast, etc)
@@ -120,11 +138,18 @@ def get_bounds(df)->tuple:
     Returns:
         tuple of best ymin,ymax for this selected data collection
     """
+    source_list = df.columns.tolist()
     ymin = abs(df.min().min())
     ymax = abs(df.max().max())
-    val = ymax if ymax > ymin else ymin
-    ymin = -math.ceil(val)
-    ymax = -ymin
+
+    if 'NDBC' in source_list or 'Contrails' in source_list or 'SWAN' in source_list:
+        ymin=0.0
+        ymax = ymax if ymax > ymin else -ymin
+    else:
+        # Look for the widest symmetric range if water_leels
+        val = ymax if ymax > ymin else ymin
+        ymin = -math.ceil(val)
+        ymax = -ymin
     return(ymin, ymax)
 
 def source_to_style(source_list):
@@ -191,8 +216,25 @@ def build_source_concat_dataframe(outputs_dict, stationid)->pd.DataFrame:
     df_station_specific_concat = pd.concat(list_dfs,axis=1)
     return df_station_specific_concat
 
+def update_headers_concat_dataframe(df_station_specific_concat)->pd.DataFrame:
+    """
+    For the input station-specific, source concatenated dataframe, replace the header SOURCE name 
+    associated value from the global dict LEGENDS_MAP. These headers are used by the plotter routine
+    to build legends for each plot. Since, different data asources may have different meanings (eg 
+    water_level +/- max, vs water_height > 0), we needed that information reflected in the legend
+
+    Headers are modified in-place
+
+    Parameters:
+        df_station_specific_concat: dataframe. time x source
+    """
+    header_list = df_station_specific_concat.columns.tolist()
+    new_headers = [ LEGENDS_MAP[header] for header in header_list]
+    df_station_specific_concat.columns = new_headers
+    return df_station_specific_concat
+
 # Cannot make any assumptons about the key order in the dict
-def build_filename_map_to_csv(png_dict):
+def build_filename_map_to_csv(png_dict)->pd.DataFrame:
     """
     For APSVIZ convenience, instead of returning the station,lon,lat,name,filename,
     to the caller as a dictionary, return it as a dataframe.
@@ -225,11 +267,13 @@ def create_station_specific_plot(fig, stationid, station_name, df_concat, time_r
     print(source_list)
     print(time_range)
     colorlist, dashlist = source_to_style(source_list)
+    # Adjust headers for more informative plot legends
+    df_concat = update_headers_concat_dataframe(df_concat)
     #
     sns.set_style('darkgrid')
     ax=sns.lineplot(data=df_concat, palette=colorlist, dashes=dashlist)
     ax.legend(loc = 4,fontsize = 6)
-    ax.set_ylabel('Water Level (m)', fontsize=7)
+    ax.set_ylabel('meters', fontsize=7)
     ax.set_ylim([ymin, ymax])
     ax.set_xlim([tmin,tmax])
     ax.get_xaxis().set_visible(True)
