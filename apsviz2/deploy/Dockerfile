@@ -57,7 +57,7 @@ WORKDIR /home/nru/repo/EDSASTAPPS/apsviz2
 #WORKDIR /repo/EDSASTAPPS/apsviz2
 
 ## set the python path
-ENV PYTHONPATH=/home/nru/repo/AST:/home/nru/repo/EDSASTAPPS:/home/nru/repo/buoypy
+ENV PYTHONPATH=/home/nru/repo/AST:/home/nru/repo/EDSASTAPPS
 #ENV PYTHONPATH=/repo/AST:/repo/EDSASTAPPS
 
 # set the location of the output directory
