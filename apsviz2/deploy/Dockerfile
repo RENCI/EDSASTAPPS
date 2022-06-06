@@ -47,7 +47,7 @@ RUN chmod 777 -R /home/nru
                         
 # Build buoypy for the NDBC stuff
 WORKDIR /home/nru/repo/buoypy
-RUN python setup.py build 
+RUN python setup.py install
 
 # switch to the non-root user
 USER nru
