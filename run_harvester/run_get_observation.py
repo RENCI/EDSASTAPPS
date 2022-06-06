@@ -124,7 +124,7 @@ def main(args):
         sys.exit(1)
 
     obs = get_obs_stations.get_obs_stations(source=data_source.upper(), product=args.data_product,
-            contrails_yamlname=args.config_name, knockout_file=None, station_list_file=station_file)
+            contrails_yamlname=args.config_name, knockout_dict=None, station_list_file=station_file)
 
     # Get data at highest resolution. Return at 15min intervals
     data,meta=obs.fetch_station_product(time_range, return_sample_min=15, interval='None' )
