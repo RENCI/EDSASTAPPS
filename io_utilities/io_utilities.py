@@ -187,7 +187,8 @@ def write_ADCIRC_formatted_gridfield_to_Disk(df, value_name='VAL',rootdir=None,s
     Results:
         df  saved to rootdir/interpolated/ADCIRC_interpolated_wl_metadata.csv
     """
-    newfilename = get_full_filename_with_subdirectory_prepended(rootdir, 'interpolated', 'ADCIRC_interpolated_wl'+iometadata+'.csv')
+    fileroot = '_'.join([fileroot,iometadata]) if iometadata != '' else fileroot
+    newfilename = get_full_filename_with_subdirectory_prepended(rootdir, subdir, fileroot+'.csv')
     df_adcirc = df[value_name].to_frame().astype(str)
     df_adcirc['node']=(df_adcirc.index+1).astype(str) # NODEID is index id +1
     d = []
