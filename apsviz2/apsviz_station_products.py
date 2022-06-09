@@ -79,21 +79,25 @@ def main(args):
 ##
 ## ADCIRC step 1. Process the INPUT (Forecast) URL. 60min default sampling
 ##
-    adc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
+    try:
+        adc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
                 station_list_file=station_file,
                 knockout_dict=None, fort63_style=fort63_style )
-    data_adc,meta_adc=adc.fetch_station_product( [input_url] , return_sample_min=args.return_sample_min, fort63_style=fort63_style  )
-    # Revert Harvester filling of nans to -99999 back to nans
-    data_adc.replace('-99999',np.nan,inplace=True)
-    meta_adc.replace('-99999',np.nan,inplace=True)
-    outputs_dict['Forecast']=data_adc
-    outputs_metadict['Forecast']=meta_adc
-    utilities.log.info('Finished with ADCIRC Forecasts')
+        data_adc,meta_adc=adc.fetch_station_product( [input_url] , return_sample_min=args.return_sample_min, fort63_style=fort63_style  )
+        # Revert Harvester filling of nans to -99999 back to nans
+        data_adc.replace('-99999',np.nan,inplace=True)
+        meta_adc.replace('-99999',np.nan,inplace=True)
+        outputs_dict['Forecast']=data_adc
+        outputs_metadict['Forecast']=meta_adc
+        utilities.log.info('Finished with ADCIRC Forecasts')
 
-    # Grab the stop and start times from the data set. Will be needed for tidal predictions data
-    time_index=data_adc.index.tolist()
-    starttime = min(time_index).strftime('%Y-%m-%d %H:%M:%S')
-    endtime = max(time_index).strftime('%Y-%m-%d %H:%M:%S')
+        # Grab the stop and start times from the data set. Will be needed for tidal predictions data
+        time_index=data_adc.index.tolist()
+        starttime = min(time_index).strftime('%Y-%m-%d %H:%M:%S')
+        endtime = max(time_index).strftime('%Y-%m-%d %H:%M:%S')
+    except Exception as e:
+        utilities.log.error('Forecast: Broad failure. Failed to find any forecast data: {}'.format(e))
+        sys.exit(1)
 
 ##
 ## ADCIRC step 2. Process the associated NOWCAST URLs.
@@ -102,26 +106,32 @@ def main(args):
 # starttime/endtime can be > resulting data set (urls list) if not enough ADCIRC files were actually found.
 # We still want the full range for observations and tidal predictions
 
+    obs_endtime = starttime # '%Y-%m-%d %H:%M:%S': Grab the beginning of the forecast
+    dt_starttime = dt.datetime.strptime(obs_endtime,dformat)+dt.timedelta(days=args.ndays) # How many days BACK
+    obs_starttime=dt.datetime.strftime(dt_starttime, dformat)
+
     # Need to build a set of NOWCASTs from the input url.
     nowadc = genurls.generate_urls_from_times(url=input_url,ndays=args.ndays)
     now_urls = nowadc.build_url_list_from_template_url_and_offset(ensemble='nowcast')
     print(now_urls)
-    nowadc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
+    try:
+        nowadc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
                 station_list_file=station_file,
                 knockout_dict=None, fort63_style=fort63_style )
-    data_now_adc,meta_now_adc=nowadc.fetch_station_product(now_urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style  )
-    data_now_adc.replace('-99999',np.nan,inplace=True)
-    meta_now_adc.replace('-99999',np.nan,inplace=True)
-    outputs_dict['Nowcast']=data_now_adc
-    outputs_metadict['Nowcast']=meta_now_adc
-    utilities.log.info('Finished with ADCIRC Nowcasts')
-    print(now_urls)
-
-    # Figure out what the asociated range of times is. 
-    obs_endtime = starttime # '%Y-%m-%d %H:%M:%S': Grab the beginning of the forecast
-    dt_starttime = dt.datetime.strptime(obs_endtime,dformat)+dt.timedelta(days=args.ndays) # How many days BACK
-    obs_starttime=dt.datetime.strftime(dt_starttime, dformat)
-    print('Nowcast time range is from {} through {}'.format(obs_starttime, obs_endtime))
+        data_now_adc,meta_now_adc=nowadc.fetch_station_product(now_urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style  )
+        data_now_adc.replace('-99999',np.nan,inplace=True)
+        meta_now_adc.replace('-99999',np.nan,inplace=True)
+        outputs_dict['Nowcast']=data_now_adc
+        outputs_metadict['Nowcast']=meta_now_adc
+        utilities.log.info('Finished with ADCIRC Nowcasts')
+        print(now_urls)
+        # Figure out what the asociated range of times is. 
+        #obs_endtime = starttime # '%Y-%m-%d %H:%M:%S': Grab the beginning of the forecast
+        #dt_starttime = dt.datetime.strptime(obs_endtime,dformat)+dt.timedelta(days=args.ndays) # How many days BACK
+        #obs_starttime=dt.datetime.strftime(dt_starttime, dformat)
+        print('Nowcast time range is from {} through {}'.format(obs_starttime, obs_endtime))
+    except Exception as e:
+        utilities.log.error('Nowcast: Broad failure. Failed to find any nowcast data: {}'.format(e))
 
 ##
 ## Assemble the list of valid observations from which to compute error series'
@@ -136,7 +146,7 @@ def main(args):
     noaa_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='NOAA_STATIONS')
     if noaa_station_file is not None:
         obs = get_obs_stations.get_obs_stations(source='NOAA', product='water_level',
-                station_list_file=noaa_station_file)
+            station_list_file=noaa_station_file)
         data_obs,meta_obs=obs.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=0, interval='None' )
         data_obs.replace('-99999',np.nan,inplace=True)
         meta_obs.replace('-99999',np.nan,inplace=True)
@@ -152,6 +162,7 @@ def main(args):
         valid_obs.append(data_obs_smoothed)
         valid_obs_meta.append(meta_obs)
         utilities.log.info('Finished with NOAA Observations')
+
 
 ##
 ## OBSERVATIONS #2. Get the Contrails station data. Assumes the contrails stations are in the same station_list
@@ -176,6 +187,7 @@ def main(args):
         valid_obs.append(cont_data)
         valid_obs_meta.append(cont_meta)
         utilities.log.info('Finished with Contrails Observations')
+
 ##
 ## OBSERVATIONS. #3 Get known Buoy wave_height data
 ##
@@ -185,7 +197,7 @@ def main(args):
     ndbc_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='NDBC_BUOYS')
     if ndbc_station_file is not None:
         ndbc = get_obs_stations.get_obs_stations(source='NDBC', product='wave_height',
-                station_list_file=ndbc_station_file)
+            station_list_file=ndbc_station_file)
         data_ndbc,meta_ndbc=ndbc.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=0, interval='None' )
         data_ndbc.replace('-99999',np.nan,inplace=True)
         meta_ndbc.replace('-99999',np.nan,inplace=True)
@@ -202,6 +214,7 @@ def main(args):
             utilities.log.error('NDBC: Failed to find any data: do not include to plot list {}'.format(e))
         valid_obs.append(data_ndbc)
         valid_obs_meta.append(meta_ndbc)
+
 ##
 ## Combine observations data for the error computations - No NDBC data here
 ##
@@ -217,26 +230,32 @@ def main(args):
     pred = get_obs_stations.get_obs_stations(source='NOAA', product='predictions',
                 station_list_file=station_file)
 
-    data_pred,meta_pred=pred.fetch_station_product((obs_starttime,endtime), return_sample_min=args.return_sample_min, interval='None' )
-    data_pred.replace('-99999',np.nan,inplace=True)
-    meta_pred.replace('-99999',np.nan,inplace=True)
-    meta_pred_list = set(data_pred.columns.tolist()).intersection(meta_pred.index.to_list())
-    meta_pred = meta_pred.loc[meta_pred_list]
+    try:
+        data_pred,meta_pred=pred.fetch_station_product((obs_starttime,endtime), return_sample_min=args.return_sample_min, interval='None' )
+        data_pred.replace('-99999',np.nan,inplace=True)
+        meta_pred.replace('-99999',np.nan,inplace=True)
+        meta_pred_list = set(data_pred.columns.tolist()).intersection(meta_pred.index.to_list())
+        meta_pred = meta_pred.loc[meta_pred_list]
+        outputs_dict['NOAA Tidal']=data_pred
+        outputs_metadict['NOAA Tidal']=meta_pred
+        utilities.log.info('Finished with Tidal Predictions')
+    except Exception as e:
+        utilities.log.error('TIDAL: Broad failure. Failed to find any nowcast data: {}'.format(e))
 
-    outputs_dict['NOAA Tidal']=data_pred
-    outputs_metadict['NOAA Tidal']=meta_pred
-    utilities.log.info('Finished with Tidal Predictions')
 
 ##
 ## Perform the error computations
 ##
-    comp_err = compute_error_field.compute_error_field(data_obs_smoothed, data_now_adc, meta_obs) # All default params
-    comp_err._intersection_stations()
-    comp_err._intersection_times()
-    comp_err._compute_and_average_errors()
+    try:
+        comp_err = compute_error_field.compute_error_field(data_obs_smoothed, data_now_adc, meta_obs) # All default params
+        comp_err._intersection_stations()
+        comp_err._intersection_times()
+        comp_err._compute_and_average_errors()
+        outputs_dict['Difference']=comp_err.diff
+        utilities.log.info('Finished with Compute Errors')
+    except Exception as e:
+        utilities.log.error('CompError: Failure. Perhaps no Nowcast to take errors from ? {}'.format(e))
 
-    outputs_dict['Difference']=comp_err.diff
-    utilities.log.info('Finished with Compute Errors')
 ##
 ## Select from RUNTIMEDIR, where to write these files
 ##
