@@ -58,7 +58,8 @@ WORKDIR /home/nru/repo/EDSASTAPPS/apsviz2
 
 ## set the python path
 ENV PYTHONPATH=/home/nru/repo/AST:/home/nru/repo/EDSASTAPPS
-ENV HTTP_PROXY=http://proxy.renci.org:8080
+#ENV HTTP_PROXY=http://proxy.renci.org:8080
+#ENV http_proxy=http://proxy.renci.org:8080
 #ENV PYTHONPATH=/repo/AST:/repo/EDSASTAPPS
 
 # set the location of the output directory
