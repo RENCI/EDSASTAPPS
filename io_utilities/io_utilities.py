@@ -78,8 +78,8 @@ def write_pickle(df, rootdir=None,subdir=None,fileroot=None,iometadata='')->str:
         newfilename = get_full_filename_with_subdirectory_prepended(rootdir, subdir, fileroot+'.pkl')
         df.to_pickle(newfilename)
         print('Wrote PICKLE file {}'.format(newfilename))
-    except IOError:
-        raise IOerror("Failed to write PKL file %s" % (newfilename))
+    except OSError:
+        raise OSError("Failed to write PKL file %s" % (newfilename))
     return newfilename
 
 def write_csv(df, rootdir=None,subdir=None,fileroot=None,iometadata='')->str:
@@ -101,8 +101,8 @@ def write_csv(df, rootdir=None,subdir=None,fileroot=None,iometadata='')->str:
         newfilename = get_full_filename_with_subdirectory_prepended(rootdir, subdir, fileroot+'.csv')
         df.to_csv(newfilename)
         print('Wrote CSV file {}'.format(newfilename))
-    except IOError:
-        raise IOerror("Failed to write CSV file %s" % (newfilename))
+    except OSError:
+        raise OSError("Failed to write CSV file %s" % (newfilename))
     return newfilename
 
 
@@ -125,8 +125,8 @@ def write_json(df, rootdir=None,subdir=None,fileroot=None,iometadata=None)->str:
         newfilename = get_full_filename_with_subdirectory_prepended(rootdir, subdir, fileroot+'.json')
         df.to_json(newfilename)
         print('Wrote JSON file {}'.format(newfilename))
-    except IOError:
-        raise IOerror("Failed to write JSON file %s" % (newfilename))
+    except OSError:
+        raise OSError("Failed to write JSON file %s" % (newfilename))
     return newfilename
 
 
@@ -152,8 +152,8 @@ def write_dict_to_json(dictdata, rootdir=None,subdir=None,fileroot=None,iometada
         with open(newfilename, 'w') as fp:
             json.dump(dictdata, fp)
         print('Wrote dictdata to JSON file {}'.format(newfilename))
-    except IOError:
-        raise IOerror("Failed to write dictdata to JSON file %s" % (newfilename))
+    except OSError:
+        raise OSError("Failed to write dictdata to JSON file %s" % (newfilename))
     return newfilename
 
 def read_json_file(filepath)->dict:
@@ -171,8 +171,8 @@ def write_json_file(data, filepath):
     try:
         with open(filepath, 'w') as fp:
             json.dump(data, fp)
-    except IOError:
-        raise IOerror("Failed to write JSON file %s" % (filepath))
+    except OSError:
+        raise OSError("Failed to write JSON file %s" % (filepath))
 
 # Special case output that is often used in our EDS context
 
