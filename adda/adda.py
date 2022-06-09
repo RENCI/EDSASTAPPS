@@ -248,7 +248,7 @@ def main(args):
     set_of_dfs.append(df_stations) # Always need this
     if df_land_controls is not None:
         # Must remover NaNs
-        df_new_land_controls = interpolate_scaled_offset_field.knn_fit_control_points(df_stations, df_land_controls, nearest_neighbors=3)
+        df_new_land_controls = interpolate_scaled_offset_field.knn_fit_control_points(df_stations, df_land_controls, nearest_neighbors=2)
         set_of_dfs.append(df_new_land_controls)
     if df_water_controls is not None:
         set_of_dfs.append(df_water_controls)
