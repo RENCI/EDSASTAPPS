@@ -145,24 +145,26 @@ def main(args):
 
     noaa_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='NOAA_STATIONS')
     if noaa_station_file is not None:
-        obs = get_obs_stations.get_obs_stations(source='NOAA', product='water_level',
-            station_list_file=noaa_station_file)
-        data_obs,meta_obs=obs.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=0, interval='None' )
-        data_obs.replace('-99999',np.nan,inplace=True)
-        meta_obs.replace('-99999',np.nan,inplace=True)
-        # Remove stations with too many nans ( Note Harvester would have previously removed stations that are ALL NANS)
-        data_thresholded = obs.remove_missingness_stations(data_obs, max_nan_percentage_cutoff=10)  # (Maximum allowable nans %)
-        meta_thresholded = meta_obs.loc[data_thresholded.columns.tolist()]
-        meta_obs_list = set(data_thresholded.columns.tolist()).intersection(meta_obs.index.to_list())
-        meta_obs_thresholded = meta_obs.loc[meta_obs_list]
-        # Apply a moving average (smooth) the data performed the required resampling to the desired rate followed by interpolating
-        data_obs_smoothed = obs.fetch_smoothed_station_product(data_thresholded, return_sample_min=args.return_sample_min, window=11)
-        outputs_dict['NOAA NOS']=data_obs_smoothed
-        outputs_metadict['NOAA NOS']=meta_obs_thresholded
-        valid_obs.append(data_obs_smoothed)
-        valid_obs_meta.append(meta_obs)
-        utilities.log.info('Finished with NOAA Observations')
-
+        try:
+            obs = get_obs_stations.get_obs_stations(source='NOAA', product='water_level',
+                station_list_file=noaa_station_file)
+            data_obs,meta_obs=obs.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=0, interval='None' )
+            data_obs.replace('-99999',np.nan,inplace=True)
+            meta_obs.replace('-99999',np.nan,inplace=True)
+            # Remove stations with too many nans ( Note Harvester would have previously removed stations that are ALL NANS)
+            data_thresholded = obs.remove_missingness_stations(data_obs, max_nan_percentage_cutoff=10)  # (Maximum allowable nans %)
+            meta_thresholded = meta_obs.loc[data_thresholded.columns.tolist()]
+            meta_obs_list = set(data_thresholded.columns.tolist()).intersection(meta_obs.index.to_list())
+            meta_obs_thresholded = meta_obs.loc[meta_obs_list]
+            # Apply a moving average (smooth) the data performed the required resampling to the desired rate followed by interpolating
+            data_obs_smoothed = obs.fetch_smoothed_station_product(data_thresholded, return_sample_min=args.return_sample_min, window=11)
+            outputs_dict['NOAA NOS']=data_obs_smoothed
+            outputs_metadict['NOAA NOS']=meta_obs_thresholded
+            valid_obs.append(data_obs_smoothed)
+            valid_obs_meta.append(meta_obs)
+            utilities.log.info('Finished with NOAA Observations')
+        except Exception as e:
+            utilities.log.error('NOAA: Broad failure. Failed to find any NOAA data: {}'.format(e))
 
 ##
 ## OBSERVATIONS #2. Get the Contrails station data. Assumes the contrails stations are in the same station_list
@@ -174,19 +176,22 @@ def main(args):
     rivers_data_product='river_water_level'
     contrails_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='CONTRAILS_RIVERS')
     if contrails_station_file is not None:
-        contrails = get_obs_stations.get_obs_stations(source='CONTRAILS', product=rivers_data_product,
-            contrails_yamlname=contrails_config, station_list_file=contrails_station_file)
-        # Get data at highest resolution. Return at 15min intervals
-        cont_data,cont_meta=contrails.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=args.return_sample_min, interval='None' )
-        cont_data.replace('-99999',np.nan,inplace=True)
-        cont_meta.replace('-99999',np.nan,inplace=True)
-        cont_meta_list = set(cont_data.columns.tolist()).intersection(cont_meta.index.to_list())
-        cont_meta = cont_meta.loc[cont_meta_list]
-        outputs_dict['Contrails']=cont_data
-        outputs_metadict['Contrails']=cont_meta
-        valid_obs.append(cont_data)
-        valid_obs_meta.append(cont_meta)
-        utilities.log.info('Finished with Contrails Observations')
+        try:
+            contrails = get_obs_stations.get_obs_stations(source='CONTRAILS', product=rivers_data_product,
+                contrails_yamlname=contrails_config, station_list_file=contrails_station_file)
+            # Get data at highest resolution. Return at 15min intervals
+            cont_data,cont_meta=contrails.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=args.return_sample_min, interval='None' )
+            cont_data.replace('-99999',np.nan,inplace=True)
+            cont_meta.replace('-99999',np.nan,inplace=True)
+            cont_meta_list = set(cont_data.columns.tolist()).intersection(cont_meta.index.to_list())
+            cont_meta = cont_meta.loc[cont_meta_list]
+            outputs_dict['Contrails']=cont_data
+            outputs_metadict['Contrails']=cont_meta
+            valid_obs.append(cont_data)
+            valid_obs_meta.append(cont_meta)
+            utilities.log.info('Finished with Contrails Observations')
+        except Exception as e:
+            utilities.log.error('CONTRAILS: Broad failure. Failed to find any CONTRAILS data. System key supplied ?: {}'.format(e))
 
 ##
 ## OBSERVATIONS. #3 Get known Buoy wave_height data
@@ -210,10 +215,10 @@ def main(args):
             outputs_dict['NDBC']=data_ndbc_thresholded
             outputs_metadict['NDBC']=meta_ndbc_thresholded
             utilities.log.info('Finished with NDBC Observations')
+            valid_obs.append(data_ndbc)
+            valid_obs_meta.append(meta_ndbc)
         except Exception as e:
             utilities.log.error('NDBC: Failed to find any data: do not include to plot list {}'.format(e))
-        valid_obs.append(data_ndbc)
-        valid_obs_meta.append(meta_ndbc)
 
 ##
 ## Combine observations data for the error computations - No NDBC data here
