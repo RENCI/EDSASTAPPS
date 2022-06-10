@@ -245,7 +245,7 @@ def main(args):
         outputs_metadict['NOAA Tidal']=meta_pred
         utilities.log.info('Finished with Tidal Predictions')
     except Exception as e:
-        utilities.log.error('TIDAL: Broad failure. Failed to find any nowcast data: {}'.format(e))
+        utilities.log.error('TIDAL: Broad failure. Failed to find any TIDAL data: {}'.format(e))
 
 ##
 ## Perform the error computations
