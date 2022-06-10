@@ -1,4 +1,4 @@
-sudo docker image rm -f ast_supp:v0.0.6
+sudo docker image rm -f ast_supp:v0.0.5
 # List images
 sudo docker image ls
 
