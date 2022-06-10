@@ -1,27 +1,26 @@
-sudo docker image rm -f ast_supp:v0.0.5
 # List images
 sudo docker image ls
 
 # Remove existing images
-sudo docker image rm -f ast_supp:v0.0.5
+sudo docker image rm -f ast_supp:v0.0.6
 
 # Cleanup
 sudo docker system prune -a
 
 # Build an image
 # sudo docker build --no-cache -t ast_supp:latest .
-sudo docker build --no-cache -t ast_supp:v0.0.6 .
+sudo docker build --no-cache -t ast_supp:v0.0.7 .
 
 # Reset the tag ID
 sudo docker image tag ast_supp:latest renciorg/ast_supp:latest
-sudo docker image tag ast_supp:v0.0.6 renciorg/ast_supp:v0.0.6
+sudo docker image tag ast_supp:v0.0.7 renciorg/ast_supp:v0.0.7
 
 # Push the image to docker 
 
 sudo docker login
 
 # Test your image: Start an interactive shell to the image
-sudo docker run -it ast_supp:v0.0.6 bash
+sudo docker run -it ast_supp:v0.0.7 bash
 
 # Load for actual cluster usage
-#sudo docker push renciorg/ast_supp:v0.0.6
+#sudo docker push renciorg/ast_supp:v0.0.7
