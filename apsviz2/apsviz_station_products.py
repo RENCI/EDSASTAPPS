@@ -242,7 +242,6 @@ def main(args):
     except Exception as e:
         utilities.log.error('TIDAL: Broad failure. Failed to find any nowcast data: {}'.format(e))
 
-
 ##
 ## Perform the error computations
 ##
