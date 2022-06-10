@@ -276,7 +276,16 @@ def main(args):
     df_station_file_png_locations = station_plotter.generate_station_specific_PNGs(outputs_dict, 
         outputs_metadict, outputdir=rootdir, station_id_list=None)
     print(df_station_file_png_locations)
-    station_props = io_utilities.write_csv(df_station_file_png_locations, rootdir=rootdir,subdir='',fileroot='stationProps',iometadata='')
+
+## 
+## Improve the PER_STATION data object by adding Node metadata. These are either form fort63 or fort61 adcirc updates
+##
+    df_station_nodes = meta_adc['Node'].to_frame()
+    df_station_file_png_locations = pd.concat([df_station_file_png_locations,df_station_nodes],axis=1)
+    df_station_file_png_locations.index.name='StationId'
+    utilities.log.info('Update station_props file with Node information')
+
+    station_props = io_utilities.write_csv(df_station_file_png_locations[['StationName','State','Lat','Lon','Node','Filename']], rootdir=rootdir,subdir='',fileroot='stationProps',iometadata='')
     utilities.log.info('Wrote out station_properties file to {}'.format(station_props))
 
 ##
