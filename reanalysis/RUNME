@@ -1,0 +1,55 @@
+export PYTHONPATH=/projects/sequence_analysis/vol1/prediction_work/AST:/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS 
+export RUNTIMEDIR=./JUNK
+
+python compute_annual_errors.py --url "/archive/users/bblanton/Projects/NOAA.Reanalysis/fr3/2018/fort.63.nc" --gridname 'hsofs' --map_file './supporting_data/grid_to_stationfile_maps.yml' --fort63_style 
+
+# Using a knockout file
+python compute_annual_errors.py --url "/archive/users/bblanton/Projects/NOAA.Reanalysis/fr3/2018/fort.63.nc" --gridname 'hsofs' --map_file './supporting_data/grid_to_stationfile_maps.yml' --knockout  ./supporting_data/knockoutStation.json
+
+##
+## Run an overall reanalysis annual pipeline
+##
+
+##
+## Test running the annual while including the knockout data
+##
+
+python compute_annual_errors.py --url "/projects/reanalysis/ADCIRC/ERA5/hsofs/2018/fort.63.nc" --gridname 'hsofs' --map_file './supporting_data/grid_to_stationfile_maps.yml' --knockout  ./supporting_data/knockoutStation.json
+
+##
+## Test running a DAILY breakdown
+##
+
+# RUn the associated DAILY function
+GRID="hsofs"
+DAILY=DAILY-$GRID-LP24
+YEAR="2018"
+
+export INDIR=$RUNTIMEDIR/
+export OUTROOT=$RUNTIMEDIR/$DAILY
+
+python daily_lowpass_sampled_error.py  --inyear $YEAR  --input_directory $INDIR --output_directory $OUTROOT --yearly_file_properties 'yearly_file_properties.json' --main_yamlname './config/main.yml'
+
+##
+## Test running a single interpolation 
+##
+
+python interpolation_daily_errorset.py --iometadata '18-365_2018123100' --daily_file_errors $INDIR/$DAILY/errorfield/stationSummaryAves_18-365_2018123100.csv --input_directory $INDIR --output_directory $OUTROOT --main_yamlname './config/main.yml' --gridname 'hsofs' --map_file './supporting_data/grid_to_stationfile_maps.yml'
+
+##
+## Test running a list of interpolations
+##
+python wrap_interpolation_daily_errorset.py --json_daily_file_errors $INDIR/daily_file_properties.json --input_directory $INDIR --output_directory $OUTROOT --main_yamlname './config/main.yml' --gridname 'hsofs' --map_file './supporting_data/grid_to_stationfile_maps.yml'
+
+
+##
+## Run an partial (no offsets) reanalysis annual pipeline on SWAN data
+##
+
+##
+## Execute the compute errors part of this pipeline to compare SWAN and NDBC data 
+##
+ 
+python swan_ndbc_buoy_comparisons.py --url "/projects/sequence_analysis/vol1/prediction_work/HSOFS-PRIOR-2022/2018/swan_HS.63.nc" --gridname 'hsofs' --map_file './supporting_data/grid_to_stationfile_maps.yml' --variable_name 'swan_HS' --fort63_style
+
+
