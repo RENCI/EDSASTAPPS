@@ -31,7 +31,7 @@ python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2021
 python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022042712/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'hsofs' --ensemble='nowcast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml
 
 ##
-## Example of how APSVIZ2 supervisor should invoke the "OBSMOD" app using ther script wrapper.
+## Example of how APSVIZ2 supervisor should invoke the "OBSMOD" app using the script wrapper.
 ##
 
 URL="http://tds.renci.org/thredds/dodsC/2022/nam/2022042712/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/namforecast/fort.63.nc"
@@ -79,6 +79,12 @@ python ./apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/20
 ##
 
 python ./apsviz_station_products.py --url "http://apsviz-thredds-dev/thredds/dodsC/2022/nam/2022060400/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sb55.01/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'ncsc_sab_v1.23' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --finalDIR "./HEY3"
+
+##
+## Can we get buoy data ? 
+##
+
+python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022061300/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sb55.01/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'NCSC_SAB_v1.23' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml
 
 
 
