@@ -8,17 +8,17 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-def save_plot_model( adc_plot_grid=None, df_surface=None, df_land_control=None, df_water_control=None, filename=None, plot_now=False):
+def save_plot_model( adc_plot_grid=None, df_stations = None, df_surface=None, df_land_control=None, df_water_control=None, filename=None, plot_now=False):
     """
     Wrapper to take generated plt file and save to disk
     """
     if filename is None:
         utilities.log.error('save_plot_model: No filename provided to save the plot')
         return
-    plt_data = plot_model(adc_plot_grid=adc_plot_grid, df_surface=df_surface, df_land_control=df_land_control, df_water_control=df_water_control, plot_now=plot_now)
+    plt_data = plot_model(adc_plot_grid=adc_plot_grid, df_surface=df_surface, df_stations = df_stations, df_land_control=df_land_control, df_water_control=df_water_control, plot_now=plot_now)
     plt_data.savefig(filename, bbox_inches='tight')
 
-def plot_model(adc_plot_grid=None, df_surface=None, df_land_control=None, df_water_control=None, plot_now=True):
+def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_control=None, df_water_control=None, plot_now=True):
     """
     Basic plotter to display a 2D extrapolation field. The best images will include
     not only the surface, but also the stations, and control points as a reference 
@@ -49,13 +49,21 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_land_control=None, df_wat
         v = df_surface['VAL'].values
         v = v.reshape(-1,len(x)) # Reshapes to LAT column-major format
         mesh = ax.pcolormesh(x, y, v, shading='nearest', cmap=cmap, vmin=-.5, vmax=.5)
+    if df_stations is not None:
+        print('plot_model: Found a station data set')
+        stations_X=df_stations['LON'].values
+        stations_Y=df_stations['LAT'].values
+        stations_V=df_stations['VAL'].values
+        ax.scatter(stations_X, stations_Y, s=50, marker='o',
+                   c=stations_V, edgecolor='black',
+                   vmin=-.5, vmax=0.5) # , cmap=cmap)
     # Merge control points
     if df_land_control is not None:
         print('plot_model: Found a land_control data set')
         land_X=df_land_control['LON'].values
         land_Y=df_land_control['LAT'].values
         land_V=df_land_control['VAL'].values
-        ax.scatter(land_X, land_Y, s=50, marker='o',
+        ax.scatter(land_X, land_Y, s=50, marker='x',
                    c=land_V, cmap=cmap, edgecolor='black',
                    vmin=-.5, vmax=0.5)
     if df_water_control is not None:

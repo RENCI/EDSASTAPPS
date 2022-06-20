@@ -173,11 +173,11 @@ def main(args):
         utilities.log.info('Processed land control nodes: Final values stored to {}'.format(file_land_controls))
 
 ##
-## Optional. Apply the model to a 400x300 grid and plot, the extrapolated surface, stations, clamps
+## Optional. Apply the model to a 500x400 grid and plot, the extrapolated surface, stations, clamps
 ##
     iosubdir='images'
     newfilename = io_utilities.get_full_filename_with_subdirectory_prepended(outputdir, iosubdir, 'extrapolated_surface_plot_'+iometadata+'.png')
-    plot_interpolation_errorset.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_land_control=df_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False)
+    plot_interpolation_errorset.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_stations=df_stations.rename(columns={"fft": "VAL"}), df_land_control=df_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False)
     utilities.log.info('Saved IMAGE file to {}'.format(newfilename))
 
     utilities.log.info('Finished with interpolation')
