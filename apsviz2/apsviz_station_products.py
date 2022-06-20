@@ -192,36 +192,8 @@ def main(args):
             utilities.log.info('Finished with Contrails Observations')
         except Exception as e:
             utilities.log.error('CONTRAILS: Broad failure. Failed to find any CONTRAILS data. System key supplied ?: {}'.format(e))
-
 ##
-## OBSERVATIONS. #3 Get known Buoy wave_height data
-##
-# We expect a lot of missingness for these data so set a high number=90% Do not use 100% because if your entire dataset is empty
-# (eg a wrong time range) then all empty buoys will be kept
-
-    ndbc_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='NDBC_BUOYS')
-    if ndbc_station_file is not None:
-        ndbc = get_obs_stations.get_obs_stations(source='NDBC', product='wave_height',
-            station_list_file=ndbc_station_file)
-        data_ndbc,meta_ndbc=ndbc.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=0, interval='None' )
-        data_ndbc.replace('-99999',np.nan,inplace=True)
-        meta_ndbc.replace('-99999',np.nan,inplace=True)
-        # Remove stations with too many nans ( Note Harvester would have previously removed stations that are ALL NANS)
-        try:
-            data_ndbc_thresholded = ndbc.remove_missingness_stations(data_ndbc, max_nan_percentage_cutoff=90)  # (Maximum allowable nans %)
-            meta_thresholded = meta_ndbc.loc[data_ndbc_thresholded.columns.tolist()]
-            meta_ndbc_list = set(data_ndbc_thresholded.columns.tolist()).intersection(meta_ndbc.index.to_list())
-            meta_ndbc_thresholded = meta_ndbc.loc[meta_ndbc_list]
-            outputs_dict['NDBC']=data_ndbc_thresholded
-            outputs_metadict['NDBC']=meta_ndbc_thresholded
-            utilities.log.info('Finished with NDBC Observations')
-            valid_obs.append(data_ndbc)
-            valid_obs_meta.append(meta_ndbc)
-        except Exception as e:
-            utilities.log.error('NDBC: Failed to find any data: do not include to plot list {}'.format(e))
-
-##
-## Combine observations data for the error computations - No NDBC data here
+## Combine observations data for the error computations - No Tidal nor NDBC data here
 ##
     data_obs_smoothed = pd.concat(valid_obs,axis=1)
     meta_obs = pd.concat(valid_obs_meta,axis=0)
@@ -259,6 +231,94 @@ def main(args):
         utilities.log.info('Finished with Compute Errors')
     except Exception as e:
         utilities.log.error('CompError: Failure. Perhaps no Nowcast to take errors from ? {}'.format(e))
+
+##
+## Try to acquire BUOY and SWAN data
+## Do this AFTER the error computation. Then simply add the list of objects to plot to the outputs_dict dict
+##
+
+    utilities.log.info('Switch to fort63_style lookups for the SWAN/Buoy data')
+    fort63_style = True
+
+##
+## SWAN Forecast
+##
+    ndbc_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='NDBC_BUOYS')
+    if ndbc_station_file is not None and fort63_compliant:
+        swan_input_url=get_adcirc_stations.convert_urls_to_swan_63style([args.url])[0]
+        print(swan_input_url)
+
+        try:
+            adc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
+                    station_list_file=ndbc_station_file,
+                    knockout_dict=None, fort63_style=fort63_style )
+            data_adc,meta_adc=adc.fetch_station_product( [swan_input_url] , return_sample_min=args.return_sample_min, fort63_style=fort63_style, variable_name='swan_HS'  )
+            # Revert Harvester filling of nans to -99999 back to nans
+            data_adc.replace('-99999',np.nan,inplace=True)
+            meta_adc.replace('-99999',np.nan,inplace=True)
+            outputs_dict['SWAN Forecast']=data_adc
+            outputs_metadict['SWAN Forecast']=meta_adc
+            utilities.log.info('Finished with SWAN Forecasts')
+    
+            # Grab the stop and start times from the data set. Will be needed for tidal predictions data
+            time_index=data_adc.index.tolist()
+            starttime = min(time_index).strftime('%Y-%m-%d %H:%M:%S')
+            endtime = max(time_index).strftime('%Y-%m-%d %H:%M:%S')
+        except Exception as e:
+            utilities.log.error('SWAN Forecast: Broad failure. Failed to find any forecast data: {}'.format(e))
+
+##
+## SWAN Nowcast
+##
+    if ndbc_station_file is not None and fort63_compliant:
+        obs_endtime = starttime # '%Y-%m-%d %H:%M:%S': Grab the beginning of the forecast
+        dt_starttime = dt.datetime.strptime(obs_endtime,dformat)+dt.timedelta(days=args.ndays) # How many days BACK
+        obs_starttime=dt.datetime.strftime(dt_starttime, dformat)
+
+        # Need to build a set of NOWCASTs from the input url.
+        nowadc = genurls.generate_urls_from_times(url=input_url,ndays=args.ndays)
+        swan_now_urls = nowadc.build_url_list_from_template_url_and_offset(ensemble='nowcast')
+        swan_now_urls = get_adcirc_stations.convert_urls_to_swan_63style(swan_now_urls)
+        try:
+            swan_nowadc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
+                    station_list_file=ndbc_station_file,
+                    knockout_dict=None, fort63_style=fort63_style )
+            data_now_adc,meta_now_adc=swan_nowadc.fetch_station_product(swan_now_urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style,variable_name='swan_HS')
+            data_now_adc.replace('-99999',np.nan,inplace=True)
+            meta_now_adc.replace('-99999',np.nan,inplace=True)
+            outputs_dict['SWAN Nowcast']=data_now_adc
+            outputs_metadict['SWAN Nowcast']=meta_now_adc
+            utilities.log.info('Finished with SWAN Nowcasts')
+            print(swan_now_urls)
+            print('SWAN Nowcast time range is from {} through {}'.format(obs_starttime, obs_endtime))
+        except Exception as e:
+            utilities.log.error('SWAN Nowcast: Broad failure. Failed to find any nowcast data: {}'.format(e))
+
+##
+## BUOY OBSERVATIONS. Get known Buoy wave_height data
+## We expect a lot of missingness for these data so set a high number=90% Do not use 100% because if your entire dataset is empty
+## (eg a wrong time range) then all empty buoys will be kept
+
+    ndbc_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='NDBC_BUOYS')
+    if ndbc_station_file is not None:
+        ndbc = get_obs_stations.get_obs_stations(source='NDBC', product='wave_height',
+            station_list_file=ndbc_station_file)
+        data_ndbc,meta_ndbc=ndbc.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=0, interval='None' )
+        data_ndbc.replace('-99999',np.nan,inplace=True)
+        meta_ndbc.replace('-99999',np.nan,inplace=True)
+        # Remove stations with too many nans ( Note Harvester would have previously removed stations that are ALL NANS)
+        try:
+            data_ndbc_thresholded = ndbc.remove_missingness_stations(data_ndbc, max_nan_percentage_cutoff=90)  # (Maximum allowable nans %)
+            meta_thresholded = meta_ndbc.loc[data_ndbc_thresholded.columns.tolist()]
+            meta_ndbc_list = set(data_ndbc_thresholded.columns.tolist()).intersection(meta_ndbc.index.to_list())
+            meta_ndbc_thresholded = meta_ndbc.loc[meta_ndbc_list]
+            outputs_dict['NDBC']=data_ndbc_thresholded
+            outputs_metadict['NDBC']=meta_ndbc_thresholded
+            utilities.log.info('Finished with NDBC Observations')
+            valid_obs.append(data_ndbc)
+            valid_obs_meta.append(meta_ndbc)
+        except Exception as e:
+            utilities.log.error('NDBC: Failed to find any data: do not include to plot list {}'.format(e))
 
 ##
 ## Select from RUNTIMEDIR, where to write these files

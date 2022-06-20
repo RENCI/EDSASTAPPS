@@ -27,7 +27,9 @@ colordict['NOAA NOS']='g'
 colordict['NOAA Tidal']='orange'
 colordict['Difference']='r'
 colordict['Contrails']='b'
-colordict['NDBC']='b'
+colordict['NDBC']='g'
+colordict['SWAN Forecast']='b'
+colordict['SWAN Nowcast']='b'
 
 dashdict=dict()
 dashdict['Forecast']=(3,1)
@@ -37,6 +39,8 @@ dashdict['NOAA Tidal']=(1,0)
 dashdict['Difference']=(1,0)
 dashdict['Contrails']=(1,1)
 dashdict['NDBC']=(2,2)
+dashdict['SWAN Forecast']=(3,1)
+dashdict['SWAN Nowcast']=(1,0)
 dashdict['misc']=(3,2)
 
 ##
@@ -47,8 +51,10 @@ dashdict['misc']=(3,2)
 LEGENDS_MAP={
      'NOAA Tidal': 'NOAA Tidal: Water level',
      'NOAA NOS': 'NOAA NOS: Water level',
-     'NDBC': 'NDBC: Wave height(WVHT)',
-     'SWAN': 'SWAN: Wavew height',
+     'NDBC': 'NDBC: Wave height (WVHT)',
+     'SWAN': 'SWAN: Wave height',
+     'SWAN Forecast': 'Swan Forecast: Wave height',
+     'SWAN Nowcast': 'Swan Nowcast: Wave height',
      'Contrails': 'Contrails: Water elevation(Stage)',
      'Forecast': 'Forecast: Water level',
      'Difference': 'Difference: Water level',
