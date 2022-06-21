@@ -14,21 +14,22 @@
 #SBATCH --mem-per-cpu 64000
 
 export PYTHONPATH=/projects/sequence_analysis/vol1/prediction_work/AST:/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS
-export RUNTIMEDIR=./JUNK
 
 YEAR=$1
 
 GRID="hsofs"
 DAILY=DAILY-$GRID-LP24
 
+export RUNTIMEDIR=./$GRID/YEARLY-$YEAR
 export INDIR=$RUNTIMEDIR/
 export OUTROOT=$RUNTIMEDIR/$DAILY
+
 
 ##
 ## Test running the hsofs annual while including the knockout data: This defaults fort61_style
 ##
 
-python compute_annual_errors.py --fort63_style --url "/projects/reanalysis/ADCIRC/ERA5/hsofs/$YEAR/fort.63.nc" --gridname 'hsofs' --map_file './supporting_data/grid_to_stationfile_maps.yml' --knockout  ./supporting_data/knockoutStation.json
+python compute_annual_errors.py --fort63_style --url "/projects/reanalysis/ADCIRC/ERA5/$GRID/$YEAR/fort.63.nc" --gridname $GRID --map_file './supporting_data/grid_to_stationfile_maps.yml' --knockout  ./supporting_data/knockoutStation.json
 
 ##
 ## run the DAILY breakdown
