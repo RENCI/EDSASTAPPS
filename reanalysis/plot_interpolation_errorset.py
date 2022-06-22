@@ -24,7 +24,7 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_co
     not only the surface, but also the stations, and control points as a reference 
 
     adc_plot_grid carries the (x,y) AXIS values spanning the data: df_surface
-    So if, len(LAT) = 300, len(LON)=400, len(dim(df_surface)) is (400*300)
+    So if, len(LAT) = 500, len(LON)=400, len(dim(df_surface)) is (400*500)
 
     Parameters:
         adc_plot_grid: dict with Keys of 'LON','LAT'
@@ -36,9 +36,7 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_co
         A plot in the USA East Coast region
     """
     coastline=np.loadtxt('/projects/sequence_analysis/vol1/prediction_work/ADCIRCSupportTools-v2/test_data/coarse_us_coast.dat')
-    N=16
-    base_cmap='tab20c' # Or simply use None tab20c is also okay
-    cmap= plt.cm.get_cmap(base_cmap, N)
+    cmap=plt.cm.jet
     #
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,10), dpi=144) #, sharex=True)
     # Set up surface
@@ -48,41 +46,42 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_co
         y = adc_plot_grid['LAT']
         v = df_surface['VAL'].values
         v = v.reshape(-1,len(x)) # Reshapes to LAT column-major format
-        mesh = ax.pcolormesh(x, y, v, shading='nearest', cmap=cmap, vmin=-.5, vmax=.5)
+        mesh = ax.pcolormesh(x, y, v, shading='nearest', cmap=cmap, vmin=-0.2, vmax=0.2)
     if df_stations is not None:
         print('plot_model: Found a station data set')
         stations_X=df_stations['LON'].values
         stations_Y=df_stations['LAT'].values
         stations_V=df_stations['VAL'].values
-        ax.scatter(stations_X, stations_Y, s=50, marker='o',
-                   c=stations_V, edgecolor='black',
-                   vmin=-.5, vmax=0.5) # , cmap=cmap)
+        ax.scatter(stations_X, stations_Y, s=60, marker='o',
+                   c=stations_V, cmap=cmap, edgecolor='black',
+                   vmin=-0.2, vmax=0.2) # , cmap=cmap)
     # Merge control points
     if df_land_control is not None:
         print('plot_model: Found a land_control data set')
         land_X=df_land_control['LON'].values
         land_Y=df_land_control['LAT'].values
         land_V=df_land_control['VAL'].values
-        ax.scatter(land_X, land_Y, s=50, marker='x',
+        ax.scatter(land_X, land_Y, s=30, marker='o',
                    c=land_V, cmap=cmap, edgecolor='black',
-                   vmin=-.5, vmax=0.5)
+                   vmin=-0.2, vmax=0.2)
     if df_water_control is not None:
         print('plot_model: Found a water_control data set')
         water_X=df_water_control['LON'].values
         water_Y=df_water_control['LAT'].values
         water_V=df_water_control['VAL'].values
-        ax.scatter(water_X, water_Y, s=50, marker='x',
-                   c=water_V, edgecolor='black',
-                   vmin=-.5, vmax=0.5)
+        ax.scatter(water_X, water_Y, s=30, marker='x',
+                   c='black', edgecolor='black') 
+                   #, vmin=-0.2, vmax=0.2)
     ax.plot(coastline[:,0],coastline[:,1],color='black',linewidth=.25)
     ax.set_xlim([-90, -70])
-    ax.set_ylim([10, 50])
+    ax.set_ylim([20, 45])
     ax.set_ylabel('Latitude')
     ax.set_xlabel('Longitude')
+    cbax = fig.add_axes([1., 0.1, 0.05, 0.8]) 
+    plt.colorbar(mesh,cax=cbax, orientation='vertical' )
     if (plot_now):
         plt.show()
     return plt
-
 
 def main(args):
     # Grab the test data

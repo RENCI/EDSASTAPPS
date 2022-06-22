@@ -91,11 +91,11 @@ def main(args):
 ## Perform the KNN plus Interpolation
 ##
     in_interpolator='LinearNDInterpolator'
-    in_nearest_neighbors=2
+    in_nearest_neighbors=3
     set_of_dfs=list()
     set_of_dfs.append(df_stations) # Always need this
     if df_land_controls is not None:
-        df_new_land_controls = interpolate_scaled_offset_field.knn_fit_control_points(df_stations, df_land_controls, nearest_neighbors=in_nearest_neighbors)
+        df_new_land_controls = interpolate_scaled_offset_field.knn_fit_control_points(df_stations, df_land_controls.copy(), nearest_neighbors=in_nearest_neighbors)
         set_of_dfs.append(df_new_land_controls)
     if df_water_controls is not None:
         set_of_dfs.append(df_water_controls)
@@ -109,9 +109,6 @@ def main(args):
     station_coords = {'LON':station_x[:].tolist(),'LAT':station_y[:].tolist()}
     df_interpolated_stations = interpolate_scaled_offset_field.interpolation_model_transform(station_coords, model=model, input_grid_type='points')
     df_stations['interpolated']=df_interpolated_stations['VAL'].tolist()
-
-    #df_stations=df_stations.rename(columns = {'VAL':'fft'})
-    #print(df_stations)
     
     # Build new extrapolated surface onto the ADCIRC grid
     df_extrapolated_ADCIRC_GRID = interpolate_scaled_offset_field.interpolation_model_transform(adc_coords, model=model, input_grid_type='points')
@@ -126,7 +123,6 @@ def main(args):
 
     # For subsequent data viewers change the VAL header back to the real data name
     df_stations=df_stations.rename(columns = {'VAL':'fft'})
-    #print(df_stations)
 
 ##
 ## Write out datafiles 
@@ -177,7 +173,11 @@ def main(args):
 ##
     iosubdir='images'
     newfilename = io_utilities.get_full_filename_with_subdirectory_prepended(outputdir, iosubdir, 'extrapolated_surface_plot_'+iometadata+'.png')
-    plot_interpolation_errorset.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_stations=df_stations.rename(columns={"fft": "VAL"}), df_land_control=df_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False)
+    plot_interpolation_errorset.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_stations=df_stations.rename(columns={"fft": "VAL"}), df_land_control=df_new_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False)
+
+    # Can save df_extrapolated_ADCIRC_GRID as a pkl with headers LON,LAT,VAL
+    # This is a very large memory operation but here is how the ADCIRC data would be be plotted
+    #plot_interpolation_errorset.save_plot_model( adc_plot_grid=df_extrapolated_ADCIRC_GRID, df_surface=df_plot_transformed, df_stations=df_stations.rename(columns={"fft": "VAL"}), df_land_control=df_new_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False)
     utilities.log.info('Saved IMAGE file to {}'.format(newfilename))
 
     utilities.log.info('Finished with interpolation')
