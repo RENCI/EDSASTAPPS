@@ -248,7 +248,7 @@ def main(args):
     set_of_dfs.append(df_stations) # Always need this
     if df_land_controls is not None:
         # Must remover NaNs
-        df_new_land_controls = interpolate_scaled_offset_field.knn_fit_control_points(df_stations, df_land_controls, nearest_neighbors=2)
+        df_new_land_controls = interpolate_scaled_offset_field.knn_fit_control_points(df_stations, df_land_controls.copy(), nearest_neighbors=2)
         set_of_dfs.append(df_new_land_controls)
     if df_water_controls is not None:
         set_of_dfs.append(df_water_controls)
@@ -295,7 +295,7 @@ def main(args):
 
     iosubdir='images'
     newfilename = io_utilities.get_full_filename_with_subdirectory_prepended(rootdir, iosubdir, 'extrapolated_surface_plot'+iometadata+'.png')
-    adda_visualization_plots.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_land_control=df_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False)
+    adda_visualization_plots.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_land_control=df_new_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False)
     utilities.log.info('Saved IMAGE file to {}'.format(newfilename))
 
 ##
