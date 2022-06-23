@@ -8,17 +8,17 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-def save_plot_model( adc_plot_grid=None, df_stations = None, df_surface=None, df_land_control=None, df_water_control=None, filename=None, plot_now=False):
+def save_plot_model( adc_plot_grid=None, df_stations = None, df_surface=None, df_land_control=None, df_water_control=None, filename=None, plot_now=False, annotation=None):
     """
     Wrapper to take generated plt file and save to disk
     """
     if filename is None:
         utilities.log.error('save_plot_model: No filename provided to save the plot')
         return
-    plt_data = plot_model(adc_plot_grid=adc_plot_grid, df_surface=df_surface, df_stations = df_stations, df_land_control=df_land_control, df_water_control=df_water_control, plot_now=plot_now)
+    plt_data = plot_model(adc_plot_grid=adc_plot_grid, df_surface=df_surface, df_stations = df_stations, df_land_control=df_land_control, df_water_control=df_water_control, plot_now=plot_now, annotation=annotation)
     plt_data.savefig(filename, bbox_inches='tight')
 
-def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_control=None, df_water_control=None, plot_now=True):
+def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_control=None, df_water_control=None, plot_now=True, annotation=None):
     """
     Basic plotter to display a 2D extrapolation field. The best images will include
     not only the surface, but also the stations, and control points as a reference 
@@ -37,6 +37,7 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_co
     """
     coastline=np.loadtxt('/projects/sequence_analysis/vol1/prediction_work/ADCIRCSupportTools-v2/test_data/coarse_us_coast.dat')
     cmap=plt.cm.jet
+    print('annotate is {}'.format(annotation))
     #
     fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,10), dpi=144) #, sharex=True)
     # Set up surface
@@ -77,8 +78,8 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_co
     ax.set_ylim([20, 45])
     ax.set_ylabel('Latitude')
     ax.set_xlabel('Longitude')
-    cbax = fig.add_axes([1., 0.1, 0.05, 0.8]) 
-    plt.colorbar(mesh,cax=cbax, orientation='vertical' )
+    plt.colorbar(mesh,orientation='vertical' )
+    plt.title(annotation)
     if (plot_now):
         plt.show()
     return plt

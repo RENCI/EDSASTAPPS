@@ -9,16 +9,6 @@ import os,sys
 import numpy as np
 import pandas as pd
 import time as tm
-#import matplotlib
-#matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import seaborn as sns
-#import matplotlib.dates as mdates
-#from pandas.tseries.frequencies import to_offset
-#import json
-#import scipy
-#from scipy import signal
-#from scipy.signal import butter
 import datetime as dt
 import processing.interpolate_scaled_offset_field as interpolate_scaled_offset_field
 import gridmap.grid_to_station_maps as grid_to_station_maps
@@ -172,14 +162,16 @@ def main(args):
 ## Optional. Apply the model to a 500x400 grid and plot, the extrapolated surface, stations, clamps
 ##
     iosubdir='images'
+    annotate = f'{gridname.upper()}_{iometadata}'
+    print(annotate)
     newfilename = io_utilities.get_full_filename_with_subdirectory_prepended(outputdir, iosubdir, 'extrapolated_surface_plot_'+iometadata+'.png')
-    plot_interpolation_errorset.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_stations=df_stations.rename(columns={"fft": "VAL"}), df_land_control=df_new_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False)
+    plot_interpolation_errorset.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_stations=df_stations.rename(columns={"fft": "VAL"}), df_land_control=df_new_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False, annotation=annotate)
 
     # Can save df_extrapolated_ADCIRC_GRID as a pkl with headers LON,LAT,VAL
     # This is a very large memory operation but here is how the ADCIRC data would be be plotted
-    #plot_interpolation_errorset.save_plot_model( adc_plot_grid=df_extrapolated_ADCIRC_GRID, df_surface=df_plot_transformed, df_stations=df_stations.rename(columns={"fft": "VAL"}), df_land_control=df_new_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False)
-    utilities.log.info('Saved IMAGE file to {}'.format(newfilename))
+    #plot_interpolation_errorset.save_plot_model( adc_plot_grid=df_extrapolated_ADCIRC_GRID, df_surface=df_plot_transformed, df_stations=df_stations.rename(columns={"fft": "VAL"}), df_land_control=df_new_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False, annotation=annotate)
 
+    utilities.log.info('Saved IMAGE file to {}'.format(newfilename))
     utilities.log.info('Finished with interpolation')
 
 if __name__ == '__main__':
