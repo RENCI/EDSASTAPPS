@@ -163,7 +163,6 @@ def main(args):
 ##
     iosubdir='images'
     annotate = f'{gridname.upper()}_{iometadata}'
-    print(annotate)
     newfilename = io_utilities.get_full_filename_with_subdirectory_prepended(outputdir, iosubdir, 'extrapolated_surface_plot_'+iometadata+'.png')
     plot_interpolation_errorset.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_stations=df_stations.rename(columns={"fft": "VAL"}), df_land_control=df_new_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False, annotation=annotate)
 
