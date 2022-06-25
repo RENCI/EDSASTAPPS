@@ -4,21 +4,21 @@ import sys, os
 import numpy as np
 import pandas as pd
 from utilities.utilities import utilities
-#import matplotlib
-#matplotlib.use('Agg')
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-def save_plot_model( adc_plot_grid=None, df_surface=None, df_land_control=None, df_water_control=None, filename=None, plot_now=False):
+def save_plot_model( adc_plot_grid=None, df_surface=None, df_stations=None, df_land_control=None, df_water_control=None, filename=None, plot_now=False):
     """
     Wrapper to take generated plt file and save to disk
     """
     if filename is None:
         utilities.log.error('save_plot_model: No filename provided to save the plot')
         return
-    plt_data = plot_model(adc_plot_grid=adc_plot_grid, df_surface=df_surface, df_land_control=df_land_control, df_water_control=df_water_control, plot_now=plot_now)
+    plt_data = plot_model(adc_plot_grid=adc_plot_grid, df_surface=df_surface, df_stations=df_stations, df_land_control=df_land_control, df_water_control=df_water_control, plot_now=plot_now)
     plt_data.savefig(filename, bbox_inches='tight')
 
-def plot_model(adc_plot_grid=None, df_surface=None, df_land_control=None, df_water_control=None, plot_now=True):
+def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_control=None, df_water_control=None, plot_now=True):
     """
     Basic plotter to display a 2D extrapolation field. The best images will include
     not only the surface, but also the stations, and control points as a reference 
@@ -29,6 +29,7 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_land_control=None, df_wat
     Parameters:
         adc_plot_grid: dict with Keys of 'LON','LAT'
         df_surface: (DataFrame) (optional) with headers 'LON','LAT','VAL'
+        df_stations: (DataFrame) (optional) with headers 'LON','LAT','VAL'
         df_land_control: (DataFrame) (optional) with headers 'LON','LAT','VAL'
         df_water_control: (DataFrame) (optional) with headers 'LON','LAT','VAL'
         plot_now: bool. True display the plot. Else not
@@ -51,12 +52,20 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_land_control=None, df_wat
         v = v.reshape(-1,len(x)) # Reshapes to LAT column-major format
         mesh = ax.pcolormesh(x, y, v, shading='nearest', cmap=cmap, vmin=-.3, vmax=.3)
     # Merge control points
+    if df_stations is not None:
+        print('plot_model: Found a station data set')
+        stations_X=df_stations['LON'].values
+        stations_Y=df_stations['LAT'].values
+        stations_V=df_stations['VAL'].values
+        ax.scatter(stations_X, stations_Y, s=60, marker='o',
+                   c=stations_V, cmap=cmap, edgecolor='black',
+                   vmin=-.3, vmax=0.3)
     if df_land_control is not None:
         print('plot_model: Found a land_control data set')
         land_X=df_land_control['LON'].values
         land_Y=df_land_control['LAT'].values
         land_V=df_land_control['VAL'].values
-        ax.scatter(land_X, land_Y, s=50, marker='o',
+        ax.scatter(land_X, land_Y, s=30, marker='o',
                    c=land_V, cmap=cmap, edgecolor='black',
                    vmin=-.3, vmax=0.3)
     if df_water_control is not None:
@@ -64,14 +73,15 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_land_control=None, df_wat
         water_X=df_water_control['LON'].values
         water_Y=df_water_control['LAT'].values
         water_V=df_water_control['VAL'].values
-        ax.scatter(water_X, water_Y, s=50, marker='x',
-                   c=water_V, edgecolor='black',
+        ax.scatter(water_X, water_Y, s=30, marker='x',
+                   c='black', edgecolor='black',
                    vmin=-.3, vmax=0.3)
     ax.plot(coastline[:,0],coastline[:,1],color='black',linewidth=.25)
     ax.set_xlim([-90, -70])
-    ax.set_ylim([10, 50])
+    ax.set_ylim([20, 45])
     ax.set_ylabel('Latitude')
     ax.set_xlabel('Longitude')
+    plt.colorbar(mesh,orientation='vertical' )
     if (plot_now):
         plt.show()
     return plt

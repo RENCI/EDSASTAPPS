@@ -15,20 +15,13 @@ import processing.interpolate_scaled_offset_field as interpolate_scaled_offset_f
 import gridmap.grid_to_station_maps as grid_to_station_maps
 import adda_visualization_plots as adda_visualization_plots
 
-#from harvester.fetch_adcirc_data import fetch_adcirc_data
-#from harvester.generate_urls_from_times import genurls # generate_urls_from_times
-#from harvester.get_adcirc_stations import get_adcirc_stations
-#from harvester.get_observations_stations import get_obs_stations
-#from processing.compute_error_field import compute_error_field
-#from processing.interpolate_scaled_offset_field import interpolate_scaled_offset_field
-#from grid_to_station_maps import grid_to_station_maps
-#from adda_visualization_plots import adda_visualization_plots
-
 from utilities.utilities import utilities as utilities
 import io_utilities.io_utilities as io_utilities
 from argparse import ArgumentParser
 
 import joblib
+
+# TODO validate when ndays > 0 especially the total_hours value
 
 ##
 ## Run the canonical ADDA approach
@@ -67,7 +60,13 @@ def main(args):
         stoptime = tnow.strftime('%Y-%m-%d %H:%M:%S')
     else:
         stoptime=args.timeout
-    print('Stoptime and ndays {}. {}'.format(stoptime,args.ndays))
+
+    #dt_starttime = dt.datetime.strptime(stoptime,'%Y-%m-%d %H:%M:%S')+dt.timedelta(days=args.ndays)
+    total_hours = abs(args.ndays*24) - 1 # Ensures the final list length INCLUDES the now time as a member and is a multiple of 24 hours
+
+    dt_starttime = dt.datetime.strptime(stoptime,'%Y-%m-%d %H:%M:%S')+np.sign(args.ndays)*dt.timedelta(hours=total_hours) # Should support lookback AND look forward
+    starttime = dt_starttime.strftime('%Y-%m-%d %H:%M:%S')
+    print('Total_hours, Starttime, Stoptime and ndays {}, {}. {}'.format(total_hours, starttime, stoptime,args.ndays))
 
 ##
 ## fetch the asgs/adcirc station data
@@ -124,16 +123,20 @@ def main(args):
     print(f'Grid name {rpl.gridname}')
     print(f'Instance name {rpl.instance}')
 
-    # Get a last piece of metadata for firsr url in iterable grabs either the time (%Y%m%s%H) or hurricane advisory (int)
+    # Get a last piece of metadata for first url in iterable grabs either the time (%Y%m%s%H) or hurricane advisory (int)
     # Grab the adcirc time ranges for calling the observations code
     
-    obs_starttime = dt.datetime.strftime( min(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
-    obs_endtime = dt.datetime.strftime( max(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
+    # Since ADCIRC start 6 hours early, using te ADCRC starttime can throw off the error averages at the end
+    #obs_starttime = dt.datetime.strftime( min(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
+    #obs_endtime = dt.datetime.strftime( max(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
+    #obs_starttime = dt.datetime.strftime(starttime, '%Y-%m-%d %H:%M:%S')
+    #obs_stoptime = dt.datetime.strftime(stoptime, '%Y-%m-%d %H:%M:%S')
+    obs_starttime=starttime
+    obs_endtime=stoptime
 
     # Cnstruct iometadata to update all filename - want diff format
     io_start = dt.datetime.strftime( min(data_adc.index.tolist()), '%Y%m%d%H%M')
     io_end = dt.datetime.strftime( max(data_adc.index.tolist()), '%Y%m%d%H%M')
-
     iometadata = io_start+'_'+io_end 
     rootdir=io_utilities.construct_base_rootdir(config['DEFAULT']['RDIR'], base_dir_extra='ADDA'+'_'+iometadata)
     
@@ -145,8 +148,8 @@ def main(args):
     detailedpkl = io_utilities.write_pickle(data_adc, rootdir=rootdir,subdir=iosubdir,fileroot='adc_wl_detailed',iometadata=iometadata)
 
     # Grab the adcirc time ranges for calling the observations code
-    obs_starttime = dt.datetime.strftime( min(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
-    obs_endtime = dt.datetime.strftime( max(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
+    ##obs_starttime = dt.datetime.strftime( min(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
+    ##obs_endtime = dt.datetime.strftime( max(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
 
     # Optionally Write selected in JSON format Convert and write selected JSON data
     #data_adc.index = data_adc.index.strftime('%Y-%m-%d %H:%M:%S')
@@ -202,10 +205,10 @@ def main(args):
     #bound_lo='2022-02-17 06:00:00'
     #bound_hi='2022-02-19 00:00:00'
     print(data_obs_smoothed.index)
-    comp_err = compute_error_field.compute_error_field(data_obs_smoothed, data_adc, meta_obs) # All default params
+    comp_err = compute_error_field.compute_error_field(data_obs_smoothed, data_adc, meta_obs, n_pad=0) # All default params
     comp_err._intersection_stations()
     comp_err._intersection_times()
-    comp_err._tidal_transform_data()
+    ##comp_err._tidal_transform_data()
     comp_err._apply_time_bounds((obs_starttime,obs_endtime)) # redundant but here for illustration
     comp_err._compute_and_average_errors()
 
@@ -248,7 +251,7 @@ def main(args):
     set_of_dfs.append(df_stations) # Always need this
     if df_land_controls is not None:
         # Must remover NaNs
-        df_new_land_controls = interpolate_scaled_offset_field.knn_fit_control_points(df_stations, df_land_controls.copy(), nearest_neighbors=2)
+        df_new_land_controls = interpolate_scaled_offset_field.knn_fit_control_points(df_stations, df_land_controls.copy(), nearest_neighbors=3)
         set_of_dfs.append(df_new_land_controls)
     if df_water_controls is not None:
         set_of_dfs.append(df_water_controls)
@@ -261,7 +264,7 @@ def main(args):
 
     # do A TEST FIT
     print('TEST FIT')
-    full_scores, best_scores = interpolate_scaled_offset_field.test_interpolation_fit(df_source=df_stations, df_land_controls=df_land_controls, df_water_controls=df_water_controls, cv_splits=5, nearest_neighbors=3)
+    full_scores, best_scores = interpolate_scaled_offset_field.test_interpolation_fit(df_source=df_stations, df_land_controls=df_land_controls.copy(), df_water_controls=df_water_controls, cv_splits=5, nearest_neighbors=3)
     print('ADDA')
     print(best_scores)
     print(full_scores)
@@ -288,14 +291,14 @@ def main(args):
         utilities.log.error('Could not dump model file to disk '+ newfilename)
 
 ##
-## Optional. Apply the model to a 400x300 grid and plot, the extrapolated surface, stations, clamps
+## Optional. Apply the model to a 400x500 grid and plot, the extrapolated surface, stations, clamps
 ##
 
 # Choose to plot or save the plot file ?
 
     iosubdir='images'
     newfilename = io_utilities.get_full_filename_with_subdirectory_prepended(rootdir, iosubdir, 'extrapolated_surface_plot'+iometadata+'.png')
-    adda_visualization_plots.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_land_control=df_new_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False)
+    adda_visualization_plots.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_stations=df_stations, df_land_control=df_new_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False)
     utilities.log.info('Saved IMAGE file to {}'.format(newfilename))
 
 ##
