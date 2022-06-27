@@ -37,7 +37,12 @@ def main(args):
     It assumes the existance of a proper local_instance.yml which (optionally_) may be used to read customized annual Instance values
     """
 
-    config = utilities.init_logging(subdir=None, config_file='./config/main.yml')
+    #assumes the existance of a proper main.yml to get IO information
+    if args.main_yamlname is None:
+        main_yamlname=os.path.join(os.path.dirname(__file__), './config', 'main.yml')
+    else:
+        main_yamlname=args.main_yamlname
+    config = utilities.init_logging(subdir=None, config_file=main_yamlname)
 
     # Basic checks
     if args.config_name is None:
@@ -205,17 +210,17 @@ def main(args):
     #bound_lo='2022-02-17 06:00:00'
     #bound_hi='2022-02-19 00:00:00'
     print(data_obs_smoothed.index)
-    comp_err = compute_error_field.compute_error_field(data_obs_smoothed, data_adc, meta_obs, n_pad=0) # All default params
+    comp_err = compute_error_field.compute_error_field(data_obs_smoothed, data_adc, meta_obs, n_pad=1) # All default params
     comp_err._intersection_stations()
     comp_err._intersection_times()
-    ##comp_err._tidal_transform_data()
+    comp_err._tidal_transform_data()
     comp_err._apply_time_bounds((obs_starttime,obs_endtime)) # redundant but here for illustration
     comp_err._compute_and_average_errors()
 
     # Set up IO env
     utilities.log.info("Product Level Working in {}.".format(os.getcwd()))
-    main_yamlname=os.path.join(os.path.dirname(__file__), './config', 'main.yml')
-    config = utilities.load_config(main_yamlname)
+    ##main_yamlname=os.path.join(os.path.dirname(__file__), './config', 'main.yml')
+    ##config = utilities.load_config(main_yamlname)
     #rootdir=utilities.fetchBasedir(config['DEFAULT']['RDIR'], basedirExtra='ADDA'+iometadata)
 
     iosubdir='errorfield'
@@ -321,8 +326,8 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--sources', action='store_true',
                         help='List currently supported data sources')
-    #parser.add_argument('--data_source', action='store', dest='data_source', default='ASGS', type=str,
-    #                    help='choose supported data source (case independant) eg ASGS')
+    parser.add_argument('--main_yamlname', action='store',dest='main_yamlname', default=None,
+                        help='str: Select appropriate main_yamlname')
     parser.add_argument('--data_product', action='store', dest='data_product', default='water_level', type=str,
                         help='choose supported data product eg water_level')
     parser.add_argument('--return_sample_min', action='store', dest='return_sample_min', default=60, type=int,
