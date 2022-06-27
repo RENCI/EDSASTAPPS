@@ -47,6 +47,9 @@ def main(args):
     # Basic checks
     if args.config_name is None:
         config_name =os.path.join(os.path.dirname(__file__), './secrets', 'url_framework.yml')
+    else:
+        config_name = args.config_name
+
     if args.instance_name is None:
         utilities.log.error('Instance name is missing but is mandatory')
         sys.exit(1)
