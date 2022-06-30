@@ -52,4 +52,7 @@ python wrap_interpolation_daily_errorset.py --json_daily_file_errors $INDIR/dail
  
 python swan_ndbc_buoy_comparisons.py --url "/projects/sequence_analysis/vol1/prediction_work/HSOFS-PRIOR-2022/2018/swan_HS.63.nc" --gridname 'hsofs' --map_file './supporting_data/grid_to_stationfile_maps.yml' --variable_name 'swan_HS' --fort63_style
 
+##
+## If imagemagick is installed, animate the inteprolated files as follows:
+# convert -delay 20 -loop 0 *.png output.gif 
 
