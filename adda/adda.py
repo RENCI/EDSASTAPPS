@@ -212,7 +212,6 @@ def main(args):
 
     #bound_lo='2022-02-17 06:00:00'
     #bound_hi='2022-02-19 00:00:00'
-    print(data_obs_smoothed.index)
     comp_err = compute_error_field.compute_error_field(data_obs_smoothed, data_adc, meta_obs, n_pad=1) # All default params
     comp_err._intersection_stations()
     comp_err._intersection_times()

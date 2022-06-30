@@ -13,4 +13,8 @@ python adda.py  --instance_name 'hsofs-nam-bob-2021' --ndays -4  --timeout '2022
 python adda.py  --instance_name 'hsofs-nam-bob-2021' --ndays -4  --timeout '2022-02-20 00:00:00' --return_sample_min 60 --gridname 'hsofs' --ensemble='nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml'
 
 python adda.py  --instance_name 'hsofs-nam-bob-2021' --ndays -4  --timeout '2022-02-20 00:00:00' --return_sample_min 60 --gridname 'hsofs' --ensemble='nowcast' --fort63_style --map_file './supporting_data/grid_to_stationfile_maps.yml'
+
+# Provide non defaults for all files
+
+
 ~                                            
