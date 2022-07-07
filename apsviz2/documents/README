@@ -86,5 +86,14 @@ python ./apsviz_station_products.py --url "http://apsviz-thredds-dev/thredds/dod
 
 python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022061300/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sb55.01/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'NCSC_SAB_v1.23' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml
 
+##
+## Read SWAN data into the buoy plots
+##
+python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022070512/ec95d/hatteras.renci.org/ec95d-nam-bob3/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'ec95d' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml
 
+##
+## Another example using the new TDS/k8s infrastructure
+##
+
+python apsviz_station_products.py --url "http://apsviz-thredds-dev.apps.renci.org/thredds/dodsC/2022/nam/2022070618/ec95d/hatteras.renci.org/ec95d-nam-bob3/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'ec95d' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
 

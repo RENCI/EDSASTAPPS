@@ -13,6 +13,7 @@ import shutil
 import numpy as np
 import pandas as pd
 import datetime as dt
+import time as tm
 
 import harvester.fetch_adcirc_data as fetch_adcirc_data
 import harvester.generate_urls_from_times as genurls # generate_urls_from_times
@@ -37,11 +38,17 @@ def main(args):
     """
     assumes the existance of a proper main.yml to get IO information
     """
+
+    tm_all = tm.time()
+
     if args.main_yamlname is None:
         main_yamlname=os.path.join(os.path.dirname(__file__), './config', 'main.yml')
     else:
         main_yamlname=args.main_yamlname
     config = utilities.init_logging(subdir=None, config_file=main_yamlname)
+
+
+    utilities.log.info('APSVIZ launcher invocation {}'.format(args))
 
     # Set up IO env
     utilities.log.info("Product Level Working in {}.".format(os.getcwd()))
@@ -79,6 +86,7 @@ def main(args):
 ##
 ## ADCIRC step 1. Process the INPUT (Forecast) URL. 60min default sampling
 ##
+    t0 = tm.time()
     try:
         adc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
                 station_list_file=station_file,
@@ -98,6 +106,9 @@ def main(args):
     except Exception as e:
         utilities.log.error('Forecast: Broad failure. Failed to find any forecast data: {}'.format(e))
         sys.exit(1)
+    total_time = tm.time() - t0
+    utilities.log.info('ADCIRC Namforecast: Time was {}'.format(total_time))
+
 
 ##
 ## ADCIRC step 2. Process the associated NOWCAST URLs.
@@ -114,6 +125,8 @@ def main(args):
     nowadc = genurls.generate_urls_from_times(url=input_url,ndays=args.ndays)
     now_urls = nowadc.build_url_list_from_template_url_and_offset(ensemble='nowcast')
     print(now_urls)
+
+    t0 = tm.time()
     try:
         nowadc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
                 station_list_file=station_file,
@@ -133,6 +146,9 @@ def main(args):
     except Exception as e:
         utilities.log.error('Nowcast: Broad failure. Failed to find any nowcast data: {}'.format(e))
 
+    total_time = tm.time() - t0
+    utilities.log.info('ADCIRC Nowcast: Time was {}'.format(total_time))
+
 ##
 ## Assemble the list of valid observations from which to compute error series'
 ##
@@ -143,6 +159,7 @@ def main(args):
 ##
 # Detailed data is collected at maximum frequency. User resample is applied to subsequent smoothing
 
+    t0 = tm.time()
     noaa_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='NOAA_STATIONS')
     if noaa_station_file is not None:
         try:
@@ -165,6 +182,8 @@ def main(args):
             utilities.log.info('Finished with NOAA Observations')
         except Exception as e:
             utilities.log.error('NOAA: Broad failure. Failed to find any NOAA data: {}'.format(e))
+    total_time = tm.time() - t0
+    utilities.log.info('NOAA OBS: Time was {}'.format(total_time))
 
 ##
 ## OBSERVATIONS #2. Get the Contrails station data. Assumes the contrails stations are in the same station_list
@@ -175,6 +194,8 @@ def main(args):
     utilities.log.info('Got Contrails access information {}'.format(contrails_config))
     rivers_data_product='river_water_level'
     contrails_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='CONTRAILS_RIVERS')
+
+    t0 = tm.time()
     if contrails_station_file is not None:
         try:
             contrails = get_obs_stations.get_obs_stations(source='CONTRAILS', product=rivers_data_product,
@@ -192,6 +213,9 @@ def main(args):
             utilities.log.info('Finished with Contrails Observations')
         except Exception as e:
             utilities.log.error('CONTRAILS: Broad failure. Failed to find any CONTRAILS data. System key supplied ?: {}'.format(e))
+    total_time = tm.time() - t0
+    utilities.log.info('Contrails OBS: Time was {}'.format(total_time))
+
 ##
 ## Combine observations data for the error computations - No Tidal nor NDBC data here
 ##
@@ -207,6 +231,7 @@ def main(args):
     pred = get_obs_stations.get_obs_stations(source='NOAA', product='predictions',
                 station_list_file=station_file)
 
+    t0 = tm.time()
     try:
         data_pred,meta_pred=pred.fetch_station_product((obs_starttime,endtime), return_sample_min=args.return_sample_min, interval='None' )
         data_pred.replace('-99999',np.nan,inplace=True)
@@ -218,10 +243,13 @@ def main(args):
         utilities.log.info('Finished with Tidal Predictions')
     except Exception as e:
         utilities.log.error('TIDAL: Broad failure. Failed to find any TIDAL data: {}'.format(e))
+    total_time = tm.time() - t0
+    utilities.log.info('Predictions NOAA: Time was {}'.format(total_time))
 
 ##
 ## Perform the error computations
 ##
+    t0 = tm.time()
     try:
         comp_err = compute_error_field.compute_error_field(data_obs_smoothed, data_now_adc, meta_obs) # All default params
         comp_err._intersection_stations()
@@ -231,6 +259,8 @@ def main(args):
         utilities.log.info('Finished with Compute Errors')
     except Exception as e:
         utilities.log.error('CompError: Failure. Perhaps no Nowcast to take errors from ? {}'.format(e))
+    total_time = tm.time() - t0
+    utilities.log.info('Compute Residual (Error): Time was {}'.format(total_time))
 
 ##
 ## Try to acquire BUOY and SWAN data
@@ -243,6 +273,7 @@ def main(args):
 ##
 ## SWAN Forecast
 ##
+    t0 = tm.time()
     ndbc_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='NDBC_BUOYS')
     if ndbc_station_file is not None and fort63_compliant:
         swan_input_url=get_adcirc_stations.convert_urls_to_swan_63style([args.url])[0]
@@ -266,10 +297,13 @@ def main(args):
             endtime = max(time_index).strftime('%Y-%m-%d %H:%M:%S')
         except Exception as e:
             utilities.log.error('SWAN Forecast: Broad failure. Failed to find any forecast data: {}'.format(e))
+    total_time = tm.time() - t0
+    utilities.log.info('SWAN Namforecast: Time was {}'.format(total_time))
 
 ##
 ## SWAN Nowcast
 ##
+    t0 = tm.time()
     if ndbc_station_file is not None and fort63_compliant:
         obs_endtime = starttime # '%Y-%m-%d %H:%M:%S': Grab the beginning of the forecast
         dt_starttime = dt.datetime.strptime(obs_endtime,dformat)+dt.timedelta(days=args.ndays) # How many days BACK
@@ -293,12 +327,15 @@ def main(args):
             print('SWAN Nowcast time range is from {} through {}'.format(obs_starttime, obs_endtime))
         except Exception as e:
             utilities.log.error('SWAN Nowcast: Broad failure. Failed to find any nowcast data: {}'.format(e))
+    total_time = tm.time() - t0
+    utilities.log.info('SWAN nowcast: Time was {}'.format(total_time))
 
 ##
 ## BUOY OBSERVATIONS. Get known Buoy wave_height data
 ## We expect a lot of missingness for these data so set a high number=90% Do not use 100% because if your entire dataset is empty
 ## (eg a wrong time range) then all empty buoys will be kept
 
+    t0 = tm.time()
     ndbc_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='NDBC_BUOYS')
     if ndbc_station_file is not None:
         ndbc = get_obs_stations.get_obs_stations(source='NDBC', product='wave_height',
@@ -319,7 +356,10 @@ def main(args):
             valid_obs_meta.append(meta_ndbc)
         except Exception as e:
             utilities.log.error('NDBC: Failed to find any data: do not include to plot list {}'.format(e))
+    total_time = tm.time() - t0
+    utilities.log.info('NDBC Buoy OBS: Time was {}'.format(total_time))
 
+    t0 = tm.time()
 ##
 ## Select from RUNTIMEDIR, where to write these files
 ##
@@ -353,6 +393,13 @@ def main(args):
 ##
     shutil.copy(utilities.LogFile,'/'.join([rootdir,'logs'])) # Copy and rename to logs for apsviz2 pipeline to find
     utilities.log.info('Copy log file')
+
+    total_time = tm.time() - t0
+    utilities.log.info('INSETS ad IO: Time was {}'.format(total_time))
+
+    total_time = tm.time() - tm_all
+    utilities.log.info('Finished: Total Runtime was {}'.format(total_time))
+
 
 ##
 ## construct and save the png CSV lookup file for APSVIZ2
