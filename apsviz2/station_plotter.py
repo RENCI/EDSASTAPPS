@@ -76,11 +76,11 @@ def union_all_source_stations(outputs_dict, station_id_list=None)->list:
         station_id_list: List (str) of stationids to retain
 
     Return:
-        union list of unique stations (str)
+        union dict of unique stations (str)
     """
     stations=list()
     for key,item in outputs_dict.items():
-        print(key)
+        #print(key)
         stations.extend(item.columns)
     station_list = list(set(stations))
     print('Union list of unique stations across all source objects is of length {}'.format(len(station_list)))
@@ -88,6 +88,60 @@ def union_all_source_stations(outputs_dict, station_id_list=None)->list:
         station_list = { station for station in station_list if station in station_id_list }
         print('union_all_source_stations: Apply station_id_list to found station_list')
     return station_list
+
+def map_datatype_to_plotter_type(in_key_name) -> str:
+    """
+    """ 
+    station_types=['NOAA Tidal','NOAA NOS','Nowcast','Forecast', 'Difference']
+    river_types=['Contrails']
+    buoy_types=['NDBC','SWAN Forecast','SWAN Nowcast']
+
+    if in_key_name in station_types:
+        out_type='WATER_LEVEL'
+    elif in_key_name in river_types:
+        out_type='WATER_ELEVATION'
+    elif in_key_name in buoy_types:
+        out_type='WAVE_HEIGHT'
+    else:
+        out_type='None'
+    return out_type
+
+def union_station_types( outputs_dict, station_id_list=None) ->dict:
+    """
+    The input dictionary is used to try and classify the suite of per-station data
+    into one of a few classes. These classes are used aftter-the-fact, by apsviz2 to 
+    better inform the viewer if an indicated station is a station, buoy or river gauge
+    The following procedure ASSUMES that no type overlapping occurs (eg, no ADCIRC WL with 
+    an NDBC buoy output. However, not much checking is (or can) occur.
+
+    Parameters:
+        outputs_dict:  a dictionary of stations x type objects with the currently known keys of:
+        Forecast, Nowcast, NOAA NOS, NOAA Tidal, Difference, NDBC, Contrails 
+        station_id_list: List (str) of stationids to retain
+
+    Return:
+        union dict of stations and types (str). Defaults to the string: "None"
+    """
+##
+## For each Key, fetch all the associated stations from the column list and appropriately assign the type
+## Them check each LIST to see if more than one entry (besides nan) exist
+##
+    station_types=dict()
+    for key,item in outputs_dict.items():
+        datatype = map_datatype_to_plotter_type(key)
+        dlist = item.columns.to_list() # bld a new dict with columns as the index
+        for station in dlist:
+            if station in station_types.keys():
+                # Check and compare: Stop if inconsistency
+                testtype=station_types[station]
+                if testtype is 'None':
+                    station_types[station]=datatype
+                if testtype is not datatype:
+                    utilities.log.error('Unexpected mixed station types found {} vs {} at station {}'.format(testtype,station_types[station],station))
+                    sys.exit(1)
+            else:
+                station_types[station]=datatype
+    return station_types
 
 def union_station_names( outputs_meta_dict, station_id_list=None) ->dict:
     """
@@ -100,14 +154,14 @@ def union_station_names( outputs_meta_dict, station_id_list=None) ->dict:
         LAT, LON, NAME, UNITS, TZ, OWNER, STATE, COUNTY
 
     Return:
-        union list of unique stations (str) winnoed to the station provided by station_id_list
+        union list of unique stations (str) Optionally winnowed to the stations provided by station_id_list
         dict {stationid:stationname}
     """
     #possible_source_keys=['NOAA NOS','NOAA Tidal','Contrails','Forecast','Nowcast','SWAN FOrecast','SWAN Nowcast', 'NDBC'] # Preferred resolution order
     
     s_metadata=dict()
     for key in outputs_meta_dict.keys(): # possible_source_keys:
-        print(key)
+        #print(key)
         try:
             df_meta=outputs_meta_dict[key]
             for station in df_meta.index:
@@ -149,6 +203,7 @@ def get_bounds(df)->tuple:
     if 'NDBC' in source_list or 'Contrails' in source_list or 'SWAN' in source_list:
         ymin=0.0
         ymax = ymax if ymax > ymin else -ymin
+        ymax = (1.0+0.15)*ymax 
     else:
         # Look for the widest symmetric range if water_leels
         val = ymax if ymax > ymin else ymin
@@ -253,11 +308,11 @@ def build_filename_map_to_csv(png_dict)->pd.DataFrame:
     """
     df=pd.DataFrame(png_dict['STATIONS']).T
     #df.columns=('Lat','Lon','State','StationName','Filename')
-    df.rename(columns = {'LON':'Lon', 'LAT':'Lat', 'FILENAME':'Filename', 'STATE':'State','STATIONNAME':'StationName'}, inplace = True)
+    df.rename(columns = {'LON':'Lon', 'LAT':'Lat', 'FILENAME':'Filename', 'TYPE':'Type', 'STATE':'State','STATIONNAME':'StationName'}, inplace = True)
     df.index.name='StationId'
     df['Lat'] = df['Lat'].astype(float)
     df['Lon'] = df['Lon'].astype(float)
-    return df[['StationName','State','Lat','Lon','Filename']]
+    return df[['StationName','State','Lat','Lon','Type','Filename']]
 
 # Build a station-specific plot
 def create_station_specific_plot(fig, stationid, station_name, df_concat, time_range):
@@ -267,7 +322,6 @@ def create_station_specific_plot(fig, stationid, station_name, df_concat, time_r
     tmin,tmax = time_range[0],time_range[1]
     ymin, ymax = get_bounds(df_concat)
     source_list = df_concat.columns.to_list()
-    print('source list')
     print(source_list)
     print(time_range)
     colorlist, dashlist = source_to_style(source_list)
@@ -331,6 +385,7 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
 
     stations_union_source_list = union_all_source_stations(outputs_dict, station_id_list = station_id_list)
     station_names = union_station_names( outputs_meta_dict, station_id_list=station_id_list)
+    station_types = union_station_types( outputs_dict, station_id_list = station_id_list)
 
     tmin,tmax = find_widest_timerange(outputs_dict)
     print('TIME RANGE {},{}'.format(tmin,tmax))
@@ -345,6 +400,7 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
         lon = station_names[station]['LON']
         lat = station_names[station]['LAT']
         state = station_names[station]['STATE']
+        st_type = station_types[station]
         # Build fig
         plt.close()
         fig = plt.figure(figsize=(6, 4))
@@ -354,7 +410,7 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
         try:
             plt.savefig(filename)
             print('Wrote PNG to {}'.format(filename))
-            data_dict[station]={'LAT':str(lat), 'LON':str(lon), 'STATE': state, 'STATIONNAME': station_name, 'FILENAME':filename}
+            data_dict[station]={'LAT':str(lat), 'LON':str(lon), 'STATE': state, 'STATIONNAME': station_name, 'TYPE': st_type, 'FILENAME':filename}
         except Exception as e:
             print('Failed writing PNG {}'.format(e))
         figures_dict = {'STATIONS':data_dict} # Conform to current apsviz2 procedure
