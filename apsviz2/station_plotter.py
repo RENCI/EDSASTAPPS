@@ -55,7 +55,7 @@ LEGENDS_MAP={
      'SWAN': 'SWAN: Wave height',
      'SWAN Forecast': 'Swan Forecast: Wave height',
      'SWAN Nowcast': 'Swan Nowcast: Wave height',
-     'Contrails': 'Contrails: Water elevation(Stage)',
+     'Contrails': 'Contrails: Water elevation (Stage)',
      'Forecast': 'Forecast: Water level',
      'Difference': 'Difference: Water level',
      'Nowcast': 'Nowcast: Water level'}
@@ -81,7 +81,6 @@ def union_all_source_stations(outputs_dict, station_id_list=None)->list:
     stations=list()
     for key,item in outputs_dict.items():
         print(key)
-        print(item)
         stations.extend(item.columns)
     station_list = list(set(stations))
     print('Union list of unique stations across all source objects is of length {}'.format(len(station_list)))
@@ -95,7 +94,6 @@ def union_station_names( outputs_meta_dict, station_id_list=None) ->dict:
     Starting with a complete list of possible stations (derived from union_all_source_stations)
     compute the associated list of actual station name. These are used as Title for subsequent
     per-station plots. We only read OBSERVATIONS type data here. ADCIRC "stations" do not have a real name
-    We choose names in the order of NOAA,NOAA Tidal,CONTRAILS, NDBC
 
     Parameters:
         outputs_meta_dict:  a dictionary of stations x metadata objects with the currently known keys of:
@@ -105,10 +103,10 @@ def union_station_names( outputs_meta_dict, station_id_list=None) ->dict:
         union list of unique stations (str) winnoed to the station provided by station_id_list
         dict {stationid:stationname}
     """
-    #possible_keys=['NOAA/NOS','NOAA Tidal','Contrails]
-    possible_source_keys=['NOAA NOS','NOAA Tidal','Contrails', 'NDBC'] # Preferred resolution order
+    #possible_source_keys=['NOAA NOS','NOAA Tidal','Contrails','Forecast','Nowcast','SWAN FOrecast','SWAN Nowcast', 'NDBC'] # Preferred resolution order
+    
     s_metadata=dict()
-    for key in possible_source_keys:
+    for key in outputs_meta_dict.keys(): # possible_source_keys:
         print(key)
         try:
             df_meta=outputs_meta_dict[key]
@@ -333,17 +331,16 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
 
     stations_union_source_list = union_all_source_stations(outputs_dict, station_id_list = station_id_list)
     station_names = union_station_names( outputs_meta_dict, station_id_list=station_id_list)
-    print('VIZ stations {}',format(station_names)) 
 
     tmin,tmax = find_widest_timerange(outputs_dict)
     print('TIME RANGE {},{}'.format(tmin,tmax))
 
     data_dict=dict()
-    for station in station_names.keys(): # Only want stations thatg have known ID names. 
+    for station in station_names.keys(): # Only want stations that have known ID names. 
         df_concat = build_source_concat_dataframe(outputs_dict, station)
         # Remove completely nan remaining stations
         df_concat.dropna(axis=1, how='all', inplace=True)
-        print('After NAN reduction remaining sources is {}.{}'.format(station, df_concat.shape[1]))
+        print('After NAN reduction remaining sources is {}.Shape was {}'.format(station, df_concat.shape[1]))
         station_name = station_names[station]['NAME']
         lon = station_names[station]['LON']
         lat = station_names[station]['LAT']
@@ -363,7 +360,3 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
         figures_dict = {'STATIONS':data_dict} # Conform to current apsviz2 procedure
         figure_dataframe = build_filename_map_to_csv(figures_dict)
     return figure_dataframe 
-
-
-
-
