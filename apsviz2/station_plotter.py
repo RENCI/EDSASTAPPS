@@ -312,7 +312,7 @@ def build_filename_map_to_csv(png_dict)->pd.DataFrame:
     df.index.name='StationId'
     df['Lat'] = df['Lat'].astype(float)
     df['Lon'] = df['Lon'].astype(float)
-    return df[['StationName','State','Lat','Lon','Type','Filename']]
+    return df[['StationName','State','Lat','Lon','Filename','Type']]
 
 # Build a station-specific plot
 def create_station_specific_plot(fig, stationid, station_name, df_concat, time_range):
