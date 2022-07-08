@@ -109,7 +109,6 @@ def main(args):
     total_time = tm.time() - t0
     utilities.log.info('ADCIRC Namforecast: Time was {}'.format(total_time))
 
-
 ##
 ## ADCIRC step 2. Process the associated NOWCAST URLs.
 ##
@@ -138,10 +137,6 @@ def main(args):
         outputs_metadict['Nowcast']=meta_now_adc
         utilities.log.info('Finished with ADCIRC Nowcasts')
         print(now_urls)
-        # Figure out what the asociated range of times is. 
-        #obs_endtime = starttime # '%Y-%m-%d %H:%M:%S': Grab the beginning of the forecast
-        #dt_starttime = dt.datetime.strptime(obs_endtime,dformat)+dt.timedelta(days=args.ndays) # How many days BACK
-        #obs_starttime=dt.datetime.strftime(dt_starttime, dformat)
         print('Nowcast time range is from {} through {}'.format(obs_starttime, obs_endtime))
     except Exception as e:
         utilities.log.error('Nowcast: Broad failure. Failed to find any nowcast data: {}'.format(e))
@@ -247,7 +242,7 @@ def main(args):
     utilities.log.info('Predictions NOAA: Time was {}'.format(total_time))
 
 ##
-## Perform the error computations
+## Perform the error computations: Note we currently exclude SWAN/NDBC data from this procedure
 ##
     t0 = tm.time()
     try:
@@ -271,14 +266,13 @@ def main(args):
     fort63_style = True
 
 ##
-## SWAN Forecast
+## SWAN Forecast: Currently for these steps the input data MUST BE fort63 compliant
 ##
     t0 = tm.time()
     ndbc_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='NDBC_BUOYS')
     if ndbc_station_file is not None and fort63_compliant:
         swan_input_url=get_adcirc_stations.convert_urls_to_swan_63style([args.url])[0]
         print(swan_input_url)
-
         try:
             adc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
                     station_list_file=ndbc_station_file,
@@ -290,7 +284,6 @@ def main(args):
             outputs_dict['SWAN Forecast']=data_adc
             outputs_metadict['SWAN Forecast']=meta_adc
             utilities.log.info('Finished with SWAN Forecasts')
-    
             # Grab the stop and start times from the data set. Will be needed for tidal predictions data
             time_index=data_adc.index.tolist()
             starttime = min(time_index).strftime('%Y-%m-%d %H:%M:%S')
@@ -352,8 +345,8 @@ def main(args):
             outputs_dict['NDBC']=data_ndbc_thresholded
             outputs_metadict['NDBC']=meta_ndbc_thresholded
             utilities.log.info('Finished with NDBC Observations')
-            valid_obs.append(data_ndbc)
-            valid_obs_meta.append(meta_ndbc)
+            #valid_obs.append(data_ndbc) # Not needed for now but in the future if we choose to applt compute_error then ?
+            #valid_obs_meta.append(meta_ndbc)
         except Exception as e:
             utilities.log.error('NDBC: Failed to find any data: do not include to plot list {}'.format(e))
     total_time = tm.time() - t0
@@ -375,17 +368,28 @@ def main(args):
 ##
     df_station_file_png_locations = station_plotter.generate_station_specific_PNGs(outputs_dict, 
         outputs_metadict, outputdir=rootdir, station_id_list=None)
-    print(df_station_file_png_locations)
 
 ## 
-## Improve the PER_STATION data object by adding Node metadata. These are either form fort63 or fort61 adcirc updates
+## Improve the PER_STATION metadata object by adding Node metadata. These are either from fort63 or fort61 adcirc updates
+## process all metadata entries, see which ones have a Node column, and if true keep it
 ##
-    df_station_nodes = meta_adc['Node'].to_frame()
+
+    meta_list = list()
+    for key,item in outputs_metadict.items():
+        try:
+            meta_data = item['Node'].to_frame()
+            meta_list.append(meta_data)
+        except Exception as e:
+            pass
+    df_station_nodes = pd.concat(meta_list,axis=1)
+    df_station_nodes.bfill(axis="columns", inplace=True)
+    df_station_nodes = df_station_nodes.iloc[:, 0].to_frame()
+
     df_station_file_png_locations = pd.concat([df_station_file_png_locations,df_station_nodes],axis=1)
     df_station_file_png_locations.index.name='StationId'
     utilities.log.info('Update station_props file with Node information')
-
-    station_props = io_utilities.write_csv(df_station_file_png_locations[['StationName','State','Lat','Lon','Node','Filename']], rootdir=rootdir,subdir='',fileroot='stationProps',iometadata='')
+    
+    station_props = io_utilities.write_csv(df_station_file_png_locations[['StationName','State','Lat','Lon','Node','Type','Filename']], rootdir=rootdir,subdir='',fileroot='stationProps',iometadata='')
     utilities.log.info('Wrote out station_properties file to {}'.format(station_props))
 
 ##
@@ -395,16 +399,11 @@ def main(args):
     utilities.log.info('Copy log file')
 
     total_time = tm.time() - t0
-    utilities.log.info('INSETS ad IO: Time was {}'.format(total_time))
+    utilities.log.info('INSETS and IO: Time was {}'.format(total_time))
 
     total_time = tm.time() - tm_all
     utilities.log.info('Finished: Total Runtime was {}'.format(total_time))
 
-
-##
-## construct and save the png CSV lookup file for APSVIZ2
-##
-    # Save the data as test data
     #for key,item in outputs_dict.items():
     #    f=key.replace(' ','_')
     #    item.to_pickle(f+'.pkl')
