@@ -389,7 +389,7 @@ def main(args):
     df_station_file_png_locations.index.name='StationId'
     utilities.log.info('Update station_props file with Node information')
     
-    station_props = io_utilities.write_csv(df_station_file_png_locations[['StationName','State','Lat','Lon','Node','Type','Filename']], rootdir=rootdir,subdir='',fileroot='stationProps',iometadata='')
+    station_props = io_utilities.write_csv(df_station_file_png_locations[['StationName','State','Lat','Lon','Node','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationProps',iometadata='')
     utilities.log.info('Wrote out station_properties file to {}'.format(station_props))
 
 ##
