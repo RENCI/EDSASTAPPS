@@ -61,11 +61,11 @@ def main(args):
     utilities.log.info('Chosen variable_name is {}'.format(variable_name))
 
     data_product = args.data_product
-    if data_product != 'water_level':
-        utilities.log.error('ADCIRC: Only available data product is water_level: {}'.format(data_product))
+    if data_product != 'hourly_height' and data_product != 'water_level':
+        utilities.log.error('NOAA: Only available data product is hourly_height (best) or water_level (sparse): {}'.format(data_product))
         sys.exit(1)
     else:
-        utilities.log.info('Chosen data product {}'.format(data_product))
+        utilities.log.info('Chosen NOAA data product {}'.format(data_product))
 
     if args.fort63_style:
         utilities.log.info('Fort_63 style station inputs specified')
@@ -84,7 +84,11 @@ def main(args):
     # Ensure the input URL is of the proper style by converting it as necessary (63 vs 61)
     input_url = args.url
     if args.fort63_style:
-        input_url=get_adcirc_stations.convert_urls_to_63style([args.url])[0] # Assumed to only have one of them
+        if args.custom_fort63_name is None:
+            input_url=get_adcirc_stations.convert_urls_to_63style([args.url])[0] # Assumed to only have one of them
+        else:
+            input_url=get_adcirc_stations.convert_urls_to_63style_customfilename([args.url], filename=args.custom_fort63_name)[0]
+            utilities.log.info('Using a customized name for the fort.63.nc filename')
     else:
         input_url=get_adcirc_stations.convert_urls_to_61style([args.url])[0]
     print(input_url)
@@ -116,11 +120,10 @@ def main(args):
 #
     outputs_dict=dict()
     outputs_metadict=dict()
-
 #
 # Fetch the actual ADCIRC data. No need to use knockout here since compute_error will intersect times anyway
 #
-    df_adcirc_data, df_adcirc_meta = fetch_adcirc_data.process_adcirc_stations( [input_url], adcirc_stations, gridname, ensemble, sitename, data_product, resample_mins=60, fort63_style=args.fort63_style, variable_name=variable_name)
+    df_adcirc_data, df_adcirc_meta = fetch_adcirc_data.process_adcirc_stations( [input_url], adcirc_stations, gridname, ensemble, sitename, 'water_level', resample_mins=60, fort63_style=args.fort63_style, variable_name=variable_name)
     df_adcirc_data.replace('-99999',np.nan,inplace=True)
     df_adcirc_meta.replace('-99999',np.nan,inplace=True)
 
@@ -129,17 +132,31 @@ def main(args):
     utilities.log.info('Finished with ADCIRC')
 
 # What YEAR does this data apply to? Find it and then build a time range for the observations
-    starttime = min(df_adcirc_data.index).strftime('%Y-%m-%d %H:%M:%S')
-    endtime = max(df_adcirc_data.index).strftime('%Y-%m-%d %H:%M:%S')
-    time_range=(starttime,endtime)
 
+    timein = min(df_adcirc_data.index)
+    timeout = max(df_adcirc_data.index)
+
+# NOAA-COOPS issue if exactly 354 days. See slack channel. Sent email to Greg Clunies appreox May 21. 
+# If the d.days is 365 days the coops code will throw a Range Limit Exceeded error. So get around this, we can simply ADD a day and 
+# request for more info. This will work AND, later on, the correctly ranged ADCIRC data will be
+# time intersected with the obs data effectively removing the extras. 
+
+    d=(timeout-timein).days
+    utilities.log.info('Num days in the OBS initial range request {}'.format(d))
+    if d==365:
+        utilities.log.info("Added 1 day to the OBS data range to get around NOAA_COOPS 365-day Range issue")
+        timeout=timeout+dt.timedelta(days=1)
+
+    starttime = timein.strftime('%Y-%m-%d %H:%M:%S')
+    endtime = timeout.strftime('%Y-%m-%d %H:%M:%S')
+    time_range=(starttime,endtime)
 #
 # Fetch the observations data
 # Detailed data is collected at maximum frequency. User resample is applied to subsequent smoothing
 #
-    obs = get_obs_stations.get_obs_stations(source='NOAA', product='water_level',
+    obs = get_obs_stations.get_obs_stations(source='NOAA', product=data_product,
             station_list_file=noaa_station_file, knockout_dict=knockout_dict)
-    data_obs,meta_obs=obs.fetch_station_product(time_range, return_sample_min=60, interval='h' )
+    data_obs,meta_obs=obs.fetch_station_product(time_range, return_sample_min=60) # , interval='h' )
     data_obs.replace('-99999',np.nan,inplace=True)
     meta_obs.replace('-99999',np.nan,inplace=True)
 
@@ -147,9 +164,10 @@ def main(args):
 # Remove stations with too many nans ( Note Harvester would have previously removed stations that are ALL NANS)
 #
     data_thresholded = obs.remove_missingness_stations(data_obs, max_nan_percentage_cutoff=10)  # (Maximum allowable nans %)
-    meta_thresholded = meta_obs.loc[data_thresholded.columns.tolist()]
     meta_obs_list = set(data_thresholded.columns.tolist()).intersection(meta_obs.index.to_list())
-    meta_obs_thresholded = meta_obs.loc[meta_obs_list]
+    #meta_thresholded = meta_obs.loc[data_thresholded.columns.tolist()]
+    #meta_obs_list = set(data_thresholded.columns.tolist()).intersection(meta_obs.index.to_list())
+    meta_thresholded = meta_obs.loc[meta_obs_list]
 #
 # Apply a moving average (smooth) the data performed the required resampling to the desired rate followed by interpolating
 # Note for hourly data we are imposing a window of 11 hours wide... centered
@@ -276,7 +294,7 @@ def main(args):
 # Write out the dict file for subsequent processing
     output_files_json = io_utilities.write_dict_to_json(output_files, rootdir=rootdir,subdir='',fileroot='yearly_file_properties',iometadata='')
     utilities.log.info('Wrote out dict: {}'.format(output_files_json))
-    utilities.log.info('Finished')
+    utilities.log.info('Finished: Total runtime was {}s'.format(tm.time()-t0))
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
@@ -303,8 +321,8 @@ if __name__ == '__main__':
                         help='List currently supported data sources')
     parser.add_argument('--data_source', action='store', dest='data_source', default='ASGS', type=str,
                         help='choose supported data source: default = ASGS')
-    parser.add_argument('--data_product', action='store', dest='data_product', default='water_level', type=str,
-                        help='choose supported data product: default is water_level')
+    parser.add_argument('--data_product', action='store', dest='data_product', default='hourly_height', type=str,
+                        help='choose supported NOAA data product: default is hourly_height')
     parser.add_argument('--map_file', action='store',dest='map_file', default=None,
                         help='str: Select appropriate map_file yml for grid lookup')
     parser.add_argument('--main_yamlname', action='store',dest='main_yamlname', default=None,
@@ -313,5 +331,7 @@ if __name__ == '__main__':
                         help='str: Select appropriate gridname Default is hsofs')
     parser.add_argument('--variable_name', action='store',dest='variable_name', default='zeta',
                         help='str: Select non default ADCIRC NC dataset variable name')
+    parser.add_argument('--custom_fort63_name', action='store',dest='custom_fort63_name', default=None,
+                        help='str: Select an alternative name for the fort.63.nc analog filename Usually when using rechunked data')
     args = parser.parse_args()
     sys.exit(main(args))
