@@ -10,6 +10,7 @@
 #SBATCH -p batch
 #SBATCH -N 1
 #SBATCH -n 1 
+#SBATCH -p lowpri
 #SBATCH -J Reanalysis
 #SBATCH --mem-per-cpu 64000
 
@@ -29,7 +30,9 @@ export OUTROOT=$RUNTIMEDIR/$DAILY
 ## Test running the hsofs annual while including the knockout data: This defaults fort61_style
 ##
 
-python compute_annual_errors.py --fort63_style --url "/projects/reanalysis/ADCIRC/ERA5/$GRID/$YEAR/fort.63.nc" --gridname $GRID --map_file './supporting_data/grid_to_stationfile_maps.yml' --knockout  ./supporting_data/knockoutStation.json
+#python compute_annual_errors.py --fort63_style --url "/projects/reanalysis/ADCIRC/ERA5/$GRID/$YEAR/fort.63.nc" --gridname $GRID --map_file './supporting_data/grid_to_stationfile_maps.yml' --knockout  ./supporting_data/knockoutStation.json
+
+python compute_annual_errors.py --fort63_style --url "/projects/reanalysis/ADCIRC/ERA5/$GRID/$YEAR/fort.63_transposed_and_rechunked_1024.nc" --gridname $GRID --map_file './supporting_data/grid_to_stationfile_maps.yml' --knockout  ./supporting_data/knockoutStation.json --custom_fort63_name 'fort.63_transposed_and_rechunked_1024.nc'
 
 ##
 ## run the DAILY breakdown

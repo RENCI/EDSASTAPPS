@@ -20,6 +20,7 @@ def build_slurm(key, daily_file_errors, main_yamlname, input_directory, output_d
     slurm.append('#SBATCH -N 1')
     slurm.append('#SBATCH -n 1')
     slurm.append('#SBATCH -J Interpolate')
+    slurm.append('#SBATCH -p lowpri')
     slurm.append('#SBATCH --mem-per-cpu 64000')
     slurm.append('echo "Begin the Interpolation phase" ')
     slurm.append('export PYTHONPATH=/projects/sequence_analysis/vol1/prediction_work/AST:/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS')
