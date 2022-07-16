@@ -206,6 +206,9 @@ def main(args):
     comp_err._intersection_stations()
     comp_err._intersection_times()
     comp_err._compute_and_average_errors()
+    # Remove outliers ?
+    utilities.log.info('Attempt to remove outliers')
+    comp_err._remove_station_outliers()
 
     outputs_dict['Difference']=comp_err.diff
     utilities.log.info('Finished with Compute Errors')
