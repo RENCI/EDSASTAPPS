@@ -45,8 +45,7 @@ def main(args):
         main_yamlname=os.path.join(os.path.dirname(__file__), './config', 'main.yml')
     else:
         main_yamlname=args.main_yamlname
-    config = utilities.init_logging(subdir=None, config_file=main_yamlname)
-
+    config = utilities.init_logging(subdir=args.instanceId, config_file=main_yamlname)
 
     utilities.log.info('APSVIZ launcher invocation {}'.format(args))
 
@@ -450,5 +449,7 @@ if __name__ == '__main__':
                         help='str: Select appropriate main_yamlname')
     parser.add_argument('--finalDIR', action='store', dest='finalDIR', default=None,
                         help='String: Custom location for the output dicts, PNGs and logs')
+    parser.add_argument('--instanceId', action='store', dest='instanceId', default=None,
+                        help='String: Extra optional ID for use by the logger for specifying log location')
     args = parser.parse_args()
     sys.exit(main(args))
