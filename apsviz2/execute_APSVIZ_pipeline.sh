@@ -29,6 +29,7 @@ fi
 URL=$1
 GRID=$2
 FINALDIR=$3
+INSTANCE=$4
 
 #
 # git clone the grid data. The underlying directory structure is implied within the provided grid_to_stationfile_maps.yml file
@@ -45,7 +46,7 @@ sed -i 's/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/'"$CONTRAILS_KEY"'/g' ./secrets/c
 # We only need to supply the proper URL to start the job
 #
 
-python ./apsviz_station_products.py --fort63_style --url "$URL" --ndays -4  --return_sample_min 60 --gridname "$GRID" --ensemble='nowcast'  --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --finalDIR "$FINALDIR" 
+python ./apsviz_station_products.py --fort63_style --url "$URL" --ndays -4  --return_sample_min 60 --gridname "$GRID" --ensemble='nowcast'  --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --finalDIR "$FINALDIR" --instanceId "$INSTANCE" 
 
 echo "Finished"
 
