@@ -161,6 +161,16 @@ def main(args):
     meta_obs.replace('-99999',np.nan,inplace=True)
 
 #
+# Also go ahead and fetch available Tidal data for reanalysis work
+# No application of thresholding is performed here. Just the returned data gets set to disk
+#
+    tidal = get_obs_stations.get_obs_stations(source='NOAA', product='predictions',
+            station_list_file=noaa_station_file, knockout_dict=knockout_dict)
+    data_tidal,meta_tidal=tidal.fetch_station_product(time_range, return_sample_min=0, interval='h' )
+    data_tidal.replace('-99999',np.nan,inplace=True)
+    meta_tidal.replace('-99999',np.nan,inplace=True)
+
+#
 # Remove stations with too many nans ( Note Harvester would have previously removed stations that are ALL NANS)
 #
     data_thresholded = obs.remove_missingness_stations(data_obs, max_nan_percentage_cutoff=10)  # (Maximum allowable nans %)
@@ -168,6 +178,7 @@ def main(args):
     #meta_thresholded = meta_obs.loc[data_thresholded.columns.tolist()]
     #meta_obs_list = set(data_thresholded.columns.tolist()).intersection(meta_obs.index.to_list())
     meta_thresholded = meta_obs.loc[meta_obs_list]
+
 #
 # Apply a moving average (smooth) the data performed the required resampling to the desired rate followed by interpolating
 # Note for hourly data we are imposing a window of 11 hours wide... centered
@@ -285,6 +296,23 @@ def main(args):
     detailedjson = io_utilities.write_json(df_observations_data,rootdir=rootdir,subdir=iosubdir,fileroot='obs_wl_detailed',iometadata=iometadata)
     metajson = io_utilities.write_json(df_observations_meta,rootdir=rootdir,subdir=iosubdir,fileroot='obs_wl_metadata',iometadata=iometadata)
     output_files['obs_wl_smoothed_json']=smoothedjson
+    output_files['obs_wl_detailed_json']=detailedjson
+    output_files['obs_wl_metadata_json']=metajson
+
+# NOAA Predicted Tidal data
+    iosubdir='' # 'obspkl'
+    iometadata='predictions'
+    metapkltidal = io_utilities.write_pickle(meta_tidal,rootdir=rootdir,subdir=iosubdir,fileroot='obs_tidal_metadata',iometadata=iometadata)
+    detailedpkltidal = io_utilities.write_pickle(data_tidal, rootdir=rootdir,subdir=iosubdir,fileroot='obs_tidal_detailed',iometadata=iometadata)
+    output_files['obs_wl_detailed_pkl']=detailedpkltidal
+    output_files['obs_wl_metadata_pkl']=metapkltidal
+
+# Also write out in Tidal JSON format. Eg for use by our Matlab processors
+
+    meta_tidal.index = meta_tidal.index.strftime('%Y-%m-%d %H:%M:%S')
+    data_tidal.index = data_tidal.index.strftime('%Y-%m-%d %H:%M:%S')
+    detailedjsontidal = io_utilities.write_json(data_tidal,rootdir=rootdir,subdir=iosubdir,fileroot='obs_tidal_detailed',iometadata=iometadata)
+    metajsontidal = io_utilities.write_json(meta_tidal,rootdir=rootdir,subdir=iosubdir,fileroot='obs_tidal_metadata',iometadata=iometadata)
     output_files['obs_wl_detailed_json']=detailedjson
     output_files['obs_wl_metadata_json']=metajson
 
