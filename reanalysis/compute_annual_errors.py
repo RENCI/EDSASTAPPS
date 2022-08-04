@@ -302,19 +302,18 @@ def main(args):
 # NOAA Predicted Tidal data
     iosubdir='' # 'obspkl'
     iometadata='predictions'
-    metapkltidal = io_utilities.write_pickle(meta_tidal,rootdir=rootdir,subdir=iosubdir,fileroot='obs_tidal_metadata',iometadata=iometadata)
-    detailedpkltidal = io_utilities.write_pickle(data_tidal, rootdir=rootdir,subdir=iosubdir,fileroot='obs_tidal_detailed',iometadata=iometadata)
-    output_files['obs_wl_detailed_pkl']=detailedpkltidal
-    output_files['obs_wl_metadata_pkl']=metapkltidal
+    metapkltidal = io_utilities.write_pickle(meta_tidal,rootdir=rootdir,subdir=iosubdir,fileroot='obs_predicted_metadata',iometadata=iometadata)
+    detailedpkltidal = io_utilities.write_pickle(data_tidal, rootdir=rootdir,subdir=iosubdir,fileroot='obs_predicted_detailed',iometadata=iometadata)
+    output_files['obs_predicted_detailed_pkl']=detailedpkltidal
+    output_files['obs_predicted_metadata_pkl']=metapkltidal
 
 # Also write out in Tidal JSON format. Eg for use by our Matlab processors
 
-    meta_tidal.index = meta_tidal.index.strftime('%Y-%m-%d %H:%M:%S')
     data_tidal.index = data_tidal.index.strftime('%Y-%m-%d %H:%M:%S')
     detailedjsontidal = io_utilities.write_json(data_tidal,rootdir=rootdir,subdir=iosubdir,fileroot='obs_tidal_detailed',iometadata=iometadata)
     metajsontidal = io_utilities.write_json(meta_tidal,rootdir=rootdir,subdir=iosubdir,fileroot='obs_tidal_metadata',iometadata=iometadata)
-    output_files['obs_wl_detailed_json']=detailedjson
-    output_files['obs_wl_metadata_json']=metajson
+    output_files['obs_predicted_detailed_json']=detailedjsontidal
+    output_files['obs_predicted_metadata_json']=metajsontidal
 
 # Raw ADCIRC water level
     metapkl = io_utilities.write_pickle(df_adcirc_meta,rootdir=rootdir,subdir='',fileroot='adc_wl_metadata',iometadata='')
