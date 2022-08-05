@@ -313,8 +313,8 @@ def main(args):
 # Also write out in Tidal JSON format. Eg for use by our Matlab processors
 
     data_tidal.index = data_tidal.index.strftime('%Y-%m-%d %H:%M:%S')
-    detailedjsontidal = io_utilities.write_json(data_tidal,rootdir=rootdir,subdir=iosubdir,fileroot='obs_tidal_detailed',iometadata=iometadata)
-    metajsontidal = io_utilities.write_json(meta_tidal,rootdir=rootdir,subdir=iosubdir,fileroot='obs_tidal_metadata',iometadata=iometadata)
+    detailedjsontidal = io_utilities.write_json(data_tidal,rootdir=rootdir,subdir=iosubdir,fileroot='obs_predicted_detailed',iometadata=iometadata)
+    metajsontidal = io_utilities.write_json(meta_tidal,rootdir=rootdir,subdir=iosubdir,fileroot='obs_predicted_metadata',iometadata=iometadata)
     output_files['obs_predicted_detailed_json']=detailedjsontidal
     output_files['obs_predicted_metadata_json']=metajsontidal
 
