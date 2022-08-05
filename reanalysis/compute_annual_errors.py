@@ -12,6 +12,9 @@
 ## Select output path/filename are stored into a dict and written out to $RUNTIMEDIR/yearly_file_properties.json
 ##
 
+## For longrange (> 365 day) runs, the NOAA/Coops data will Duplicate the 365th day for every station. I don't know why. Our system removes all 
+## duplicates which is good BUT, you will see Warnings about duplicates for every station. This is the reason
+
 import os,sys
 import shutil
 import numpy as np
