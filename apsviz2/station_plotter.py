@@ -199,8 +199,7 @@ def get_bounds(df)->tuple:
     source_list = df.columns.tolist()
     ymin = abs(df.min().min())
     ymax = abs(df.max().max())
-
-    if 'NDBC' in source_list or 'Contrails' in source_list or 'SWAN' in source_list:
+    if 'NDBC' in source_list or 'Contrails' in source_list or 'SWAN Forecast' in source_list or 'SWAN Nowcast' in source_list:
         ymin=0.0
         ymax = ymax if ymax > ymin else -ymin
         ymax = (1.0+0.15)*ymax 
