@@ -16,4 +16,4 @@ sudo docker build . --no-cache -t containers.renci.org/ast_supp:v0.0.14
 sudo docker run -it containers.renci.org/ast_supp:v0.0.14 bash
 
 # Load for actual cluster usage
-#sudo docker push containers.renci.org/ast_supp:v0.0.14
+#sudo docker push containers.renci.org/eds/ast_supp:v0.0.14
