@@ -1,0 +1,12 @@
+##
+## Examples of invoking geopoints_to_reducedWaterlevels.py
+##
+
+## Standard fort.63.nc using CERA stations lists as the taget geopoints
+
+python geopoints_to_reducedWaterlevels.py --url='/projects/reanalysis/ADCIRC/ERA5/hsofs/2019/fort.63_transposed_and_rechunked_1024.nc' --geopoints='./testdata/hsofs_example_geopoints.csv' --kmax=1 --variable_name 'zeta'
+
+## process an hsofs SWAN file
+
+python geopoints_to_reducedWaterlevels.py --url='/projects/reanalysis/ADCIRC/ERA5/hsofs/1980/swan_HS.63_transposed_and_rechunked_1024.nc' --geopoints='./testdata/hsofs_example_geopoints.csv' --kmax=1 --variable_name 'swan_HS'
+
