@@ -433,7 +433,7 @@ if __name__ == '__main__':
                         help='Choose a non-default contrails auth config_name')
     parser.add_argument('--instance_name', action='store', dest='instance_name', default=None,
                         help='String: instance name')
-    parser.add_argument('--fort63_style', action='store_true', default=False,
+    parser.add_argument('--fort63_style', action='store_true', default=True,
                         help='Boolean: Will inform Harvester to use fort.63.methods to get station nodesids')
     parser.add_argument('--hurricane_source', action='store',dest='hurricane_source', default=None,
                         help='str: Only needed for Hurricanes AND if using YAML to specify urls')
