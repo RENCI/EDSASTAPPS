@@ -46,7 +46,7 @@ sed -i 's/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/'"$CONTRAILS_KEY"'/g' ./secrets/c
 # We only need to supply the proper URL to start the job
 #
 
-python ./apsviz_station_products.py --fort63_style --url "$URL" --ndays -4  --return_sample_min 60 --gridname "$GRID" --ensemble='nowcast'  --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --finalDIR "$FINALDIR" --instanceId "$INSTANCE" 
+python ./apsviz_station_products.py --url "$URL" --ndays -4  --return_sample_min 60 --gridname "$GRID" --ensemble='nowcast'  --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --finalDIR "$FINALDIR" --instanceId "$INSTANCE" |& tee "$INSTANCE"_stdout
 
-echo "Finished"
+echo "Finished OBSMOD $URL with status $?"
 
