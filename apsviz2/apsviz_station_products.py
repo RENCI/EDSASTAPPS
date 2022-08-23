@@ -338,8 +338,8 @@ def main(args):
         # Remove stations with too many nans ( Note Harvester would have previously removed stations that are ALL NANS)
         try:
             data_ndbc_thresholded = ndbc.remove_missingness_stations(data_ndbc, max_nan_percentage_cutoff=90)  # (Maximum allowable nans %)
-            meta_thresholded = meta_ndbc.loc[data_ndbc_thresholded.columns.tolist()]
             meta_ndbc_list = set(data_ndbc_thresholded.columns.tolist()).intersection(meta_ndbc.index.to_list())
+            meta_thresholded = meta_ndbc.loc[meta_ndbc_list]
             meta_ndbc_thresholded = meta_ndbc.loc[meta_ndbc_list]
             outputs_dict['NDBC']=data_ndbc_thresholded
             outputs_metadict['NDBC']=meta_ndbc_thresholded
