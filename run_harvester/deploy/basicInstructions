@@ -1,26 +1,19 @@
-# List images
-sudo docker image ls
+# Login 
+# Ref: https://containers.renci.org/
+
+sudo docker login containers.renci.org
 
 # Remove existing images
-sudo docker image rm -f run_harvester:v0.0.1
+sudo docker image rm -f containers.renci.org/eds/ast_run_harvester:v0.0.1
 
 # Cleanup
 sudo docker system prune -a
 
 # Build an image
-# sudo docker build --no-cache -t run_harvester:latest .
-sudo docker build --no-cache -t run_harvester:v0.0.1 .
-
-# Reset the tag ID
-sudo docker image tag run_harvester:latest renciorg/run_harvester:latest
-sudo docker image tag run_harvester:v0.0.1 renciorg/run_harvester:v0.0.1
-
-# Push the image to docker 
-
-sudo docker login
+sudo docker build . --no-cache -t containers.renci.org/eds/ast_run_harvester:v0.0.1
 
 # Test your image: Start an interactive shell to the image
-sudo docker run -it run_harvester:v0.0.1 bash
+sudo docker run -it containers.renci.org/eds/ast_run_harvester:v0.0.1 bash
 
 # Load for actual cluster usage
-#sudo docker push renciorg/run_harvester:v0.0.1
+#sudo docker push containers.renci.org/eds/ast_run_harvester:v0.0.1

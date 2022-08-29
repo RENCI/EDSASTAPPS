@@ -53,7 +53,6 @@ USER nru
 
 # change to the apsviz2 pipelines directory                        
 WORKDIR /home/nru/repo/EDSASTAPPS/run_harvester
-#WORKDIR /repo/EDSASTAPPS/apsviz2
 
 ## set the python path
 ENV PYTHONPATH=/home/nru/repo/AST:/home/nru/repo/EDSASTAPPS
