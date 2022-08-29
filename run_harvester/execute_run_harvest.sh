@@ -36,7 +36,7 @@ FINALDIR=$1
 #
 # git clone the grid data. The underlying directory structure is implied within the provided grid_to_stationfile_maps.yml file
 
-#git clone https://github.com/RENCI/AST_gridstations.git
+git clone https://github.com/RENCI/AST_gridstations.git
 
 #
 # Where is Contrails authentication yml. Grab the secrets key from $CONTRAILS_KEY. Update the local secrets file
