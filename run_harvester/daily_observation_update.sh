@@ -42,4 +42,11 @@ $PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'NOAA'
 # NDBC buoy data
 $PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'NDBC' --data_product "wave_height" --station_list "$STATIONDIR/ndbc_buoys.csv"
 
+# NOAA air pressure
+$PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'NOAA' --data_product "air_pressure" --station_list "$STATIONDIR/noaa_stations.csv"
+
+# NDBC wind speed 
+$PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'NDBC' --data_product "wind_speed" --station_list "$STATIONDIR/ndbc_buoys.csv"
+
+
 echo "Finished"
