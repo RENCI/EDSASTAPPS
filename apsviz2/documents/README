@@ -98,3 +98,9 @@ python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2022
 
 python apsviz_station_products.py --url "http://apsviz-thredds-dev.apps.renci.org/thredds/dodsC/2022/nam/2022070618/ec95d/hatteras.renci.org/ec95d-nam-bob3/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'ec95d' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
 
+##
+## A new addition. Save the actual per-station plot data to a series of json files for post-processing.
+##
+python apsviz_station_products.py --url='http://tds.renci.org:80/thredds/dodsC/2022/nam/2022082306/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc' --ndays -4  --return_sample_min 60 --gridname 'NCSC_SAB_v1.23' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style --construct_jsons
+
+

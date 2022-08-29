@@ -1,0 +1,43 @@
+
+python ./apsviz_station_products.py --url "https://apsviz-thredds-dev.apps.renci.org/thredds/dodsC/2022/nam/2022060800/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sb55.01/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'ncsc_sab_v1.23' --fort63_style --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --finalDIR "./HEY3"
+
+## Try this
+
+python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2021/nam/2021120100/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'hsofs' --ensemble='nowcast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+
+## A fresh one:
+
+python apsviz_station_products.py --url "http://apsviz-thredds-dev.apps.renci.org/thredds/dodsC/2022/nam/2022062912/ec95d/hatteras.renci.org/ec95d-nam-bob3/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'ec95d' --ensemble='nowcast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+
+python apsviz_station_products.py --url "http://apsviz-thredds-dev.apps.renci.org/thredds/dodsC/2022/nam/2022070618/ec95d/hatteras.renci.org/ec95d-nam-bob3/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'ec95d' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+
+python apsviz_station_products.py --url "http://apsviz-thredds-dev.apps.renci.org/thredds/dodsC/2022/nam/2022070618/ec95d/hatteras.renci.org/ec95d-nam-bob3/namforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'ec95d' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+
+# Florence
+python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2018/al06/42/nc_inundation_v9.99_w_rivers/hatteras.renci.org/062018hiresr/nhcConsensus/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'NC_INUNDATION_V9.99_W_RIVERS' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+
+# Florence
+# python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2018/al06/42/nc_inundation_v9.99_w_rivers/hatteras.renci.org/062018hiresr/nhcConsensus/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'NC_INUNDATION_V9.99_W_RIVERS' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+#
+#
+python apsviz_station_products.py --url "http://tds.renci.org/thredds/dodsC/2018/al06/42/nc_inundation_v9.99_w_rivers/hatteras.renci.org/062018hiresr/nhcConsensus/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'NC_INUNDATION_V9.99_W_RIVERS' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+
+python apsviz_station_products.py --url='http://tds.renci.org:80/thredds/dodsC/2022/nam/2022080906/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sb55.01/namforecast/fort.63.nc' --ndays -4  --return_sample_min 60 --gridname 'NCSC_SAB_v1.23' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+
+python apsviz_station_products.py --url='https://apsviz-thredds-dev.apps.renci.org/thredds/dodsC/2022/nam/2022080912/ec95d/bridges2.psc.edu/ec95d-nam-bob-psc/namforecast/fort.63.nc' --ndays -4  --return_sample_min 60 --gridname 'ec95d' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+
+python apsviz_station_products.py --url='http://tds.renci.org:80/thredds/dodsC/2022/nam/2022081000/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sb55.01/namforecast/fort.63.nc' --ndays -4  --return_sample_min 60 --gridname 'NCSC_SAB_v1.23' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+
+python apsviz_station_products.py --url='http://tds.renci.org:80/thredds/dodsC/2022/nam/2022081206/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sb55.01/namforecast/fort.63.nc' --ndays -4  --return_sample_min 60 --gridname 'NCSC_SAB_v1.23' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+
+python apsviz_station_products.py --url='http://tds.renci.org:80/thredds/dodsC/2022/nam/2022081718/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc' --ndays -4  --return_sample_min 60 --gridname 'NCSC_SAB_v1.23' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+
+python apsviz_station_products.py --url='http://tds.renci.org:80/thredds/dodsC/2022/nam/2022082306/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc' --ndays -4  --return_sample_min 60 --gridname 'NCSC_SAB_v1.23' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+
+python apsviz_station_products.py --url='https://apsviz-thredds-dev.apps.renci.org/thredds/dodsC/2022/nam/2022082312/hsofs/bridges2.psc.edu/hsofs-nam-bob-2022-psc/namforecast/fort.63.nc' --ndays -4  --return_sample_min 60 --gridname 'hsofs' --ensemble 'nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+
+# New test add saving the json data to disk
+
+python apsviz_station_products.py --url='http://tds.renci.org:80/thredds/dodsC/2022/nam/2022082306/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc' --ndays -4  --return_sample_min 60 --gridname 'NCSC_SAB_v1.23' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style --construct_jsons 
+
+
