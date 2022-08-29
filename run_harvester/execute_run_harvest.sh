@@ -50,5 +50,4 @@ sed -i 's/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/'"$CONTRAILS_KEY"'/g' ./secrets/c
 
 python ./run_fetch_pipeline_observation.py --stoptime "$stoptime"  --finalDIR "$FINALDIR"  --map_source_file './AST_gridstations/harvester_stations/sources_map.yaml' --contrails_auth './secrets/contrails.yml'
 
-echo "Finished RUN_HARVESTER $URL with status $?"
-
+echo "Finished RUN_HARVESTER with status $?"
