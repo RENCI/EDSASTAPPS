@@ -326,6 +326,7 @@ def main(args):
 ## BUOY OBSERVATIONS. Get known Buoy wave_height data
 ## We expect a lot of missingness for these data so set a high number=90% Do not use 100% because if your entire dataset is empty
 ## (eg a wrong time range) then all empty buoys will be kept
+## Also fetch full sampling for the same reason
 
     t0 = tm.time()
     ndbc_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='NDBC_BUOYS')
@@ -392,6 +393,23 @@ def main(args):
     utilities.log.info('Wrote out station_properties file to {}'.format(station_props))
 
 ##
+## Optionally grab the actual timeseries data for each station that was used to create the pngs. Also improve the data by including the ADCIRC Node number
+##
+    if args.construct_jsons:
+        utilities.log.info('Construct and save individual per-station json fles')
+        stations_dicts, df_station_file_json_locations = station_plotter.generate_station_specific_DICTS(outputs_dict, outputs_metadict, station_id_list=None)
+        print(df_station_file_json_locations)
+        json_files=list()
+        for key,item in stations_dicts.items():
+            json_file = io_utilities.write_dict_to_json(item, rootdir=rootdir,subdir='',fileroot=f'{key}_WL',iometadata='')
+            json_files.append(json_file)
+            print(f'Wrote json timeseries file {json_file}')
+        df_json_files = pd.DataFrame(json_files,columns=['Filename'], index=df_station_file_json_locations.index)
+        df_station_file_json_locations = pd.concat([df_station_file_json_locations,df_station_nodes,df_json_files],axis=1)
+        df_station_file_json_locations.index.name='StationId'
+        station_timeseries_props = io_utilities.write_csv(df_station_file_json_locations[['StationName','State','Lat','Lon','Node','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationJsons',iometadata='')
+        utilities.log.info('Update station_json file with Node information')
+##
 ## Copy over logfile into the rootdir so as to reside with the output data sets
 ##
     shutil.copy(utilities.LogFile,'/'.join([rootdir,'logs'])) # Copy and rename to logs for apsviz2 pipeline to find
@@ -402,16 +420,6 @@ def main(args):
 
     total_time = tm.time() - tm_all
     utilities.log.info('Finished: Total Runtime was {}'.format(total_time))
-
-    #for key,item in outputs_dict.items():
-    #    f=key.replace(' ','_')
-    #    item.to_pickle(f+'.pkl')
-    #    print('Write key {}'.format(key))
-
-    #for key,item in outputs_metadict.items():
-    #    f=key.replace(' ','_')
-    #    item.to_pickle(f+'_meta.pkl')
-    #    print('Write meta key {}'.format(key))
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
@@ -435,6 +443,8 @@ if __name__ == '__main__':
                         help='String: instance name')
     parser.add_argument('--fort63_style', action='store_true', default=True,
                         help='Boolean: Will inform Harvester to use fort.63.methods to get station nodesids')
+    parser.add_argument('--construct_jsons', action='store_true', default=False,
+                        help='Boolean: Trigger saving actual per-station plot data to local jsons files')
     parser.add_argument('--hurricane_source', action='store',dest='hurricane_source', default=None,
                         help='str: Only needed for Hurricanes AND if using YAML to specify urls')
     parser.add_argument('--hurricane_year', action='store',dest='hurricane_year', default=None,

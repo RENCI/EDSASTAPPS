@@ -137,7 +137,7 @@ def union_station_types( outputs_dict, station_id_list=None) ->dict:
                 if testtype is 'None':
                     station_types[station]=datatype
                 if testtype is not datatype:
-                    utilities.log.error('Unexpected mixed station types found {} vs {} at station {}'.format(testtype,station_types[station],station))
+                    print('Unexpected mixed station types found {} vs {} at station {}'.format(testtype,station_types[station],station))
                     sys.exit(1)
             else:
                 station_types[station]=datatype
@@ -313,6 +313,26 @@ def build_filename_map_to_csv(png_dict)->pd.DataFrame:
     df['Lon'] = df['Lon'].astype(float)
     return df[['StationName','State','Lat','Lon','Filename','Type']]
 
+def build_station_filename_map_to_csv(station_dict)->pd.DataFrame:
+    """
+    For APSVIZ convenience, instead of returning the station,lon,lat,name,data-dict
+    to the caller as a dictionary, return it as a dataframe.
+    The intent being to save the data as a CSV.
+
+    Paramaters
+        station_dict: A dict containing (at least) (LAT,LON,STATE,STATIONNAME,TIMESERIES)
+    Return
+        An equivelent dataframe with some data formatting checks
+            Also, name case has changed slightly for backward compatibility with current apsviz pipeline
+    """
+    df=pd.DataFrame(station_dict['STATIONS']).T
+    #df.columns=('Lat','Lon','State','StationName','Filename')
+    df.rename(columns = {'ID':'Id','LON':'Lon','LAT':'Lat', 'TIMESERIES':'Timeseries', 'TYPE':'Type', 'STATE':'State','STATIONNAME':'StationName'}, inplace = True)
+    df.index.name='StationId'
+    df['Lat'] = df['Lat'].astype(float)
+    df['Lon'] = df['Lon'].astype(float)
+    return df[['StationName','State','Lat','Lon','Type']]
+
 # Build a station-specific plot
 def create_station_specific_plot(fig, stationid, station_name, df_concat, time_range):
     """
@@ -412,6 +432,36 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
             data_dict[station]={'LAT':str(lat), 'LON':str(lon), 'STATE': state, 'STATIONNAME': station_name, 'TYPE': st_type, 'FILENAME':filename}
         except Exception as e:
             print('Failed writing PNG {}'.format(e))
-        figures_dict = {'STATIONS':data_dict} # Conform to current apsviz2 procedure
-        figure_dataframe = build_filename_map_to_csv(figures_dict)
+    figures_dict = {'STATIONS':data_dict} # Conform to current apsviz2 procedure
+    figure_dataframe = build_filename_map_to_csv(figures_dict)
     return figure_dataframe 
+
+def generate_station_specific_DICTS(outputs_dict, outputs_meta_dict, station_id_list=None):
+    """
+    Construct dicts for each station containing the actual plot data that would be used to create pngs. 
+    Store them into an overall dict and return the dict for subsequent storage as a series of jsons
+
+    Also, return a dataframe that lists the set of dicts created and their stationid.
+    """
+    stations_union_source_list = union_all_source_stations(outputs_dict, station_id_list = station_id_list)
+    station_names = union_station_names( outputs_meta_dict, station_id_list=station_id_list)
+    station_types = union_station_types( outputs_dict, station_id_list = station_id_list)
+
+    station_dict=dict()
+    for station in station_names.keys(): # Only want stations that have known ID names. 
+        df_concat = build_source_concat_dataframe(outputs_dict, station)
+        # Remove completely nan remaining stations
+        df_concat.dropna(axis=1, how='all', inplace=True)
+        df_concat.index = df_concat.index.strftime('%Y-%m-%d %H:%M:%S')
+        print('JSON: After NAN reduction remaining sources is {}.Shape was {}'.format(station, df_concat.shape[1]))
+        station_name = station_names[station]['NAME']
+        lon = station_names[station]['LON']
+        lat = station_names[station]['LAT']
+        state = station_names[station]['STATE']
+        st_type = station_types[station]
+        # Build station-specific dicts
+        station_dict[station]={'ID':station,'LAT':str(lat), 'LON':str(lon), 'STATE': state, 'STATIONNAME': station_name, 'TYPE': st_type, 'TIMESERIES':df_concat.to_dict()}
+    station_all_dict={'STATIONS':station_dict}
+    station_dataframe=build_station_filename_map_to_csv(station_all_dict) 
+    print(f'station specific dicts of len {len(station_dict)}')
+    return station_dict, station_dataframe
