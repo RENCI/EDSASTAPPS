@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #
+#
 # Here we are simulating having run a series of fetches from the Harvester and storing the data to csv files.
 # These files will be used for building and testing out schema for the newq DB 
 #
@@ -23,14 +24,20 @@ import io_utilities.io_utilities as io_utilities
 
 #$PHOME/python  "$SRC"/fetch_data.py --data_source 'NOAA' --data_product 'water_level' --stoptime "$stoptime" --station_list "$STATIONDIR"/noaa_stations.csv --ofile "$RUNTIMEDIR" --ometafile "$RUNTIMEDIR" 
 
-def format_data_frames(df) -> pd.DataFrame:
+def format_data_frames(df,product) -> pd.DataFrame:
     """
     A Common formatting used by all sources
     """
+    prod_name = PRODUCT[product].upper() if product in PRODUCT.keys() else 'NOAME'
+    print('TEST')
+    print(product)
+    print(PRODUCT)
+    print(prod_name)
+    print(PRODUCT[product])
     df.index = df.index.strftime('%Y-%m-%dT%H:%M:%S')
     df.reset_index(inplace=True)
     df_out=pd.melt(df, id_vars=['TIME'])
-    df_out.columns=('TIME','STATION',PRODUCT.upper())
+    df_out.columns=('TIME','STATION',prod_name)
     df_out.set_index('TIME',inplace=True)
     return df_out
 
@@ -40,7 +47,18 @@ def format_data_frames(df) -> pd.DataFrame:
 
 dformat='%Y-%m-%d %H:%M:%S'
 GLOBAL_TIMEZONE='gmt' # Every source is set or presumed to return times in the zone
-PRODUCT='water_level'
+##PRODUCT='water_level'
+
+PRODUCT={
+        'water_level':'water_level',
+        'hourly_height':'water_level',
+        'predictions':'water_level',
+        'river_water_level':'water_level',
+        'coastal_water_level':'water_level',
+        'wave_height':'water_level',
+        'air_pressure':'air_pressure',
+        'wind_speed':'wind_speed'
+         }
 
 # Currently supported sources
 SOURCES = ['NOAA','CONTRAILS','NDBC']
@@ -129,7 +147,7 @@ def main(args):
     # Get data at highest resolution. Return at 15min intervals
     data,meta=obs.fetch_station_product(time_range, return_sample_min=15, interval='None' )
 
-    df_data = format_data_frames(data) # Melt data to support later database updates
+    df_data = format_data_frames(data, data_product) # Melt data to support later database updates
 
     # Output
     try:
@@ -159,5 +177,7 @@ if __name__ == '__main__':
                         help='Choose a non-default location/filename for a stationlist')
     parser.add_argument('--config_name', action='store', dest='config_name', default=None, type=str,
                         help='Choose a non-default contrails auth config_name')
+    parser.add_argument('--finalDIR', action='store', dest='finalDIR', default=None,
+                        help='String: Custom location for the output dicts, PNGs and logs')
     args = parser.parse_args()
     sys.exit(main(args))

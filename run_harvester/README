@@ -2,6 +2,22 @@
 ## Examples of running the data harvestor code
 ##
 
+##
+## This is the most modern approach and was designed for use by the apsviz pipeline
+## This approach requires having cloned the AST_gridstation repo in the PWD.
+
+
+python run_fetch_pipeline_observation.py --stoptime '2022-02-20 00:00:00'  --map_source_file './sources_map.yaml' --contrails_auth './secrets/contrails.yml' --finalDIR './TEST'
+
+python run_fetch_pipeline_observation.py --stoptime '2022-02-20 00:00:00'  --map_source_file './AST_gridstations/harvester_stations/sources_map.yaml' --contrails_auth './secrets/contrails.yml' --finalDIR './TEST'
+
+python run_fetch_pipeline_observation.py --stoptime '2022-02-20 00:00:00'  --map_source_file './AST_gridstations/harvester_stations/sources_map.yaml' --contrails_auth './secrets/contrails.yml' --finalDIR './TEST2'
+
+
+
+##
+## The below approach continues to work but is outdated
+##
 
 usage: run_get_observations.py [-h] [--ndays NDAYS] [--stoptime STOPTIME] [--sources]
                        [--data_source DATA_SOURCE]
@@ -39,6 +55,10 @@ python run_get_observation.py --stoptime '2022-02-20 00:00:00' --data_source 'CO
 
 # Get some buoy data
 python run_get_observation.py --stoptime '2022-05-10 00:00:00' --data_source 'NDBC' --data_product 'wave_height'
+
+
+# Get non-water products
+python run_get_observation.py --stoptime '2022-02-20 00:00:00' --data_source 'NOAA' --data_product 'air_pressure'
 
 
 
