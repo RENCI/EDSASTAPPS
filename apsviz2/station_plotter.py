@@ -453,6 +453,7 @@ def generate_station_specific_DICTS(outputs_dict, outputs_meta_dict, station_id_
         # Remove completely nan remaining stations
         df_concat.dropna(axis=1, how='all', inplace=True)
         df_concat.index = df_concat.index.strftime('%Y-%m-%d %H:%M:%S')
+        df_concat.fillna(-99999, inplace=True)
         print('JSON: After NAN reduction remaining sources is {}.Shape was {}'.format(station, df_concat.shape[1]))
         station_name = station_names[station]['NAME']
         lon = station_names[station]['LON']
