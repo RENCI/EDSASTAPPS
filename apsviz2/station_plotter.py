@@ -463,6 +463,8 @@ def generate_station_specific_DICTS(outputs_dict, outputs_meta_dict, station_id_
         # Build station-specific dicts
         station_dict[station]={'ID':station,'LAT':str(lat), 'LON':str(lon), 'STATE': state, 'STATIONNAME': station_name, 'TYPE': st_type, 'TIMESERIES':df_concat.to_dict()}
     station_all_dict={'STATIONS':station_dict}
+    station_all_dict_clean = {k: {k2: "-99999" if v2 == 'NaN' else v2 for k2, v2 in v.items()} \
+                    for k, v in station_all_dict.items()}
     station_dataframe=build_station_filename_map_to_csv(station_all_dict) 
     print(f'station specific dicts of len {len(station_dict)}')
     return station_dict, station_dataframe
