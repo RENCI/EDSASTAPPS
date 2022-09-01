@@ -4,16 +4,16 @@
 sudo docker login containers.renci.org
 
 # Remove existing images
-sudo docker image rm -f containers.renci.org/eds/ast_supp:v0.0.21
+sudo docker image rm -f containers.renci.org/eds/ast_supp:v0.0.22
 
 # Cleanup
 sudo docker system prune -a
 
 # Build an image
-sudo docker build . --no-cache -t containers.renci.org/eds/ast_supp:v0.0.22
+sudo docker build . --no-cache -t containers.renci.org/eds/ast_supp:v0.0.23
 
 # Test your image: Start an interactive shell to the image
-sudo docker run -it containers.renci.org/eds/ast_supp:v0.0.22 bash
+sudo docker run -it containers.renci.org/eds/ast_supp:v0.0.23 bash
 
 # Load for actual cluster usage
-#sudo docker push containers.renci.org/eds/ast_supp:v0.0.22
+#sudo docker push containers.renci.org/eds/ast_supp:v0.0.23
