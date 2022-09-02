@@ -23,7 +23,7 @@ FINALDIR=$2
 #
 # git clone the grid data. The underlying directory structure is implied within the provided grid_to_stationfile_maps.yml file
 
-#git clone https://github.com/RENCI/AST_gridstations.git
+git clone https://github.com/RENCI/AST_gridstations.git
 
 
 # Need to run the actual input URL first without changing the ensemble name
