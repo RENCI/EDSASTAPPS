@@ -8,11 +8,6 @@
 #
 # Check environment
 
-if [ -z "${PYTHONPATH:-}" ]; then
-   echo "PYTHONPATH is not set"
-   exit 1
-fi
-
 if [ -z "${CONTRAILS_KEY:-}" ]; then
    echo "CONTRAILS_KEY is not set: Abort"
    exit 1
