@@ -181,7 +181,7 @@ def main(args):
 ##
 ## Copy over logfile into the rootdir so as to reside with the output data sets
 ##
-    shutil.copy(utilities.LogFile,'/'.join([rootdir,'logs'])) # Copy and rename to logs for apsviz2 pipeline to find
+    shutil.copy(utilities.LogFile,'/'.join([rootdir,'obs_logs'])) # Copy and rename to logs for apsviz2 pipeline to find
     utilities.log.info('Copy log file')
 
     utilities.log.info('Finished') 

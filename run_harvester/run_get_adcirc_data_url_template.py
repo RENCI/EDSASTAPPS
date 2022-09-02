@@ -11,6 +11,7 @@
 #python get_adcirc_stations.py --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.61.nc" --data_source 'ASGS' --timeout 8  --fort63_style
 
 
+## NEED to detemrine what the variable_name is ad pass it to fetch_adcirc_stations()
 
 import os,sys
 import numpy as np

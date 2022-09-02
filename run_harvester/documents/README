@@ -1,3 +1,6 @@
+export PYTHONPATH=~/AST:~/EDSASTAPPS
+export RUNTIMEDIR=./JUNK
+
 Interpretation and usage information
 
 The run_harvester codes use the AST/harvester classes to fetch observation and model data. These codes are generally designed to
@@ -7,7 +10,103 @@ will read these files and upload them to a database.
 These codes are excellent examples of how a user can utilize the AST/harvester codes.
 
 ##
-## Observational data (NOAA, NDBC and CONTRAILS) 
+## k8s wrapped versions of the following codes used to construct data files for ingest to the EDS timeseries DB
+##
+
+These k8s version are intended to be launched by bash scripts. (see below)
+
+##
+## Observations
+##
+
+usage: run_fetch_pipeline_observation.py [-h] [--ndays NDAYS]
+                                         [--stoptime STOPTIME] [--sources]
+                                         [--contrails_auth CONTRAILS_AUTH]
+                                         [--map_source_file MAP_SOURCE_FILE]
+                                         [--finalDIR FINALDIR]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --ndays NDAYS         Number of look-back days from stoptime (or now):
+                        default -2
+  --stoptime STOPTIME   Desired stoptime YYYY-mm-dd HH:MM:SS. Default=now
+  --sources             List currently supported data sources
+  --contrails_auth CONTRAILS_AUTH
+                        Choose a non-default contrails auth contrails_auth
+  --map_source_file MAP_SOURCE_FILE
+                        str: Select appropriate map_source_file yml for source
+                        processing list
+  --finalDIR FINALDIR   String: Custom location for the output dicts, PNGs and
+                        logs
+
+##
+## ADCIRC
+##
+
+usage: run_fetch_pipeline_adcirc_data_url_template.py [-h] [--sources]
+                                                      [--data_source DATA_SOURCE]
+                                                      [--data_product DATA_PRODUCT]
+                                                      [--map_file MAP_FILE]
+                                                      [--url URL]
+                                                      [--ensemble ENSEMBLE]
+                                                      [--fort63_style]
+                                                      [--finalDIR FINALDIR]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --sources             List currently supported data sources
+  --data_source DATA_SOURCE
+                        choose supported data source: default = ASGS
+  --data_product DATA_PRODUCT
+                        choose supported data product: default is water_level
+  --map_file MAP_FILE   Location of the grid_to_stationfile_maps.yml data
+  --url URL             ASGS url to fetcb ADCIRC data
+  --ensemble ENSEMBLE   str: Select appropriate ensemble Default is nowcast
+  --fort63_style        Boolean: Will inform Harvester to use fort.63.methods
+                        to get station nodesids
+  --finalDIR FINALDIR   String: Custom location for the output dicts, PNGs and
+                        logs
+
+##
+## Example invocations
+##
+
+python run_fetch_pipeline_observation.py --stoptime '2022-02-20 00:00:00'  --map_source_file './sources_map.yaml' --contrails_auth './secrets/contrails.yml' --finalDIR './TEST'
+
+python run_fetch_pipeline_observation.py --stoptime '2022-02-20 00:00:00'  --map_source_file './AST_gridstations/harvester_stations/sources_map.yaml' --contrails_auth './secrets/contrails.yml' --finalDIR './TEST'
+
+python run_fetch_pipeline_observation.py --stoptime '2022-02-20 00:00:00'  --map_source_file './AST_gridstations/harvester_stations/sources_map.yaml' --contrails_auth './secrets/contrails.yml' --finalDIR './TEST2'
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.61.nc" --ensemble 'nhcOfcl' --map_file './supporting_data/grid_to_stationfile_maps.yml'
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.61.nc" --ensemble 'nhcOfcl' --map_file './supporting_data/grid_to_stationfile_maps.yml'
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url 'http://tds.renci.org:80/thredds/dodsC/2022/nam/2022082306/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc' --ensemble='namforecast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --fort63_style
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url 'http://tds.renci.org:80/thredds/dodsC/2022/nam/2022082306/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc' --ensemble='nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --fort63_style
+
+##
+## To launch these for mthe provided scripts, the pipline must set one or more ENVs and pass the finalDIR to each of the runs
+## We anticipate finalDIR to be a persistant filesystem
+## The user needs to pass in the 
+
+export PYTHONPATH="xxx"
+export PYTHONPATH="~/AST:~/EDSASTAPPS"
+export CONTRAILS_KEY="xxx"
+export FINALDIR="."
+
+./execute_run_harvest.sh $FINALDIR
+
+export PYTHONPATH="~/AST:~/EDSASTAPPS"
+export URL="http://tds.renci.org:80/thredds/dodsC/2022/nam/2022082306/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc"
+export FINALDIR="."
+
+./execute_run_harvest_adcirc.sh $URL $FINALDIR
+
+
+
+##
+## Basic Observational codes: data (NOAA, NDBC and CONTRAILS) 
 ##
 
 The invocation of the run_get_observations.py code is to create two files. The product data file and the associated metadata.
