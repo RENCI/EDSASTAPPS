@@ -13,10 +13,6 @@ if [ -z "${PYTHONPATH:-}" ]; then
    exit 1
 fi
 
-if [ -z "${RUNTIMEDIR:-}" ]; then
-   echo "RUNTIMEDIR is not set"
-fi
-
 if [ -z "${CONTRAILS_KEY:-}" ]; then
    echo "CONTRAILS_KEY is not set: Abort"
    exit 1
@@ -35,13 +31,12 @@ FINALDIR=$1
 
 #
 # git clone the grid data. The underlying directory structure is implied within the provided grid_to_stationfile_maps.yml file
-
+#
 git clone https://github.com/RENCI/AST_gridstations.git
 
 #
 # Where is Contrails authentication yml. Grab the secrets key from $CONTRAILS_KEY. Update the local secrets file
 #
-
 sed -i 's/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/'"$CONTRAILS_KEY"'/g' ./secrets/contrails.yml
 
 #
