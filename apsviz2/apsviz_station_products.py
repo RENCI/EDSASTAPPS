@@ -210,6 +210,35 @@ def main(args):
     total_time = tm.time() - t0
     utilities.log.info('Contrails OBS: Time was {}'.format(total_time))
 
+## OBSERVATIONS #3. Get the Contrails Coastal data
+
+    utilities.log.info('Preparing for a CONTRAILS fetch')
+    contrails_config = args.contrails_auth
+    utilities.log.info('Got Contrails access information {}'.format(contrails_config))
+    rivers_data_product='coastal_water_level'
+    contrails_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='CONTRAILS_COASTAL')
+
+    t0 = tm.time()
+    if contrails_station_file is not None:
+        try:
+            contrails_coastal = get_obs_stations.get_obs_stations(source='CONTRAILS', product=rivers_data_product,
+                contrails_yamlname=contrails_config, station_list_file=contrails_station_file)
+            # Get data at highest resolution. Return at 15min intervals
+            cont_coastal_data,cont_coastal_meta=contrails_coastal.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=args.return_sample_min, interval='None' )
+            cont_coastal_data.replace('-99999',np.nan,inplace=True)
+            cont_coastal_meta.replace('-99999',np.nan,inplace=True)
+            cont_coastal_meta_list = set(cont_coastal_data.columns.tolist()).intersection(cont_coastal_meta.index.to_list())
+            cont_coastal_meta = cont_coastal_meta.loc[cont_coastal_meta_list]
+            outputs_dict['Contrails Coastal']=cont_coastal_data
+            outputs_metadict['Contrails Coastal']=cont_coastal_meta
+            valid_obs.append(cont_coastal_data)
+            valid_obs_meta.append(cont_coastal_meta)
+            utilities.log.info('Finished with Contrails Coastal Observations')
+        except Exception as e:
+            utilities.log.error('CONTRAILS: Broad failure. Failed to find any CONTRAILS Coastal data. System key supplied ?: {}'.format(e))
+    total_time = tm.time() - t0
+    utilities.log.info('Contrails Coastal OBS: Time was {}'.format(total_time))
+
 ##
 ## Combine observations data for the error computations - No Tidal nor NDBC data here
 ##
