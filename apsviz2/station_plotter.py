@@ -27,7 +27,7 @@ colordict['NOAA NOS']='g'
 colordict['NOAA Tidal']='orange'
 colordict['Difference']='r'
 colordict['Contrails']='b'
-colordict['Contrails Coastal']='b'
+colordict['Contrails Coastal']='g'
 colordict['NDBC']='g'
 colordict['SWAN Forecast']='b'
 colordict['SWAN Nowcast']='b'
@@ -39,7 +39,7 @@ dashdict['NOAA NOS']=(1,0)
 dashdict['NOAA Tidal']=(1,0)
 dashdict['Difference']=(1,0)
 dashdict['Contrails']=(1,1)
-dashdict['Contrails Coastal']=(1,1)
+dashdict['Contrails Coastal']=(2,2)
 dashdict['NDBC']=(2,2)
 dashdict['SWAN Forecast']=(3,1)
 dashdict['SWAN Nowcast']=(1,0)
@@ -392,6 +392,8 @@ def find_widest_timerange(outputs_dict):
     tmax = max(time_maxes)
     return tmin,tmax
 
+# The After NAN can happen, for example, if a station has No OBS and l the ADC data are nans.
+
 def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.', station_id_list=None )->pd.DataFrame:
     """
     The input dicts will be processed to build individual FIGS for each fund station id 
@@ -418,23 +420,26 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
         # Remove completely nan remaining stations
         df_concat.dropna(axis=1, how='all', inplace=True)
         print('After NAN reduction remaining sources is {}.Shape was {}'.format(station, df_concat.shape[1]))
-        station_name = station_names[station]['NAME']
-        lon = station_names[station]['LON']
-        lat = station_names[station]['LAT']
-        state = station_names[station]['STATE']
-        st_type = station_types[station]
-        # Build fig
-        plt.close()
-        fig = plt.figure(figsize=(6, 4))
-        create_station_specific_plot(fig, station, station_name, df_concat, (tmin,tmax) )
-        plt.subplots_adjust(bottom=0.25)
-        filename=outputdir+'/'+station+'_WL.png'
-        try:
-            plt.savefig(filename)
-            print('Wrote PNG to {}'.format(filename))
-            data_dict[station]={'LAT':str(lat), 'LON':str(lon), 'STATE': state, 'STATIONNAME': station_name, 'TYPE': st_type, 'FILENAME':filename}
-        except Exception as e:
-            print('Failed writing PNG {}'.format(e))
+        if df_concat.shape[1] > 0:
+            station_name = station_names[station]['NAME']
+            lon = station_names[station]['LON']
+            lat = station_names[station]['LAT']
+            state = station_names[station]['STATE']
+            st_type = station_types[station]
+            # Build fig
+            plt.close()
+            fig = plt.figure(figsize=(6, 4))
+            create_station_specific_plot(fig, station, station_name, df_concat, (tmin,tmax) )
+            plt.subplots_adjust(bottom=0.25)
+            filename=outputdir+'/'+station+'_WL.png'
+            try:
+                plt.savefig(filename)
+                print('Wrote PNG to {}'.format(filename))
+                data_dict[station]={'LAT':str(lat), 'LON':str(lon), 'STATE': state, 'STATIONNAME': station_name, 'TYPE': st_type, 'FILENAME':filename}
+            except Exception as e:
+                print('Failed writing PNG {}'.format(e))
+        else:
+            utilities.log.info(f'Station {station} had no surviving data to plot')
     figures_dict = {'STATIONS':data_dict} # Conform to current apsviz2 procedure
     figure_dataframe = build_filename_map_to_csv(figures_dict)
     return figure_dataframe 
