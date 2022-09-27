@@ -31,6 +31,9 @@ colordict['Contrails Coastal']='g'
 colordict['NDBC']='g'
 colordict['SWAN Forecast']='b'
 colordict['SWAN Nowcast']='b'
+colordict['Contrails Forecast']='b'
+colordict['Contrails Nowcast']='b'
+
 
 dashdict=dict()
 dashdict['Forecast']=(3,1)
@@ -43,6 +46,8 @@ dashdict['Contrails Coastal']=(2,2)
 dashdict['NDBC']=(2,2)
 dashdict['SWAN Forecast']=(3,1)
 dashdict['SWAN Nowcast']=(1,0)
+dashdict['Contrails Forecast']=(3,1)
+dashdict['Contrails Nowcast']=(1,0)
 dashdict['misc']=(3,2)
 
 ##
@@ -57,6 +62,8 @@ LEGENDS_MAP={
      'SWAN': 'SWAN: Wave height',
      'SWAN Forecast': 'Swan Forecast: Wave height',
      'SWAN Nowcast': 'Swan Nowcast: Wave height',
+     'Contrails Forecast': 'Contrails Forecast: Water level',
+     'Contrails Nowcast': 'Contrails Nowcast: Water level',
      'Contrails': 'Contrails: Water elevation (Stage)',
      'Contrails Coastal': 'Contrails Coastal: Water level',
      'Forecast': 'Forecast: Water level',
@@ -95,7 +102,7 @@ def union_all_source_stations(outputs_dict, station_id_list=None)->list:
 def map_datatype_to_plotter_type(in_key_name) -> str:
     """
     """ 
-    station_types=['NOAA Tidal','NOAA NOS','Nowcast','Forecast', 'Difference', 'Contrails Coastal']
+    station_types=['NOAA Tidal','NOAA NOS','Nowcast','Forecast', 'Difference', 'Contrails Coastal','Contrails Nowcast','Contrails Forecast']
     river_types=['Contrails']
     buoy_types=['NDBC','SWAN Forecast','SWAN Nowcast']
 
@@ -439,7 +446,7 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
             except Exception as e:
                 print('Failed writing PNG {}'.format(e))
         else:
-            utilities.log.info(f'Station {station} had no surviving data to plot')
+            print(f'Station {station} had no surviving data to plot')
     figures_dict = {'STATIONS':data_dict} # Conform to current apsviz2 procedure
     figure_dataframe = build_filename_map_to_csv(figures_dict)
     return figure_dataframe 

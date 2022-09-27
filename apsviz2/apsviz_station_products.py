@@ -390,7 +390,6 @@ def main(args):
 ##
 ## Forecast
 ##
-
     utilities.log.info('Switch to fort63_style lookups for the Contrails coastal data')
     fort63_style = False
 
@@ -407,13 +406,11 @@ def main(args):
                     knockout_dict=None, fort63_style=fort63_style )
             data_contrail_coastal_adc,meta_contrail_coastal_adc=adc.fetch_station_product( [contrails_coastal_url] , return_sample_min=args.return_sample_min, fort63_style=fort63_style)
             # Revert Harvester filling of nans to -99999 back to nans
-            print('Forecast')
-            print(data_contrail_coastal_adc['30048'].sum())
-    
+            ##print(data_contrail_coastal_adc['30048'].sum())
             data_contrail_coastal_adc.replace('-99999',np.nan,inplace=True)
             meta_contrail_coastal_adc.replace('-99999',np.nan,inplace=True)
-            outputs_dict['Forecast']=data_contrail_coastal_adc
-            outputs_metadict['Forecast']=meta_contrail_coastal_adc
+            outputs_dict['Contrails Forecast']=data_contrail_coastal_adc
+            outputs_metadict['Contrails Forecast']=meta_contrail_coastal_adc
             utilities.log.info('Finished with Contrails Coastal Forecasts')
             # Grab the stop and start times from the data set. Will be needed for tidal predictions data
             time_index=data_contrail_coastal_adc.index.tolist()
@@ -445,12 +442,11 @@ def main(args):
                     station_list_file=contrails_coastal_station_file,
                     knockout_dict=None, fort63_style=fort63_style )
             data_now_adc,meta_now_adc=contrails_coastal_nowadc.fetch_station_product(contrails_coastal_now_urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style)
-            print('Nowcast')
-            print(data_contrail_coastal_adc['30048'].sum())
+            ##print(data_contrail_coastal_adc['30048'].sum())
             data_now_adc.replace('-99999',np.nan,inplace=True)
             meta_now_adc.replace('-99999',np.nan,inplace=True)
-            outputs_dict['Nowcast']=data_now_adc
-            outputs_metadict['Nowcast']=meta_now_adc
+            outputs_dict['Contrails Nowcast']=data_now_adc
+            outputs_metadict['Contrails Nowcast']=meta_now_adc
             utilities.log.info('Finished with Contrails Coastal Nowcasts')
             print(contrails_coastal_now_urls)
             print('Contrailsa Coastal Nowcast time range is from {} through {}'.format(obs_starttime, obs_endtime))
