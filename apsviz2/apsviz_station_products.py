@@ -211,17 +211,92 @@ def main(args):
     utilities.log.info('Contrails OBS: Time was {}'.format(total_time))
 
 ## OBSERVATIONS #3. Get the Contrails Coastal data
+## NOTE must always perform ADCIRC looks up first. THat way the LAST metadata update will be available observations
+## Resulting in the final plots to use the OBS station name (if avail) as the plot title.
 
     utilities.log.info('Preparing for a CONTRAILS fetch')
     contrails_config = args.contrails_auth
     utilities.log.info('Got Contrails access information {}'.format(contrails_config))
-    rivers_data_product='coastal_water_level'
+
+## Modification Sep 2022. Ad the Contrails Coastal data sites and attempt to find nowcast/forecast ADC fort.63 data associatd with these sites.
+
+##
+## Forecast
+##
+    utilities.log.info('Switch to fort63_style lookups for the Contrails coastal data')
+    fort63_style = False
+
+    t0 = tm.time()
+    contrails_coastal_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='CONTRAILS_COASTAL')
+    if contrails_coastal_station_file is not None: #  and fort63_compliant:
+        if fort63_style:
+            contrails_coastal_url=get_adcirc_stations.convert_urls_to_63style([args.url])[0]
+        else:
+            contrails_coastal_url=get_adcirc_stations.convert_urls_to_61style([args.url])[0]
+        try:
+            adc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
+                    station_list_file=contrails_coastal_station_file,
+                    knockout_dict=None, fort63_style=fort63_style )
+            data_contrail_coastal_adc,meta_contrail_coastal_adc=adc.fetch_station_product( [contrails_coastal_url] , return_sample_min=args.return_sample_min, fort63_style=fort63_style)
+            # Revert Harvester filling of nans to -99999 back to nans
+            ##print(data_contrail_coastal_adc['30048'].sum())
+            data_contrail_coastal_adc.replace('-99999',np.nan,inplace=True)
+            meta_contrail_coastal_adc.replace('-99999',np.nan,inplace=True)
+            outputs_dict['Contrails Forecast']=data_contrail_coastal_adc
+            outputs_metadict['Contrails Forecast']=meta_contrail_coastal_adc
+            utilities.log.info('Finished with Contrails Coastal Forecasts')
+            # Grab the stop and start times from the data set. Will be needed for tidal predictions data
+            time_index=data_contrail_coastal_adc.index.tolist()
+            starttime = min(time_index).strftime('%Y-%m-%d %H:%M:%S')
+            endtime = max(time_index).strftime('%Y-%m-%d %H:%M:%S')
+        except Exception as e:
+            utilities.log.error('Contrails Coastal Forecast: Broad failure. Failed to find any forecast data: {}'.format(e))
+    total_time = tm.time() - t0
+    utilities.log.info('Contrails Namforecast: Time was {}'.format(total_time))
+##
+## Nowcast
+##
+    t0 = tm.time()
+    if contrails_coastal_station_file is not None: #  and fort63_compliant:
+        obs_endtime = starttime # '%Y-%m-%d %H:%M:%S': Grab the beginning of the forecast
+        dt_starttime = dt.datetime.strptime(obs_endtime,dformat)+dt.timedelta(days=args.ndays) # How many days BACK
+        obs_starttime=dt.datetime.strftime(dt_starttime, dformat)
+
+        # Need to build a set of NOWCASTs from the input url.
+        nowadc = genurls.generate_urls_from_times(url=input_url,ndays=args.ndays)
+        contrails_coastal_now_urls = nowadc.build_url_list_from_template_url_and_offset(ensemble='nowcast')
+        if fort63_style:
+            contrails_coastal_now_urls = get_adcirc_stations.convert_urls_to_63style(contrails_coastal_now_urls)
+        else:
+            contrails_coastal_now_urls = get_adcirc_stations.convert_urls_to_61style(contrails_coastal_now_urls)
+
+        try:
+            contrails_coastal_nowadc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
+                    station_list_file=contrails_coastal_station_file,
+                    knockout_dict=None, fort63_style=fort63_style )
+            data_now_adc,meta_now_adc=contrails_coastal_nowadc.fetch_station_product(contrails_coastal_now_urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style)
+            ##print(data_contrail_coastal_adc['30048'].sum())
+            data_now_adc.replace('-99999',np.nan,inplace=True)
+            meta_now_adc.replace('-99999',np.nan,inplace=True)
+            outputs_dict['Contrails Nowcast']=data_now_adc
+            outputs_metadict['Contrails Nowcast']=meta_now_adc
+            utilities.log.info('Finished with Contrails Coastal Nowcasts')
+            print(contrails_coastal_now_urls)
+            print('Contrailsa Coastal Nowcast time range is from {} through {}'.format(obs_starttime, obs_endtime))
+        except Exception as e:
+            utilities.log.error('Contrails Coastal Nowcast: Broad failure. Failed to find any nowcast data: {}'.format(e))
+    total_time = tm.time() - t0
+    utilities.log.info('Contrals Coastal nowcast: Time was {}'.format(total_time))
+
+## Observations
+
+    coastal_data_product='coastal_water_level'
     contrails_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='CONTRAILS_COASTAL')
 
     t0 = tm.time()
     if contrails_station_file is not None:
         try:
-            contrails_coastal = get_obs_stations.get_obs_stations(source='CONTRAILS', product=rivers_data_product,
+            contrails_coastal = get_obs_stations.get_obs_stations(source='CONTRAILS', product=coastal_data_product,
                 contrails_yamlname=contrails_config, station_list_file=contrails_station_file)
             # Get data at highest resolution. Return at 15min intervals
             cont_coastal_data,cont_coastal_meta=contrails_coastal.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=args.return_sample_min, interval='None' )
@@ -383,77 +458,6 @@ def main(args):
 
     t0 = tm.time()
 
-##
-## Revisit the Contrails Coastal data set
-## Modification Sep 2022. Ad the Contrails Coastal data sites and attempt to find nowcast/forecast ADC fort.63 data associatd with these sites.
-
-##
-## Forecast
-##
-    utilities.log.info('Switch to fort63_style lookups for the Contrails coastal data')
-    fort63_style = False
-
-    t0 = tm.time()
-    contrails_coastal_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='CONTRAILS_COASTAL')
-    if contrails_coastal_station_file is not None: #  and fort63_compliant:
-        if fort63_style:
-            contrails_coastal_url=get_adcirc_stations.convert_urls_to_63style([args.url])[0]
-        else:
-            contrails_coastal_url=get_adcirc_stations.convert_urls_to_61style([args.url])[0]
-        try:
-            adc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
-                    station_list_file=contrails_coastal_station_file,
-                    knockout_dict=None, fort63_style=fort63_style )
-            data_contrail_coastal_adc,meta_contrail_coastal_adc=adc.fetch_station_product( [contrails_coastal_url] , return_sample_min=args.return_sample_min, fort63_style=fort63_style)
-            # Revert Harvester filling of nans to -99999 back to nans
-            ##print(data_contrail_coastal_adc['30048'].sum())
-            data_contrail_coastal_adc.replace('-99999',np.nan,inplace=True)
-            meta_contrail_coastal_adc.replace('-99999',np.nan,inplace=True)
-            outputs_dict['Contrails Forecast']=data_contrail_coastal_adc
-            outputs_metadict['Contrails Forecast']=meta_contrail_coastal_adc
-            utilities.log.info('Finished with Contrails Coastal Forecasts')
-            # Grab the stop and start times from the data set. Will be needed for tidal predictions data
-            time_index=data_contrail_coastal_adc.index.tolist()
-            starttime = min(time_index).strftime('%Y-%m-%d %H:%M:%S')
-            endtime = max(time_index).strftime('%Y-%m-%d %H:%M:%S')
-        except Exception as e:
-            utilities.log.error('Contrails Coastal Forecast: Broad failure. Failed to find any forecast data: {}'.format(e))
-    total_time = tm.time() - t0
-    utilities.log.info('Contrails Namforecast: Time was {}'.format(total_time))
-##
-## Nowcast
-##
-    t0 = tm.time()
-    if contrails_coastal_station_file is not None: #  and fort63_compliant:
-        obs_endtime = starttime # '%Y-%m-%d %H:%M:%S': Grab the beginning of the forecast
-        dt_starttime = dt.datetime.strptime(obs_endtime,dformat)+dt.timedelta(days=args.ndays) # How many days BACK
-        obs_starttime=dt.datetime.strftime(dt_starttime, dformat)
-
-        # Need to build a set of NOWCASTs from the input url.
-        nowadc = genurls.generate_urls_from_times(url=input_url,ndays=args.ndays)
-        contrails_coastal_now_urls = nowadc.build_url_list_from_template_url_and_offset(ensemble='nowcast')
-        if fort63_style:
-            contrails_coastal_now_urls = get_adcirc_stations.convert_urls_to_63style(contrails_coastal_now_urls)
-        else:
-            contrails_coastal_now_urls = get_adcirc_stations.convert_urls_to_61style(contrails_coastal_now_urls)
-
-        try:
-            contrails_coastal_nowadc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
-                    station_list_file=contrails_coastal_station_file,
-                    knockout_dict=None, fort63_style=fort63_style )
-            data_now_adc,meta_now_adc=contrails_coastal_nowadc.fetch_station_product(contrails_coastal_now_urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style)
-            ##print(data_contrail_coastal_adc['30048'].sum())
-            data_now_adc.replace('-99999',np.nan,inplace=True)
-            meta_now_adc.replace('-99999',np.nan,inplace=True)
-            outputs_dict['Contrails Nowcast']=data_now_adc
-            outputs_metadict['Contrails Nowcast']=meta_now_adc
-            utilities.log.info('Finished with Contrails Coastal Nowcasts')
-            print(contrails_coastal_now_urls)
-            print('Contrailsa Coastal Nowcast time range is from {} through {}'.format(obs_starttime, obs_endtime))
-        except Exception as e:
-            utilities.log.error('Contrails Coastal Nowcast: Broad failure. Failed to find any nowcast data: {}'.format(e))
-    total_time = tm.time() - t0
-    utilities.log.info('Contrals Coastal nowcast: Time was {}'.format(total_time))
 
 ##
 ## Select from RUNTIMEDIR, where to write these files
