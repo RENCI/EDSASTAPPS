@@ -83,6 +83,12 @@ def main(args):
     print(input_url)
 
 ##
+## Assemble the list of valid observations from which to compute error series'
+##
+    valid_obs=list()
+    valid_now=list()
+    valid_obs_meta=list()
+##
 ## ADCIRC step 1. Process the INPUT (Forecast) URL. 60min default sampling
 ##
     t0 = tm.time()
@@ -134,6 +140,7 @@ def main(args):
         meta_now_adc.replace('-99999',np.nan,inplace=True)
         outputs_dict['Nowcast']=data_now_adc
         outputs_metadict['Nowcast']=meta_now_adc
+        valid_now.append(data_now_adc)
         utilities.log.info('Finished with ADCIRC Nowcasts')
         print(now_urls)
         print('Nowcast time range is from {} through {}'.format(obs_starttime, obs_endtime))
@@ -143,11 +150,6 @@ def main(args):
     total_time = tm.time() - t0
     utilities.log.info('ADCIRC Nowcast: Time was {}'.format(total_time))
 
-##
-## Assemble the list of valid observations from which to compute error series'
-##
-    valid_obs=list()
-    valid_obs_meta=list()
 
 ## OBSERVATIONS. Get the NOAA station data
 ##
@@ -202,8 +204,8 @@ def main(args):
             cont_meta = cont_meta.loc[cont_meta_list]
             outputs_dict['Contrails']=cont_data
             outputs_metadict['Contrails']=cont_meta
-            valid_obs.append(cont_data)
-            valid_obs_meta.append(cont_meta)
+            #valid_obs.append(cont_data)
+            #valid_obs_meta.append(cont_meta)
             utilities.log.info('Finished with Contrails Observations')
         except Exception as e:
             utilities.log.error('CONTRAILS: Broad failure. Failed to find any CONTRAILS data. System key supplied ?: {}'.format(e))
@@ -281,6 +283,7 @@ def main(args):
             outputs_dict['Contrails Nowcast']=data_now_adc
             outputs_metadict['Contrails Nowcast']=meta_now_adc
             utilities.log.info('Finished with Contrails Coastal Nowcasts')
+            valid_now.append(data_now_adc)
             print(contrails_coastal_now_urls)
             print('Contrailsa Coastal Nowcast time range is from {} through {}'.format(obs_starttime, obs_endtime))
         except Exception as e:
@@ -306,6 +309,7 @@ def main(args):
             cont_coastal_meta = cont_coastal_meta.loc[cont_coastal_meta_list]
             outputs_dict['Contrails Coastal']=cont_coastal_data
             outputs_metadict['Contrails Coastal']=cont_coastal_meta
+            # DO we want to smooth these data too?
             valid_obs.append(cont_coastal_data)
             valid_obs_meta.append(cont_coastal_meta)
             utilities.log.info('Finished with Contrails Coastal Observations')
@@ -318,6 +322,7 @@ def main(args):
 ## Combine observations data for the error computations - No Tidal nor NDBC data here
 ##
     data_obs_smoothed = pd.concat(valid_obs,axis=1)
+    data_adc_full=pd.concat(valid_now,axis=1)
     meta_obs = pd.concat(valid_obs_meta,axis=0)
     print(meta_obs)
 
@@ -347,9 +352,11 @@ def main(args):
 ##
 ## Perform the error computations: Note we currently exclude SWAN/NDBC data from this procedure
 ##
+
     t0 = tm.time()
     try:
-        comp_err = compute_error_field.compute_error_field(data_obs_smoothed, data_now_adc, meta_obs) # All default params
+        #comp_err = compute_error_field.compute_error_field(data_obs_smoothed, data_now_adc, meta_obs) # All default params
+        comp_err = compute_error_field.compute_error_field(data_obs_smoothed, data_adc_full, meta_obs) # All default params
         comp_err._intersection_stations()
         comp_err._intersection_times()
         comp_err._compute_and_average_errors()
