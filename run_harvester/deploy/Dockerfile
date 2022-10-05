@@ -33,7 +33,8 @@ WORKDIR /home/nru/repo
 # get the AST repo - needs to be made public first
 RUN git clone https://github.com/RENCI/AST.git
 RUN git clone https://github.com/RENCI/EDSASTAPPS.git
-RUN git clone https://github.com/nickc1/buoypy.git
+RUN git clone https://github.com/RENCI/buoypy.git
+#RUN git clone https://github.com/nickc1/buoypy.git
 
 # move to the deploy directory
 WORKDIR /home/nru/repo/EDSASTAPPS/run_harvester/deploy
