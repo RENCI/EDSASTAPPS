@@ -158,6 +158,8 @@ def union_station_names( outputs_meta_dict, station_id_list=None) ->dict:
     Starting with a complete list of possible stations (derived from union_all_source_stations)
     compute the associated list of actual station name. These are used as Title for subsequent
     per-station plots. We only read OBSERVATIONS type data here. ADCIRC "stations" do not have a real name
+    It is possible for a station name to get here with nans for a State. Since these data are used to build a new 
+    subsequent object we need to change the nans to -99999 here. 
 
     Parameters:
         outputs_meta_dict:  a dictionary of stations x metadata objects with the currently known keys of:
@@ -174,6 +176,7 @@ def union_station_names( outputs_meta_dict, station_id_list=None) ->dict:
         #print(key)
         try:
             df_meta=outputs_meta_dict[key]
+            df_meta.fillna("-99999", inplace=True)
             for station in df_meta.index:
                 df_meta.loc[station]
                 lon,lat,name,state=df_meta.loc[station][['LON','LAT','NAME','STATE']]
@@ -461,7 +464,6 @@ def generate_station_specific_DICTS(outputs_dict, outputs_meta_dict, station_id_
     stations_union_source_list = union_all_source_stations(outputs_dict, station_id_list = station_id_list)
     station_names = union_station_names( outputs_meta_dict, station_id_list=station_id_list)
     station_types = union_station_types( outputs_dict, station_id_list = station_id_list)
-
     station_dict=dict()
     for station in station_names.keys(): # Only want stations that have known ID names. 
         df_concat = build_source_concat_dataframe(outputs_dict, station)
@@ -469,6 +471,7 @@ def generate_station_specific_DICTS(outputs_dict, outputs_meta_dict, station_id_
         df_concat.dropna(axis=1, how='all', inplace=True)
         df_concat.index = df_concat.index.strftime('%Y-%m-%d %H:%M:%S')
         df_concat.fillna(-99999, inplace=True)
+        #df_concat.replace(np.nan,'-99999',inplace=True)
         print('JSON: After NAN reduction remaining sources is {}.Shape was {}'.format(station, df_concat.shape[1]))
         station_name = station_names[station]['NAME']
         lon = station_names[station]['LON']
