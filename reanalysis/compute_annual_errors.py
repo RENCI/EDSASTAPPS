@@ -249,8 +249,13 @@ def main(args):
     output_files=dict()
 
 # Save ADCIRC fullgrid coordinates
-    url_63 = get_adcirc_stations.convert_urls_to_63style([input_url])[0]
-    print(url_63)
+
+    if args.custom_fort63_name is None:
+        url_63=get_adcirc_stations.convert_urls_to_63style([input_url])[0] # Assumed to only have one of them
+    else:
+        url_63=get_adcirc_stations.convert_urls_to_63style_customfilename([input_url], filename=args.custom_fort63_name)[0]
+        utilities.log.info('Using a customized name for the fort.63.nc filename')
+    #print(url_63)
     iosubdir='' # 'adcpkl'
     iometadata=''
     adc_coords = get_adcirc_stations.extract_adcirc_grid_coords(url_63 )
