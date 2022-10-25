@@ -164,7 +164,8 @@ def main(args):
     dataDict, metaDict = fetch_data_metadata(f, meta)
 
     stations = list(dataDict.keys()) # For subsequent naming - are we sure order is maintained?
-    utilities.log.info('Input data chosen range is {}, {}'.format(timein, timeout))
+    utilities.log.info(f'Input data chosen range is {timein}, {timeout}')
+    utilities.log.info(f'Num of input stations is {len(stations)}')
 
     # Metadata
     df_meta=pd.DataFrame(metaDict)
@@ -186,7 +187,7 @@ def main(args):
 
     intersectedStations=set(df_err_all.columns.to_list()).intersection(stations) # Compares data to metadata lists
     utilities.log.info('Number of intersected stations is {}'.format(len(intersectedStations)))
-    utilities.log.debug('Intersected stations {}'.format(intersectedStations))
+    #utilities.log.debug('Intersected stations {}'.format(intersectedStations))
 
     # Perform FFT for each station over the entire time range
     df_err_all_lowpass=pd.DataFrame(index=df_err_all.index)
@@ -200,12 +201,10 @@ def main(args):
         try:
             print('Process station {}'.format(station))
             stationName = df_meta.loc[station]['NAME']
-            print('NAME {}'.format(stationName))
             df_fft=pd.DataFrame()
             df_low = pd.DataFrame()
-            print('Process cutoff {} for station {}'.format(cutoff,station))
+            utilities.log.info('Process cutoff {} for station {}'.format(cutoff,station))
             df_temp = df_err_all[station].dropna()
-            print(df_temp)
             df_low['low'] = fft_lowpass(df_temp,lowhrs=cutoff)
             df_low.index=df_temp.index 
             df_fft[str(cutoff)]=df_low['low']
@@ -215,6 +214,7 @@ def main(args):
             utilities.log.info('Removing a failed station from the FFT data set {}'.format(station))
             lostStations.append(station)
 
+    utilities.log.info(f'Lost stations {lostStations}')
     #intersectedStations = [x for x in intersectedStations if x not in lostStations] 
     io_utilities.write_pickle(df_err_all_lowpass, rootdir=outputdir,subdir='',fileroot='df_err_all_lowpass',iometadata='')
 
@@ -249,7 +249,7 @@ def main(args):
     utilities.log.info('df_err_lowpass times {}'.format(df_err_all_lowpass.index))
     intersect = [value for value in startday if value in df_err_all_lowpass.index] 
 
-    utilities.log.info('Residual data: intersect list {}'.format(intersect))
+    utilities.log.info('Residual data: intersect list {}'.format(len(intersect)))
     df_err_all_lowpass_subselect=df_err_all_lowpass.loc[intersect]
 
     # Now process the Rows and build a new datafile for each
@@ -259,7 +259,9 @@ def main(args):
     subdir='errorfield'
     datadict = dict()
     for index, df in df_err_all_lowpass_subselect.iterrows():
+        utilities.log.info(f' Index {index}')
         df = df.to_frame()
+        utilities.log.info(f' df {df}')
         df.index.name='STATION'
         df.columns=['fft'] 
         metadata=iometa[index]
@@ -267,14 +269,16 @@ def main(args):
         df_merged=df_meta.join(df)
         ##df_merged.drop('NAME',axis=1, inplace=True)
         df_merged=df_merged[['LAT','LON','NAME','STATE','fft']]
-        df_merged.dropna(inplace=True) # Cannot pass Nans to the interpolation system
+        # utilities.log.info(f'Full merged data set {df_merged}')
+        # We do not need the STATE for the subsequent analysis
+        # df_merged[['LAT','LON','NAME','fft']].dropna(inplace=True) # Cannot pass Nans to the interpolation system
+        utilities.log.info(f'Data shape after nan drop: {df_merged.shape}')
         outfilename=io_utilities.write_csv(df_merged,rootdir=outputdir,subdir=subdir,fileroot='stationSummaryAves',iometadata=metadata)
         datadict[iometa[index]]=outfilename
         df_merged.to_csv(outfilename)
 
     print('Write out runProps.json file')
     outfilesjson = io_utilities.write_dict_to_json(datadict, rootdir=topdir,subdir='',fileroot='daily_file_properties',iometadata='')
-
 
 ## Maybe just launch the slurm jobs from here?
 
@@ -308,6 +312,3 @@ if __name__ == '__main__':
     parser.add_argument('--inyear', action='store', dest='inyear', default=None, help='potentially contains flanks about the main year')
     args = parser.parse_args()
     sys.exit(main(args))
-
-
-

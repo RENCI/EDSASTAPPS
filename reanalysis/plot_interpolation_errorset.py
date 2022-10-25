@@ -67,6 +67,7 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_co
                    vmin=-0.2, vmax=0.2)
     if df_water_control is not None:
         print('plot_model: Found a water_control data set')
+        utilities.log.info(f' water controls {df_water_control}')
         water_X=df_water_control['LON'].values
         water_Y=df_water_control['LAT'].values
         water_V=df_water_control['VAL'].values
