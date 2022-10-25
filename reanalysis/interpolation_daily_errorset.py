@@ -68,8 +68,19 @@ def main(args):
 
 # Get the data
     df_stations = interpolate_scaled_offset_field.get_station_values(fname=args.daily_file_errors, header_data='fft')
-    df_land_controls = interpolate_scaled_offset_field.get_lon_lat_control_values(fname=file_land_controls)
-    df_water_controls = interpolate_scaled_offset_field.get_lon_lat_control_values(fname=file_water_controls)
+    if file_land_controls is not None:
+        df_land_controls = interpolate_scaled_offset_field.get_lon_lat_control_values(fname=file_land_controls)
+    else:
+        df_land_controls=None
+    if file_water_controls is not None:
+        df_water_controls = interpolate_scaled_offset_field.get_lon_lat_control_values(fname=file_water_controls)
+    else:
+        df_water_controls=None
+
+    #utilities.log.info(f'Control points {df_water_controls.shape}')
+    #utilities.log.info(f'Control points data {df_water_controls}')
+    #utilities.log.info(f'Station input file is {args.daily_file_errors}')
+    #utilities.log.info(f'Stations {df_stations}')
 
 ##
 ## Fetch the ADCIRC triangular grid file
@@ -81,22 +92,29 @@ def main(args):
 ## Perform the KNN plus Interpolation
 ##
     in_interpolator='LinearNDInterpolator'
+    ##in_interpolator='NearestNDInterpolator'
     in_nearest_neighbors=3
     set_of_dfs=list()
     set_of_dfs.append(df_stations) # Always need this
-    if df_land_controls is not None:
+    df_new_land_controls=None
+    if file_land_controls is not None:
+        utilities.log.info('KNN fit the control points')
         df_new_land_controls = interpolate_scaled_offset_field.knn_fit_control_points(df_stations, df_land_controls.copy(), nearest_neighbors=in_nearest_neighbors)
         set_of_dfs.append(df_new_land_controls)
-    if df_water_controls is not None:
+        utilities.log.info(f'KNN results {df_new_land_controls}')
+    if file_water_controls is not None:
         set_of_dfs.append(df_water_controls)
     utilities.log.info('construct_interpolation_model: Number of dfs to combine for interpolation is {}'.format(len(set_of_dfs)))
     df_combined=interpolate_scaled_offset_field.combine_datasets_for_interpolation(set_of_dfs)
+    #utilities.log.info(f' Interpolation post KNN {df_combined.shape}')
+    #utilities.log.info(f'After KNN: Stations {df_stations}')
     model = interpolate_scaled_offset_field.interpolation_model_fit(df_combined, fill_value=0.0, interpolation_type=in_interpolator)
 
     # Apply model to the input data as a test. For non-exact interpolation methods this may be informative
     station_x = df_stations['LON']
     station_y = df_stations['LAT']
     station_coords = {'LON':station_x[:].tolist(),'LAT':station_y[:].tolist()}
+    #utilities.log.info(f'Interpolation. Number of input lon/lat pairs is {station_coords}')
     df_interpolated_stations = interpolate_scaled_offset_field.interpolation_model_transform(station_coords, model=model, input_grid_type='points')
     df_stations['interpolated']=df_interpolated_stations['VAL'].tolist()
     
@@ -141,6 +159,7 @@ def main(args):
     # Write out the new df_stations that includes the interpolate column
     # must build a new name from the old convert from stationSummaryAves_00-366_2000123100.csv to interpolate_stationSummary_00-366_2000123100.csv
 
+    utilities.log.info(f'Write out interpolation data {df_stations.shape}')
     iosubdir='interpolated'
     new_sum_avefile = io_utilities.write_csv(df_stations, rootdir=outputdir,subdir=iosubdir,fileroot='interpolated_stationSummaryAves',iometadata=iometadata)
     utilities.log.info('Wrote Offset field CSV that includes interpolated values {}'.format(new_sum_avefile))
@@ -153,9 +172,9 @@ def main(args):
 
     # For posterity also dump out the KNN values of the processed control nodes ( if provided)
 
-    if df_land_controls is not None:
+    if df_new_land_controls is not None:
         iosubdir='interpolated'
-        file_land_controls = io_utilities.write_json(df_land_controls, rootdir=outputdir,subdir=iosubdir,fileroot='controlNodeSummary',iometadata=iometadata) 
+        file_land_controls = io_utilities.write_json(df_new_land_controls, rootdir=outputdir,subdir=iosubdir,fileroot='controlNodeSummary',iometadata=iometadata) 
         utilities.log.info('Processed land control nodes: Final values stored to {}'.format(file_land_controls))
 
 ##
