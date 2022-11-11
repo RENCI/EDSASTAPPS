@@ -119,7 +119,7 @@ def main(args):
     df_combined=interpolate_scaled_offset_field.combine_datasets_for_interpolation(set_of_dfs)
     #utilities.log.info(f' Interpolation post KNN {df_combined.shape}')
     #utilities.log.info(f'After KNN: Stations {df_stations}')
-    model = interpolate_scaled_offset_field.interpolation_model_fit(df_combined, fill_value=0.0, interpolation_type=in_interpolator)
+    model = interpolate_scaled_offset_field.interpolation_model_fit(df_combined, interpolation_type=in_interpolator)
 
     # Apply model to the input data as a test. For non-exact interpolation methods this may be informative
     station_x = df_stations['LON']
