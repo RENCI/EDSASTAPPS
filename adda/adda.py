@@ -243,7 +243,7 @@ def main(args):
     utilities.log.info('Wrote out CSV summary averages {}'.format(station_summary_aves))
 
 ##
-## Perform the interpolation
+## Perform the interpolation. Must use the LinearRBF approach
 ##
     # map_file=os.path.join(os.path.dirname(__file__), './supporting_data', 'grid_to_stationfile_maps.yml')
     file_stations = station_summary_aves # Better to reread using "get_station_values"
@@ -255,19 +255,30 @@ def main(args):
     df_water_controls = interpolate_scaled_offset_field.get_lon_lat_control_values(fname=file_water_controls)
 
     set_of_dfs=list()
+    set_of_clamp_dfs=list()
+
     set_of_dfs.append(df_stations) # Always need this
-    if df_land_controls is not None:
-        # Must remover NaNs
-        df_new_land_controls = interpolate_scaled_offset_field.knn_fit_control_points(df_stations, df_land_controls.copy(), nearest_neighbors=3)
-        set_of_dfs.append(df_new_land_controls)
     if df_water_controls is not None:
         set_of_dfs.append(df_water_controls)
+        set_of_clamp_dfs.append(df_water_controls)
+    if df_land_controls is not None:
+        set_of_dfs.append(df_land_controls)
+        set_of_clamp_dfs.append(df_land_controls)
+        utilities.log.info(f'Final Land control results {df_land_controls}')
+
+    df_ClampControl = pd.concat(set_of_clamp_dfs,axis=0)
+    # This can only be used with LinearRBF. More testing is required
+    pathpoly = interpolate_scaled_offset_field.build_polygon_path(df_ClampControl)
+
     utilities.log.info('construct_interpolation_model: Number of dfs to combine for interpolation is {}'.format(len(set_of_dfs)))
+
     df_combined=interpolate_scaled_offset_field.combine_datasets_for_interpolation(set_of_dfs)
-    model = interpolate_scaled_offset_field.interpolation_model_fit(df_combined, fill_value=0.0, interpolation_type='LinearNDInterpolator')
+    print('df_combined')
+    print(df_combined)
+    model = interpolate_scaled_offset_field.interpolation_model_fit(df_combined, interpolation_type='LinearRBF')
 
     # Build new grid
-    df_extrapolated_ADCIRC_GRID = interpolate_scaled_offset_field.interpolation_model_transform(adc_coords, model=model, input_grid_type='points')
+    df_extrapolated_ADCIRC_GRID = interpolate_scaled_offset_field.interpolation_model_transform(adc_coords, model=model, input_grid_type='points',pathpoly=pathpoly)
 
     # do A TEST FIT
     print('TEST FIT')
@@ -286,7 +297,7 @@ def main(args):
 
     # Test using the generic grid and plot to see the generated offset surface. Use the same model as previously generated
     adc_plot_grid = interpolate_scaled_offset_field.generic_grid()
-    df_plot_transformed = interpolate_scaled_offset_field.interpolation_model_transform(adc_plot_grid, model=model, input_grid_type='grid') 
+    df_plot_transformed = interpolate_scaled_offset_field.interpolation_model_transform(adc_plot_grid, model=model, input_grid_type='grid',pathpoly=pathpoly) 
 
     # Write out the model for posterity
     newfilename = io_utilities.get_full_filename_with_subdirectory_prepended(rootdir, iosubdir, 'interpolate_linear_model'+iometadata+'.h5')
@@ -305,7 +316,7 @@ def main(args):
 
     iosubdir='images'
     newfilename = io_utilities.get_full_filename_with_subdirectory_prepended(rootdir, iosubdir, 'extrapolated_surface_plot'+iometadata+'.png')
-    adda_visualization_plots.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_stations=df_stations, df_land_control=df_new_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False)
+    adda_visualization_plots.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_stations=df_stations, df_land_control=df_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False)
     utilities.log.info('Saved IMAGE file to {}'.format(newfilename))
 
 ##
@@ -314,7 +325,7 @@ def main(args):
     
     # Write out temp files for testing visualization
     #df_plot_transformed.to_csv('/projects/sequence_analysis/vol1/prediction_work/ADCIRCSupportTools-v2/test_data/df_surface.csv')
-    #df_new_land_controls.to_csv('/projects/sequence_analysis/vol1/prediction_work/ADCIRCSupportTools-v2/test_data/df_land_controls.csv')
+    #df_and_controls.to_csv('/projects/sequence_analysis/vol1/prediction_work/ADCIRCSupportTools-v2/test_data/df_land_controls.csv')
     #df_water_controls.to_csv('/projects/sequence_analysis/vol1/prediction_work/ADCIRCSupportTools-v2/test_data/df_water_controls.csv')
     #ADCJson = io_utilities.write_dict_to_json(adc_plot_grid, rootdir='/projects/sequence_analysis/vol1/prediction_work/ADCIRCSupportTools-v2',subdir='test_data',fileroot='adc_plot_grid',iometadata='')
 
