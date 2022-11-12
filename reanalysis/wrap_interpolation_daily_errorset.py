@@ -25,7 +25,10 @@ def build_slurm(key, daily_file_errors, main_yamlname, input_directory, output_d
     slurm.append('echo "Begin the Interpolation phase" ')
     slurm.append('export PYTHONPATH=/projects/sequence_analysis/vol1/prediction_work/AST:/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS')
     slurm.append('dir="/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/reanalysis"')
+    #slurm.append('python -u $dir/interpolation_daily_errorset.py --input_directory "'+input_directory+'" --output_directory "'+output_directory+'" --daily_file_errors "'+daily_file_errors+'" --main_yamlname "'+main_yamlname+'" --map_file "'+map_file+'" --iometadata "'+key+'" --gridname "'+gridname+'"' )
     slurm.append('python -u $dir/interpolation_daily_errorset.py --cv_testing --input_directory "'+input_directory+'" --output_directory "'+output_directory+'" --daily_file_errors "'+daily_file_errors+'" --main_yamlname "'+main_yamlname+'" --map_file "'+map_file+'" --iometadata "'+key+'" --gridname "'+gridname+'"' )
+    try:
+
     try:
         os.makedirs('./tmp')
     except OSError as exc: # Python >2.5
