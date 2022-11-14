@@ -112,6 +112,7 @@ def main(args):
     utilities.log.info('construct_interpolation_model: Number of dfs to combine for clamps polygon path building is {}'.format(len(set_of_clamp_dfs)))
 
     df_ClampControl = pd.concat(set_of_clamp_dfs,axis=0)
+    utilities.log.info(f'ClampControl {df_ClampControl}')
 
     # This can only be used with LinearRBF. More testing is required
     pathpoly = interpolate_scaled_offset_field.build_polygon_path(df_ClampControl)
@@ -129,16 +130,19 @@ def main(args):
     df_interpolated_stations = interpolate_scaled_offset_field.interpolation_model_transform(station_coords, model=model, input_grid_type='points',pathpoly=pathpoly)
 
     df_stations['interpolated']=df_interpolated_stations['VAL'].tolist()
-    
+
     # Build new extrapolated surface onto the ADCIRC grid
     df_extrapolated_ADCIRC_GRID = interpolate_scaled_offset_field.interpolation_model_transform(adc_coords, model=model, input_grid_type='points',pathpoly=pathpoly)
 
-    # do A TEST FIT and include other information for posterity
+    # do A TEST FIT and include other information for posterity. NOTE: under the covers, controls get merged with df_source. df_source must only enter
+    # with the columns lON,LAT,VAL
+
     if cv_testing:
-        full_scores, best_scores = interpolate_scaled_offset_field.test_interpolation_fit(df_source=df_stations, df_land_controls=df_land_controls, df_water_controls=df_water_controls, cv_splits=5, nearest_neighbors=3)
+        full_scores, best_scores = interpolate_scaled_offset_field.test_interpolation_fit(df_source=df_stations[['LON','LAT','VAL']], df_land_controls=df_land_controls, df_water_controls=df_water_controls, cv_splits=5)
         print(best_scores)
         print(full_scores)
-        combined_scoring={'best_scores':best_scores, 'full_scores':full_scores, 'KNN':in_nearest_neighbors, 'Interpolator':in_interpolator}
+        combined_scoring={'best_scores':best_scores, 'full_scores':full_scores, 'Interpolator':in_interpolator}
+        #combined_scoring={'best_scores':best_scores, 'full_scores':full_scores, 'KNN':in_nearest_neighbors, 'Interpolator':in_interpolator}
         utilities.log.info('Performed a CV testing')
 
     # For subsequent data viewers change the VAL header back to the real data name
