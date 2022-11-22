@@ -16,5 +16,9 @@ python adda.py  --instance_name 'hsofs-nam-bob-2021' --ndays -4  --timeout '2022
 
 # Provide non defaults for all files
 
+# If you wish to clne the AST_gridstations repo into some arbitrary location, ef /data/github/AST_gridstations, inside your working ./adda directory 
+# simply add the symlink: ln -s /data/github/AST_gridstations AST_gridstations. Then you would launch the adda jobs as follows:
+#
+python adda.py  --instance_name 'hsofs-nam-bob-2021' --ndays -4  --timeout '2022-02-20 00:00:00' --return_sample_min 60 --gridname 'hsofs' --ensemble='nowcast' --fort63_style --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml'
 
 ~                                            
