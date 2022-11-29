@@ -70,7 +70,7 @@ def main(args):
         stoptime=args.timeout
 
     #dt_starttime = dt.datetime.strptime(stoptime,'%Y-%m-%d %H:%M:%S')+dt.timedelta(days=args.ndays)
-    total_hours = abs(args.ndays*24) - 1 # Ensures the final list length INCLUDES the now time as a member and is a multiple of 24 hours
+    total_hours = 0 if args.ndays==0 else abs(args.ndays*24) - 1 # Ensures the final list length INCLUDES the now time as a member and is a multiple of 24 hours
 
     dt_starttime = dt.datetime.strptime(stoptime,'%Y-%m-%d %H:%M:%S')+np.sign(args.ndays)*dt.timedelta(hours=total_hours) # Should support lookback AND look forward
     starttime = dt_starttime.strftime('%Y-%m-%d %H:%M:%S')
@@ -100,6 +100,7 @@ def main(args):
     urls = rpl.build_url_list_from_yaml_and_offset(ensemble=args.ensemble)
 
     print(station_file)
+    utilities.log.info(f'Number of URLs return is {len(urls)}') 
 
     rpl = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
                 station_list_file=station_file, 
@@ -110,7 +111,7 @@ def main(args):
         urls=get_adcirc_stations.convert_urls_to_63style(urls)
     else:
         urls=get_adcirc_stations.convert_urls_to_61style(urls)
-    print(urls)
+    utilities.log.info(f'Set of URLs to process {urls}')
 
     # Fetch best resolution and no resampling
     data_adc,meta_adc=rpl.fetch_station_product(urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style  )
@@ -134,19 +135,42 @@ def main(args):
     # Get a last piece of metadata for first url in iterable grabs either the time (%Y%m%s%H) or hurricane advisory (int)
     # Grab the adcirc time ranges for calling the observations code
     
-    # Since ADCIRC start 6 hours early, using te ADCRC starttime can throw off the error averages at the end
-    #obs_starttime = dt.datetime.strftime( min(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
-    #obs_endtime = dt.datetime.strftime( max(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
+    # Since ADCIRC start 6 hours early, using the ADCRC starttime can throw off the error averages at the end
+    obs_starttime = dt.datetime.strftime( min(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
+    obs_endtime = dt.datetime.strftime( max(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
     #obs_starttime = dt.datetime.strftime(starttime, '%Y-%m-%d %H:%M:%S')
     #obs_stoptime = dt.datetime.strftime(stoptime, '%Y-%m-%d %H:%M:%S')
+
+    # Currently being used: Derived from ndays and timeout specification
     obs_starttime=starttime
     obs_endtime=stoptime
+
+    #
+    # This is a little tricky. If you select 0 for ndays, starttime ad stoptime are equil. which will result in no OBS data coming back
+    # If you simply grab the times from the aggregate URL ADC data, then the subsequent period-grouping may get a little off. Thus the following
+    # complicated looking code
+    #
+
+    # If equal fetch the min/max values of the adcirc data.
+    if obs_starttime == obs_endtime:
+            obs_starttime = dt.datetime.strftime( min(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
+            obs_endtime = dt.datetime.strftime( max(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
+
+    # Now double check that the time orders properly
+    (obs_starttime,obs_endtime)= (obs_endtime,obs_starttime) if obs_starttime > obs_endtime else (obs_starttime,obs_endtime)
+
+    print(f'Time ranges {obs_starttime} and {obs_endtime}')
 
     # Cnstruct iometadata to update all filename - want diff format
     io_start = dt.datetime.strftime( min(data_adc.index.tolist()), '%Y%m%d%H%M')
     io_end = dt.datetime.strftime( max(data_adc.index.tolist()), '%Y%m%d%H%M')
     iometadata = io_start+'_'+io_end 
-    rootdir=io_utilities.construct_base_rootdir(config['DEFAULT']['RDIR'], base_dir_extra='ADDA'+'_'+iometadata)
+
+    if args.use_iometadata:
+        rootdir=io_utilities.construct_base_rootdir(config['DEFAULT']['RDIR'], base_dir_extra='ADDA'+'_'+iometadata)
+    else:
+        rootdir=io_utilities.construct_base_rootdir(config['DEFAULT']['RDIR'], base_dir_extra='')
+        iometadata='' 
     
     # Write the data to disk in a way that mimics ADDA
 
@@ -204,7 +228,7 @@ def main(args):
     metapkl = io_utilities.write_pickle(meta_thresholded,rootdir=rootdir,subdir=iosubdir,fileroot='obs_wl_metadata',iometadata=iometadata)
     detailedpkl = io_utilities.write_pickle(data_thresholded, rootdir=rootdir,subdir=iosubdir,fileroot='obs_wl_detailed',iometadata=iometadata)
     smoothpkl = io_utilities.write_pickle(data_obs_smoothed, rootdir=rootdir,subdir=iosubdir,fileroot='obs_wl_smoothed',iometadata=iometadata)
-    print('Finished')
+    print('Finished OBS')
 
 ##
 ## Perform the error computations
@@ -216,6 +240,7 @@ def main(args):
     comp_err._intersection_stations()
     comp_err._intersection_times()
     comp_err._tidal_transform_data()
+    print(f'COMPERR input times {obs_starttime} and {obs_endtime}')
     comp_err._apply_time_bounds((obs_starttime,obs_endtime)) # redundant but here for illustration
     comp_err._compute_and_average_errors()
 
@@ -281,11 +306,12 @@ def main(args):
     df_extrapolated_ADCIRC_GRID = interpolate_scaled_offset_field.interpolation_model_transform(adc_coords, model=model, input_grid_type='points',pathpoly=pathpoly)
 
     # do A TEST FIT
-    print('TEST FIT')
-    full_scores, best_scores = interpolate_scaled_offset_field.test_interpolation_fit(df_source=df_stations, df_land_controls=df_land_controls.copy(), df_water_controls=df_water_controls, cv_splits=5, nearest_neighbors=3)
-    print('ADDA')
-    print(best_scores)
-    print(full_scores)
+    if args.cv_testing:
+        print('TEST FIT')
+        full_scores, best_scores = interpolate_scaled_offset_field.test_interpolation_fit(df_source=df_stations, df_land_controls=df_land_controls.copy(), df_water_controls=df_water_controls, cv_splits=5, nearest_neighbors=3)
+        print('ADDA')
+        print(best_scores)
+        print(full_scores)
 ##
 ## Write out datafiles 
 ##
@@ -363,5 +389,9 @@ if __name__ == '__main__':
                         help='str: Select appropriate ensemble Default is nowcast')
     parser.add_argument('--map_file', action='store',dest='map_file', default=None,
                         help='str: Select appropriate map_file ym; for grid lookup')
+    parser.add_argument('--cv_testing', action='store_true', dest='cv_testing', default=False,
+                        help='Boolean: Invoke a CV procedure for post model CV testing')
+    parser.add_argument('--use_iometadata', action='store_true', dest='use_iometadata', default=False,
+                        help='Boolean: Include the iometadata time range to al output files and dirs')
     args = parser.parse_args()
     sys.exit(main(args))
