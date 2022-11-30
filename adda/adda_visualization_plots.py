@@ -8,17 +8,26 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-def save_plot_model( adc_plot_grid=None, df_surface=None, df_stations=None, df_land_control=None, df_water_control=None, filename=None, plot_now=False):
+vmax=0.5
+vmin=-vmax
+xlim=[-99, -58]
+ylim=[7, 50]
+
+def save_plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_control=None, df_water_control=None, 
+                    filename=None, plot_now=False, title=None):
     """
     Wrapper to take generated plt file and save to disk
     """
     if filename is None:
         utilities.log.error('save_plot_model: No filename provided to save the plot')
         return
-    plt_data = plot_model(adc_plot_grid=adc_plot_grid, df_surface=df_surface, df_stations=df_stations, df_land_control=df_land_control, df_water_control=df_water_control, plot_now=plot_now)
+    plt_data = plot_model(adc_plot_grid=adc_plot_grid, 
+                          df_surface=df_surface, df_stations=df_stations, 
+                          df_land_control=df_land_control, df_water_control=df_water_control, 
+                          plot_now=plot_now, title=title)
     plt_data.savefig(filename, bbox_inches='tight')
 
-def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_control=None, df_water_control=None, plot_now=True):
+def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_control=None, df_water_control=None, plot_now=True, title=None):
     """
     Basic plotter to display a 2D extrapolation field. The best images will include
     not only the surface, but also the stations, and control points as a reference 
@@ -42,7 +51,7 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_co
     #cmap= plt.cm.get_cmap(base_cmap, N)
     cmap=plt.cm.jet
     #
-    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(6,10), dpi=144) #, sharex=True)
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10,10), dpi=144) #, sharex=True)
     # Set up surface
     if df_surface is not None:
         print('plot_model: Found a extrapolated surface data set')
@@ -50,7 +59,7 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_co
         y = adc_plot_grid['LAT']
         v = df_surface['VAL'].values
         v = v.reshape(-1,len(x)) # Reshapes to LAT column-major format
-        mesh = ax.pcolormesh(x, y, v, shading='nearest', cmap=cmap, vmin=-.3, vmax=.3)
+        mesh = ax.pcolormesh(x, y, v, shading='nearest', cmap=cmap, vmin=vmin, vmax=vmax)
     # Merge control points
     if df_stations is not None:
         print('plot_model: Found a station data set')
@@ -59,7 +68,7 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_co
         stations_V=df_stations['VAL'].values
         ax.scatter(stations_X, stations_Y, s=60, marker='o',
                    c=stations_V, cmap=cmap, edgecolor='black',
-                   vmin=-.3, vmax=0.3)
+                   vmin=vmin, vmax=vmax)
     if df_land_control is not None:
         print('plot_model: Found a land_control data set')
         land_X=df_land_control['LON'].values
@@ -67,7 +76,7 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_co
         land_V=df_land_control['VAL'].values
         ax.scatter(land_X, land_Y, s=30, marker='o',
                    c=land_V, cmap=cmap, edgecolor='black',
-                   vmin=-.3, vmax=0.3)
+                   vmin=vmin, vmax=vmax)
     if df_water_control is not None:
         print('plot_model: Found a water_control data set')
         water_X=df_water_control['LON'].values
@@ -75,12 +84,16 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_co
         water_V=df_water_control['VAL'].values
         ax.scatter(water_X, water_Y, s=30, marker='x',
                    c='black', edgecolor='black',
-                   vmin=-.3, vmax=0.3)
+                   vmin=vmin, vmax=vmax)
     ax.plot(coastline[:,0],coastline[:,1],color='black',linewidth=.25)
-    ax.set_xlim([-90, -70])
-    ax.set_ylim([20, 45])
+    ax.axis('equal')
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
     ax.set_ylabel('Latitude')
     ax.set_xlabel('Longitude')
+    if title is not None:
+        ax.set_title(title)
+
     plt.colorbar(mesh,orientation='vertical' )
     if (plot_now):
         plt.show()

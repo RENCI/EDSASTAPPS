@@ -98,6 +98,7 @@ def main(args):
     #hurricane_year=None
     rpl = genurls.generate_urls_from_times(timeout=stoptime, ndays=args.ndays, grid_name=args.gridname, instance_name=args.instance_name, config_name=config_name, hurricane_yaml_year=hurricane_year,hurricane_yaml_source=hurricane_source)
     urls = rpl.build_url_list_from_yaml_and_offset(ensemble=args.ensemble)
+    print(urls)
 
     print(station_file)
     utilities.log.info(f'Number of URLs return is {len(urls)}') 
@@ -116,6 +117,12 @@ def main(args):
     # Fetch best resolution and no resampling
     data_adc,meta_adc=rpl.fetch_station_product(urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style  )
 
+    # Construct iometadata to update all filename - want diff format
+    io_start = dt.datetime.strftime( min(data_adc.index.tolist()), '%Y%m%d%H%M')
+    io_end = dt.datetime.strftime( max(data_adc.index.tolist()), '%Y%m%d%H%M')
+    iometadata = io_start+'_'+io_end 
+    title_str = dt.datetime.strftime( max(data_adc.index.tolist()), '%Y-%m-%d @ %HZ')
+
     # Revert Harvester filling of nans to -99999 back to nans
     data_adc.replace('-99999',np.nan,inplace=True)
     meta_adc.replace('-99999',np.nan,inplace=True)
@@ -131,11 +138,11 @@ def main(args):
 
     print(f'Grid name {rpl.gridname}')
     print(f'Instance name {rpl.instance}')
-
+    
     # Get a last piece of metadata for first url in iterable grabs either the time (%Y%m%s%H) or hurricane advisory (int)
     # Grab the adcirc time ranges for calling the observations code
     
-    # Since ADCIRC start 6 hours early, using the ADCRC starttime can throw off the error averages at the end
+    # Since ADCIRC start 6 hours early, using the ADCIRC starttime can throw off the error averages at the end
     obs_starttime = dt.datetime.strftime( min(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
     obs_endtime = dt.datetime.strftime( max(data_adc.index.tolist()), '%Y-%m-%d %H:%M:%S')
     #obs_starttime = dt.datetime.strftime(starttime, '%Y-%m-%d %H:%M:%S')
@@ -160,11 +167,6 @@ def main(args):
     (obs_starttime,obs_endtime)= (obs_endtime,obs_starttime) if obs_starttime > obs_endtime else (obs_starttime,obs_endtime)
 
     print(f'Time ranges {obs_starttime} and {obs_endtime}')
-
-    # Cnstruct iometadata to update all filename - want diff format
-    io_start = dt.datetime.strftime( min(data_adc.index.tolist()), '%Y%m%d%H%M')
-    io_end = dt.datetime.strftime( max(data_adc.index.tolist()), '%Y%m%d%H%M')
-    iometadata = io_start+'_'+io_end 
 
     if args.use_iometadata:
         rootdir=io_utilities.construct_base_rootdir(config['DEFAULT']['RDIR'], base_dir_extra='ADDA'+'_'+iometadata)
@@ -342,7 +344,7 @@ def main(args):
 
     iosubdir='images'
     newfilename = io_utilities.get_full_filename_with_subdirectory_prepended(rootdir, iosubdir, 'extrapolated_surface_plot'+iometadata+'.png')
-    adda_visualization_plots.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_stations=df_stations, df_land_control=df_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False)
+    adda_visualization_plots.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_stations=df_stations, df_land_control=df_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False, title=title_str)
     utilities.log.info('Saved IMAGE file to {}'.format(newfilename))
 
 ##
