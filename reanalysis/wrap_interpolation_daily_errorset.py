@@ -10,8 +10,6 @@ import io_utilities.io_utilities as io_utilities
 #############################################################################
 # Build a slurm file
 
-# slurm.append('python -u $dir/krigListOfErrorSets.py --daily --inrange "'+RANGE+'" --insill "'+SILL+'" --outroot "'+ROOTDIR+'" --yamlname "'+YAMLNAME+'" --errorfile "'+ERRFILE+'" --clampfile "'+CLAMPFILE+'" --controlfile "'+CONTROLFILE+'" --gridjsonfile "'+ADCJSON+'"' )
-
 def build_slurm(key, daily_file_errors, main_yamlname, input_directory, output_directory, map_file, gridname, cv_testing): 
     slurm = list()
     slurm.append('#!/bin/sh')
@@ -98,7 +96,7 @@ if __name__ == '__main__':
     parser.add_argument('--gridname', action='store',dest='gridname', default='hsofs',
                         help='str: Select appropriate gridname Default is hsofs')
     parser.add_argument('--cv_testing', action='store_true', dest='cv_testing',
-                        help='Boolean: Invoke a CV procedure prior to fitting kriging model')
+                        help='Boolean: Invoke a CV procedure subsequent to fitting interpolation model')
     parser.add_argument('--map_file', action='store',dest='map_file', default=None,
                         help='str: Select appropriate map_file ym; for grid lookup')
     args = parser.parse_args()

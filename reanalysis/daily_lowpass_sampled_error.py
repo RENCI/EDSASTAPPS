@@ -254,7 +254,7 @@ def main(args):
 
     # Now process the Rows and build a new datafile for each
     # df_meta and df report stationids as diff types. Yuk.
-    # Store the list of filenames into a dict for krig processing
+    # Store the list of filenames into a dict for interpolation processing
 
     subdir='errorfield'
     datadict = dict()
