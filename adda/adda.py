@@ -50,8 +50,8 @@ def main(args):
     else:
         config_name = args.config_name
 
-    if args.instance_name is None:
-        utilities.log.error('Instance name is missing but is mandatory')
+    if (args.instance_name is None) and (args.input_url is None):
+        utilities.log.error('Instance name is missing but is mandatory for YAML-based url builds')
         sys.exit(1)
 
     hurricane_source=args.hurricane_source
@@ -63,6 +63,7 @@ def main(args):
     utilities.log.info("Product Level Working in {}.".format(os.getcwd()))
 
     # Set up the times information No need to worry about values for hh:mm:ssZ Subsequent resampling cleans that up
+
     if args.timeout is None: # Set to a default of now()
         tnow = dt.datetime.now()
         stoptime = tnow.strftime('%Y-%m-%d %H:%M:%S')
@@ -72,9 +73,10 @@ def main(args):
     #dt_starttime = dt.datetime.strptime(stoptime,'%Y-%m-%d %H:%M:%S')+dt.timedelta(days=args.ndays)
     total_hours = 0 if args.ndays==0 else abs(args.ndays*24) - 1 # Ensures the final list length INCLUDES the now time as a member and is a multiple of 24 hours
 
-    dt_starttime = dt.datetime.strptime(stoptime,'%Y-%m-%d %H:%M:%S')+np.sign(args.ndays)*dt.timedelta(hours=total_hours) # Should support lookback AND look forward
-    starttime = dt_starttime.strftime('%Y-%m-%d %H:%M:%S')
-    print('Total_hours, Starttime, Stoptime and ndays {}, {}. {}'.format(total_hours, starttime, stoptime,args.ndays))
+    if args.input_url is None:
+        dt_starttime = dt.datetime.strptime(stoptime,'%Y-%m-%d %H:%M:%S')+np.sign(args.ndays)*dt.timedelta(hours=total_hours) # Should support lookback AND look forward
+        starttime = dt_starttime.strftime('%Y-%m-%d %H:%M:%S')
+        print('Total_hours, Starttime, Stoptime and ndays {}, {}. {}'.format(total_hours, starttime, stoptime,args.ndays))
 
 ##
 ## fetch the asgs/adcirc station data
@@ -96,8 +98,15 @@ def main(args):
 
     #hurricane_source=None
     #hurricane_year=None
-    rpl = genurls.generate_urls_from_times(timeout=stoptime, ndays=args.ndays, grid_name=args.gridname, instance_name=args.instance_name, config_name=config_name, hurricane_yaml_year=hurricane_year,hurricane_yaml_source=hurricane_source)
-    urls = rpl.build_url_list_from_yaml_and_offset(ensemble=args.ensemble)
+    if args.input_url is None:
+        rpl = genurls.generate_urls_from_times(timeout=stoptime, ndays=args.ndays, grid_name=args.gridname, instance_name=args.instance_name, config_name=config_name, hurricane_yaml_year=hurricane_year,hurricane_yaml_source=hurricane_source)
+        urls = rpl.build_url_list_from_yaml_and_offset(ensemble=args.ensemble)
+    else:
+        print('Generate from URL and times ')
+        rpl = genurls.generate_urls_from_times(url=args.input_url,ndays=args.ndays)
+        urls = rpl.build_url_list_from_template_url_and_offset(ensemble=args.ensemble)
+        #urls = rpl.build_url_list_from_alternate_template_url_and_offset(ensemble=args.ensemble)
+        print(urls)
 
     print(station_file)
     utilities.log.info(f'Number of URLs return is {len(urls)}') 
@@ -142,8 +151,10 @@ def main(args):
     #obs_stoptime = dt.datetime.strftime(stoptime, '%Y-%m-%d %H:%M:%S')
 
     # Currently being used: Derived from ndays and timeout specification
-    obs_starttime=starttime
-    obs_endtime=stoptime
+    # If a special case input_url, need to grab times form the input url incase it was a hurricane
+    if args.input_url is None:
+        obs_starttime=starttime
+        obs_endtime=stoptime
 
     #
     # This is a little tricky. If you select 0 for ndays, starttime ad stoptime are equil. which will result in no OBS data coming back
@@ -392,6 +403,8 @@ if __name__ == '__main__':
     parser.add_argument('--cv_testing', action='store_true', dest='cv_testing', default=False,
                         help='Boolean: Invoke a CV procedure for post model CV testing')
     parser.add_argument('--use_iometadata', action='store_true', dest='use_iometadata', default=False,
-                        help='Boolean: Include the iometadata time range to al output files and dirs')
+                        help='Boolean: Include the iometadata time range to all output files and dirs')
+    parser.add_argument('--input_url', action='store', dest='input_url', default=None, type=str,
+                        help='ASGS url to fetch ADCIRC data')
     args = parser.parse_args()
     sys.exit(main(args))
