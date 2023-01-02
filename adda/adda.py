@@ -358,42 +358,33 @@ def main(args):
     #ADCJson = io_utilities.write_dict_to_json(adc_plot_grid, rootdir='/projects/sequence_analysis/vol1/prediction_work/ADCIRCSupportTools-v2',subdir='test_data',fileroot='adc_plot_grid',iometadata='')
 
 
-
-
 # We need to support both specifying URLs by explicit urls and by specifying time ranges.
 
 if __name__ == '__main__':
+
     from argparse import ArgumentParser
+
     parser = ArgumentParser()
-    parser.add_argument('--sources', action='store_true',
-                        help='List currently supported data sources')
-    parser.add_argument('--main_yamlname', action='store',dest='main_yamlname', default=None,
-                        help='str: Select appropriate main_yamlname')
-    parser.add_argument('--data_product', action='store', dest='data_product', default='water_level', type=str,
-                        help='choose supported data product eg water_level')
-    parser.add_argument('--return_sample_min', action='store', dest='return_sample_min', default=60, type=int,
-                        help='return_sample_min is the time stepping in the final data objects. (mins)')
-    parser.add_argument('--ndays', default=-2, action='store', dest='ndays',help='Day lag (usually < 0)', type=int)
-    parser.add_argument('--timeout', default=None, action='store', dest='timeout', help='YYYY-mm-dd HH:MM:SS. Latest day of analysis def to now()', type=str)
-    parser.add_argument('--config_name', action='store', dest='config_name', default=None,
-                        help='String: yml config which contains URL structural information')
-    parser.add_argument('--instance_name', action='store', dest='instance_name', default=None,
-                        help='String: instance name')
-    parser.add_argument('--fort63_style', action='store_true',
-                        help='Boolean: Will inform Harvester to use fort.63.methods to get station nodesids')
-    parser.add_argument('--hurricane_source', action='store',dest='hurricane_source', default=None,
-                        help='str: Only needed for Hurricanes AND if using YAML to specify urls')
-    parser.add_argument('--hurricane_year', action='store',dest='hurricane_year', default=None,
-                        help='str: Only needed for Hurricanes AND if using YAML to specify urls')
-    parser.add_argument('--gridname', action='store',dest='gridname', default='hsofs',
-                        help='str: Select appropriate gridname Default is hsofs')
-    parser.add_argument('--ensemble', action='store',dest='ensemble', default='nowcast',
-                        help='str: Select appropriate ensemble Default is nowcast')
-    parser.add_argument('--map_file', action='store',dest='map_file', default=None,
-                        help='str: Select appropriate map_file ym; for grid lookup')
-    parser.add_argument('--cv_testing', action='store_true', dest='cv_testing', default=False,
-                        help='Boolean: Invoke a CV procedure for post model CV testing')
-    parser.add_argument('--use_iometadata', action='store_true', dest='use_iometadata', default=False,
-                        help='Boolean: Include the iometadata time range to al output files and dirs')
+
+    parser.add_argument('--sources',           action='store_true', help='List currently supported data sources')
+    parser.add_argument('--main_yamlname',     action='store',      dest='main_yamlname',     default=None,                    help='str: Select appropriate main_yamlname')
+    parser.add_argument('--data_product',      action='store',      dest='data_product',      default='water_level', type=str, help='choose supported data product eg water_level')
+    parser.add_argument('--return_sample_min', action='store',      dest='return_sample_min', default=60,            type=int, help='return_sample_min is the time stepping in the final data objects. (mins)')
+    parser.add_argument('--ndays',             action='store',      dest='ndays',             default=-2,            type=int, help='Day lag (usually < 0)')
+    parser.add_argument('--timeout',           action='store',      dest='timeout',           default=None,          type=str, help='YYYY-mm-dd HH:MM:SS. Latest day of analysis def to now()')
+
+    parser.add_argument('--config_name',       action='store',      dest='config_name',       default=None,                    help='String: yml config which contains URL structural information')
+    parser.add_argument('--instance_name',     action='store',      dest='instance_name',     default=None,                    help='String: instance name')
+    parser.add_argument('--fort63_style',      action='store_true',                                                            help='Boolean: Will inform Harvester to use fort.63.methods to get station nodesids')
+    parser.add_argument('--hurricane_source',  action='store',      dest='hurricane_source',  default=None,                    help='str: Only needed for Hurricanes AND if using YAML to specify urls')
+    parser.add_argument('--hurricane_year',    action='store',      dest='hurricane_year',    default=None,                    help='str: Only needed for Hurricanes AND if using YAML to specify urls')
+
+    parser.add_argument('--gridname',          action='store',      dest='gridname',          default='hsofs',                 help='str: Select appropriate gridname Default is hsofs')
+    parser.add_argument('--ensemble',          action='store',      dest='ensemble',          default='nowcast',               help='str: Select appropriate ensemble Default is nowcast')
+    parser.add_argument('--map_file',          action='store',      dest='map_file',          default=None,                    help='str: Select appropriate map_file ym; for grid lookup')
+    parser.add_argument('--cv_testing',        action='store_true', dest='cv_testing',        default=False,                   help='Boolean: Invoke a CV procedure for post model CV testing')
+    parser.add_argument('--use_iometadata',    action='store_true', dest='use_iometadata',    default=False,                   help='Boolean: Include the iometadata time range to al output files and dirs')
+
     args = parser.parse_args()
+
     sys.exit(main(args))
