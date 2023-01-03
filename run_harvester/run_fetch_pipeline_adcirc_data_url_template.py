@@ -94,7 +94,7 @@ def main(args):
     Then the STARTTIME is ndays on the past
     """
 
-    main_config = utilities.init_logging(subdir=None, config_file='./config/main.yml')
+    main_config = utilities.init_logging(subdir=None,config_file=os.path.join(os.path.dirname(__file__),'./config','main.yml'))
 
     # Grab the args
     map_file=args.map_file

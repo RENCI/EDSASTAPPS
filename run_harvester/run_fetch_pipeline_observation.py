@@ -123,7 +123,7 @@ def main(args):
     """
 
     # Set logging
-    main_config = utilities.init_logging(subdir=None, config_file='./config/main.yml')
+    main_config = utilities.init_logging(subdir=None,config_file=os.path.join(os.path.dirname(__file__),'./config','main.yml'))
     utilities.log.info("Product Level Working in {}.".format(os.getcwd()))
 
 ##

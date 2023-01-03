@@ -73,7 +73,7 @@ def main(args):
     Then the STARTTIME is ndays on the past
     """
 
-    main_config = utilities.init_logging(subdir=None, config_file='./config/main.yml')
+    main_config = utilities.init_logging(subdir=None,config_file=os.path.join(os.path.dirname(__file__),'./config','main.yml'))
 
     # Get the IO basic s setep
     utilities.log.info("Product Level Working in {}.".format(os.getcwd()))
@@ -115,7 +115,7 @@ def main(args):
     if data_source.upper()=='NOAA':
         utilities.log.info('Preparing for a NOAA fetch')
         time_range=(starttime,endtime) # Can be directly used by NOAA 
-        station_file='./supporting_data/noaa_stations.csv' if in_station_list is None else in_station_list
+        station_file=os.path.join(os.path.dirname(__file__),'./supporting_data','noaa_stations.csv') if in_station_list is None else in_station_list
         output_fileroot='noaa_stationdata'
         output_metafileroot='noaa_stationdata_meta'
     elif data_source.upper()=='CONTRAILS':
@@ -123,10 +123,10 @@ def main(args):
         contrails_config = args.config_name # utilities.load_config(os.path.join(os.path.dirname(__file__),'./secrets','contrails.yml'))['DEFAULT']
         utilities.log.info('Got Contrails access information {}'.format(contrails_config))
         if data_product=='river_water_level':
-            station_file='./supporting_data/contrails_stations_rivers.csv' if in_station_list is None else in_station_list
+            station_file=os.path.join(os.path.dirname(__file__),'./supporting_data','contrails_stations_rivers.csv') if in_station_list is None else in_station_list
             meta='RIVERS'
         else:
-            station_file='./supporting_data/contrails_stations_coastal.csv' if in_station_list is None else in_station_list
+            station_file=os.path.join(os.path.dirname(__file__),'./supporting_data','contrails_stations_coastal.csv') if in_station_list is None else in_station_list
             meta='COASTAL'
         metadata=f'{metadata}_{meta}'
         output_fileroot='contrails_stationdata'
@@ -134,7 +134,7 @@ def main(args):
     elif data_source.upper()=='NDBC':
         utilities.log.info('Preparing for a NDBC fetch')
         time_range=(starttime,endtime) # Can be directly used by NDBC
-        station_file='./supporting_data/ndbc_buoys.csv' if in_station_list is None else in_station_list
+        station_file=os.path.join(os.path.dirname(__file__),'./supporting_data','ndbc_buoys.csv') if in_station_list is None else in_station_list
         output_fileroot='ndbc_stationdata'
         output_metafileroot='ndbc_stationdata_meta'
     else:
