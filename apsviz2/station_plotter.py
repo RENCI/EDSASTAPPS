@@ -454,6 +454,47 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
     figure_dataframe = build_filename_map_to_csv(figures_dict)
     return figure_dataframe 
 
+def generate_station_specific_CSVs(outputs_dict, outputs_meta_dict, outputdir='.', station_id_list=None )->pd.DataFrame:
+    """
+    The input dicts will be processed to build individual CSV files for each station id 
+    This is only a temporary solution until the new plotting software gets designed
+
+    Return
+        csv_dict: A dictionary with the keys LAT,LON,STATE,STATIONNAME,CSV 
+    """
+
+    # Now grab the list of variables (eg ADC, OBS etc). Only need to choose a single station
+    # How to handle DUPLICATE variable names?
+
+    stations_union_source_list = union_all_source_stations(outputs_dict, station_id_list = station_id_list)
+    station_names = union_station_names( outputs_meta_dict, station_id_list=station_id_list)
+    station_types = union_station_types( outputs_dict, station_id_list = station_id_list)
+
+    tmin,tmax = find_widest_timerange(outputs_dict)
+    print('TIME RANGE {},{}'.format(tmin,tmax))
+
+    data_dict=dict()
+    for station in station_names.keys(): # Only want stations that have known ID names. 
+        df_concat = build_source_concat_dataframe(outputs_dict, station)
+        # Remove completely nan remaining stations
+        df_concat.dropna(axis=1, how='all', inplace=True)
+        print('After NAN reduction remaining sources is {}.Shape was {}'.format(station, df_concat.shape[1]))
+        if df_concat.shape[1] > 0:
+            station_name = station_names[station]['NAME']
+            lon = station_names[station]['LON']
+            lat = station_names[station]['LAT']
+            state = station_names[station]['STATE']
+            st_type = station_types[station]
+            filename=outputdir+'/'+station+'_WL.csv'
+            df_concat.to_csv(filename)
+            print(f'Wrote file {filename}')
+            data_dict[station]={'LAT':str(lat), 'LON':str(lon), 'STATE': state, 'STATIONNAME': station_name, 'TYPE': st_type, 'FILENAME':filename}
+        else:
+            print(f'Station {station} had no surviving CSV data to plot')
+    csv_dict = {'STATIONS':data_dict} # Conform to current apsviz2 procedure
+    csv_dataframe = build_filename_map_to_csv(csv_dict)
+    return csv_dataframe 
+
 def generate_station_specific_DICTS(outputs_dict, outputs_meta_dict, station_id_list=None):
     """
     Construct dicts for each station containing the actual plot data that would be used to create pngs. 
