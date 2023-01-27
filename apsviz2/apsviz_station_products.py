@@ -142,7 +142,7 @@ def main(args):
         outputs_metadict['Nowcast']=meta_now_adc
         valid_now.append(data_now_adc)
         utilities.log.info('Finished with ADCIRC Nowcasts')
-        print(now_urls)
+        #print(now_urls)
         print('Nowcast time range is from {} through {}'.format(obs_starttime, obs_endtime))
     except Exception as e:
         utilities.log.error('Nowcast: Broad failure. Failed to find any nowcast data: {}'.format(e))
@@ -487,7 +487,6 @@ def main(args):
 ## Improve the PER_STATION metadata object by adding Node metadata. These are either from fort63 or fort61 adcirc updates
 ## process all metadata entries, see which ones have a Node column, and if true keep it
 ##
-
     meta_list = list()
     for key,item in outputs_metadict.items():
         try:
@@ -506,6 +505,16 @@ def main(args):
     station_props = io_utilities.write_csv(df_station_file_png_locations[['StationName','State','Lat','Lon','Node','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationProps',iometadata='')
     utilities.log.info('Wrote out station_properties file to {}'.format(station_props))
 
+##
+## Optionally create temporary CSV files to grab the actual timeseries data for each station that was used to create the pngs. Also improve the data by including the ADCIRC Node number
+## No NODE data is captured here
+
+    if args.construct_csvs:
+        for stationid in df_station_nodes.index:
+            df_station = station_plotter.build_source_concat_dataframe(outputs_dict, stationid)
+            df_station_file_csv_locations = station_plotter.generate_station_specific_CSVs(outputs_dict, outputs_metadict, outputdir=rootdir, station_id_list=None )
+            print(f'Location {df_station_file_csv_locations}')
+            station_csvs = io_utilities.write_csv(df_station_file_csv_locations[['StationName','State','Lat','Lon','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationPropsCSV',iometadata='')
 ##
 ## Optionally grab the actual timeseries data for each station that was used to create the pngs. Also improve the data by including the ADCIRC Node number
 ##
@@ -559,6 +568,8 @@ if __name__ == '__main__':
                         help='Boolean: Will inform Harvester to use fort.63.methods to get station nodesids')
     parser.add_argument('--construct_jsons', action='store_true', default=False,
                         help='Boolean: Trigger saving actual per-station plot data to local jsons files')
+    parser.add_argument('--construct_csvs', action='store_true', default=False,
+                        help='Boolean: Trigger saving actual per-station plot data to local csv files')
     parser.add_argument('--hurricane_source', action='store',dest='hurricane_source', default=None,
                         help='str: Only needed for Hurricanes AND if using YAML to specify urls')
     parser.add_argument('--hurricane_year', action='store',dest='hurricane_year', default=None,
