@@ -285,7 +285,7 @@ def main(args):
             utilities.log.info('Finished with Contrails Coastal Nowcasts')
             valid_now.append(data_now_adc)
             print(contrails_coastal_now_urls)
-            print('Contrailsa Coastal Nowcast time range is from {} through {}'.format(obs_starttime, obs_endtime))
+            print('Contrails Coastal Nowcast time range is from {} through {}'.format(obs_starttime, obs_endtime))
         except Exception as e:
             utilities.log.error('Contrails Coastal Nowcast: Broad failure. Failed to find any nowcast data: {}'.format(e))
     total_time = tm.time() - t0
