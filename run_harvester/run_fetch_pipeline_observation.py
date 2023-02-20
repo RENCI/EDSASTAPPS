@@ -44,11 +44,7 @@ def format_data_frames(df,product) -> pd.DataFrame:
     A Common formatting used by all sources
     """
     prod_name = PRODUCT[product].upper() if product in PRODUCT.keys() else 'NOAME'
-    print('TEST')
-    print(product)
-    print(PRODUCT)
-    print(prod_name)
-    print(PRODUCT[product])
+    print(f'Data Product: {PRODUCT[product]}')
     df.index = df.index.strftime('%Y-%m-%dT%H:%M:%S')
     df.reset_index(inplace=True)
     df_out=pd.melt(df, id_vars=['TIME'])
@@ -69,6 +65,7 @@ PRODUCT={
         'hourly_height':'water_level',
         'predictions':'water_level',
         'river_water_level':'water_level',
+        'river_flow_volume':'river_flow_volume',
         'coastal_water_level':'water_level',
         'wave_height':'water_level',
         'air_pressure':'air_pressure',
@@ -163,9 +160,9 @@ def main(args):
         output_fileroot,output_metafileroot = construct_root_filenames(data_source)
         source_products = source_config[data_source]['SOURCES'].values() 
         station_file=source_config[data_source]['STATION_FILE']
-        output_fileroot,output_metafileroot = construct_root_filenames(data_source)
-        utilities.log.info(f'File rootnames are {output_fileroot} and {output_metafileroot}')
         data_source_short = 'CONTRAILS' if 'CONTRAILS' in data_source else data_source
+        output_fileroot,output_metafileroot = construct_root_filenames(data_source_short)
+        utilities.log.info(f'File rootnames are {output_fileroot} and {output_metafileroot}')
         for data_product in source_products:
             print(f'Processing source {data_source} and product {data_product}')
             metadata = construct_metadata(data_product, endt)
@@ -174,8 +171,12 @@ def main(args):
                 contrails_yamlname=args.contrails_auth, knockout_dict=None, station_list_file=station_file)
             # Get data at highest resolution. Return at 15min intervals
             data,meta=obs.fetch_station_product(time_range, return_sample_min=15, interval='None' )
-            df_data = format_data_frames(data, data_product) # Melt data to support later database updates
-            dataf,metaf = write_data_todisk(rootdir,data_source,df_data,meta,metadata,output_fileroot,output_metafileroot)
+            try: # DO this in case we got no data from any station
+                df_data = format_data_frames(data, data_product) # Melt data to support later database updates
+                dataf,metaf = write_data_todisk(rootdir,data_source_short,df_data,meta,metadata,output_fileroot,output_metafileroot)
+            except IndexError as e:
+                utilities.log.info(f'No data products {data_product} for source {data_source}. Skip')
+                pass
             utilities.log.info(f'Finished with data source {data_source}')
 
 ##

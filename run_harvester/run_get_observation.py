@@ -29,11 +29,6 @@ def format_data_frames(df,product) -> pd.DataFrame:
     A Common formatting used by all sources
     """
     prod_name = PRODUCT[product].upper() if product in PRODUCT.keys() else 'NOAME'
-    print('TEST')
-    print(product)
-    print(PRODUCT)
-    print(prod_name)
-    print(PRODUCT[product])
     df.index = df.index.strftime('%Y-%m-%dT%H:%M:%S')
     df.reset_index(inplace=True)
     df_out=pd.melt(df, id_vars=['TIME'])
@@ -54,9 +49,11 @@ PRODUCT={
         'hourly_height':'water_level',
         'predictions':'water_level',
         'river_water_level':'water_level',
+        'river_flow_volume':'river_flow_volume',
         'coastal_water_level':'water_level',
         'wave_height':'water_level',
         'air_pressure':'air_pressure',
+        'river_flow_volume': 'river_flow_volume',
         'wind_speed':'wind_speed'
          }
 
@@ -138,7 +135,7 @@ def main(args):
         output_fileroot='ndbc_stationdata'
         output_metafileroot='ndbc_stationdata_meta'
     else:
-        utilities.log.error('Failed: Only NDBC, NOAA or CONTRAILS currently supported')
+        utilities.log.error('Failed: Only NDBC, NDBC_HISTORIC, NOAA or CONTRAILS currently supported')
         sys.exit(1)
 
     obs = get_obs_stations.get_obs_stations(source=data_source.upper(), product=args.data_product,
