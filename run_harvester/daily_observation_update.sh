@@ -2,8 +2,8 @@
 # Setup the basic env values relative to /projects/sequence_analysis/vol1/prediction_work/HARVESTOR/fetch_station_data
 
 export PYTHONPATH=/projects/sequence_analysis/vol1/prediction_work/AST:/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS
-#export RUNTIMEDIR=./DAILY-TEST
-export RUNTIMEDIR=/projects/ees/TDS/DataHarvesting/DAILY_HARVESTING
+export RUNTIMEDIR=./DAILY-TEST-NEW
+#export RUNTIMEDIR=/projects/ees/TDS/DataHarvesting/DAILY_HARVESTING
 
 # Which PYTHON
 PHOME="/projects/sequence_analysis/vol1/prediction_work/PythonMethods/anaconda3/bin"
@@ -32,6 +32,9 @@ $PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'CONTR
 
 # Contrails coastal data
 $PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'CONTRAILS' --data_product 'coastal_water_level' --config_name "$CONT_AUTH/contrails.yml" --station_list "$STATIONDIR/contrails_stations_coastal.csv"
+
+# Coastal River Volume
+$PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'CONTRAILS' --data_product 'river_flow_volume' --config_name "$CONT_AUTH/contrails.yml" --station_list "$STATIONDIR/contrails_stations_rivers.csv"
 
 # NOAA coastal data
 $PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'NOAA' --data_product "water_level" --station_list "$STATIONDIR/noaa_stations.csv"
