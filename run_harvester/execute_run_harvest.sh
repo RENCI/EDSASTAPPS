@@ -24,6 +24,12 @@ stoptime="$year-$month-$day 00:00:00"
 
 FINALDIR=$1
 
+if [ -z "${LOG_PATH:-}" ]; then
+   echo "LOG_PATH is not set: logs will be sent to $FINALDIR"
+   LOG_PATH="$FINALDIR"
+fi
+
+
 #
 # git clone the grid data. The underlying directory structure is implied within the provided grid_to_stationfile_maps.yml file
 #
@@ -38,6 +44,6 @@ sed -i 's/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/'"$CONTRAILS_KEY"'/g' ./secrets/c
 # We only need to supply the proper URL to start the job
 #
 
-python ./run_fetch_pipeline_observation.py --stoptime "$stoptime"  --finalDIR "$FINALDIR"  --map_source_file './AST_gridstations/harvester_stations/sources_map.yaml' --contrails_auth './secrets/contrails.yml'
+python ./run_fetch_pipeline_observation.py --stoptime "$stoptime"  --finalLOG "$LOG_PATH" --finalDIR "$FINALDIR"  --map_source_file './AST_gridstations/harvester_stations/sources_map.yaml' --contrails_auth './secrets/contrails.yml'
 
 echo "Finished RUN_HARVESTER with status $?"

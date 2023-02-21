@@ -132,7 +132,13 @@ def main(args):
         print('Override with finalDIR setting {}'.format(args.finalDIR))
         rootdir=io_utilities.construct_base_rootdir(args.finalDIR, base_dir_extra=None)
 
-    utilities.log.info('Output directory specified to be {}'.format(rootdir))
+    if args.finalLOG is None:
+        logdir=rootdir
+    else:
+        logdir=args.finalLOG
+
+    utilities.log.info(f'Output directory specified to be {rootdir}')
+    utilities.log.info(f'Output logger directory specified to be {logdir}')
 
     # Get list of sources/products to process
     source_config = utilities.load_config(args.map_source_file)['SOURCEMAP']
@@ -146,6 +152,20 @@ def main(args):
     starttime=dt.datetime.strftime(time_start, dformat)
     endtime=dt.datetime.strftime(time_stop, dformat)
     utilities.log.info('Selected time range is {} to {}, ndays is {}'.format(starttime,endtime,args.ndays))
+
+##
+## Build stoptime metadata for output logfle annotation
+##
+    log_time_meta = dt.datetime.strftime(time_stop,'%Y%m%d%H%M%S')
+
+
+##
+## Copy log file to finalDir
+##
+    shutil.copy(utilities.LogFile,'/'.join([rootdir,f'logs'])) # Copy and rename to logs for apsviz2 pipeline to find
+    utilities.log.info('Copy log file')
+
+
 
     time_range=(starttime,endtime)
 
@@ -182,7 +202,8 @@ def main(args):
 ##
 ## Copy over logfile into the rootdir so as to reside with the output data sets
 ##
-    shutil.copy(utilities.LogFile,'/'.join([rootdir,'obs_logs'])) # Copy and rename to logs for apsviz2 pipeline to find
+
+    shutil.copy(utilities.LogFile,'/'.join([logdir,f'run_harvester_obs_{log_time_meta}_log'])) # Copy and rename to logs for apsviz2 pipeline to find
     utilities.log.info('Copy log file')
 
     utilities.log.info('Finished') 
@@ -201,6 +222,8 @@ if __name__ == '__main__':
     parser.add_argument('--map_source_file', action='store',dest='map_source_file', default=None,
                         help='str: Select appropriate map_source_file yml for source processing list')
     parser.add_argument('--finalDIR', action='store', dest='finalDIR', default=None,
-                        help='String: Custom location for the output dicts, PNGs and logs')
+                        help='String: Custom location for the output dicts, PNGs and (potentially) logs')
+    parser.add_argument('--finalLOG', action='store', dest='finalLOG', default=None,
+                        help='String: Custom location logs. If not specified logs go to the datadir')
     args = parser.parse_args()
     sys.exit(main(args))
