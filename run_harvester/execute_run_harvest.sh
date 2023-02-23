@@ -29,6 +29,21 @@ if [ -z "${LOG_PATH:-}" ]; then
    LOG_PATH="$FINALDIR"
 fi
 
+if [ -z "${NDAYS:-}" ]; then
+   echo "NDAYS is not set: Use default lookback behavior"
+   NDAYSSET=""
+else
+    NDAYSSET="--ndays $NDAYS"
+fi
+
+
+
+
+# TEMP
+#nru@4292a7f1007b:~/repo/EDSASTAPPS/run_harvester$ export HTTP_PROXY=http://proxy.renci.org:8080
+#nru@4292a7f1007b:~/repo/EDSASTAPPS/run_harvester$ export HTTPS_PROXY=http://proxy.renci.org:8080
+#nru@4292a7f1007b:~/repo/EDSASTAPPS/run_harvester$ export http_proxy=http://proxy.renci.org:8080
+#nru@4292a7f1007b:~/repo/EDSASTAPPS/run_harvester$ export https_proxy=http://proxy.renci.org:8080
 
 #
 # git clone the grid data. The underlying directory structure is implied within the provided grid_to_stationfile_maps.yml file
@@ -44,6 +59,6 @@ sed -i 's/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/'"$CONTRAILS_KEY"'/g' ./secrets/c
 # We only need to supply the proper URL to start the job
 #
 
-python ./run_fetch_pipeline_observation.py --stoptime "$stoptime"  --finalLOG "$LOG_PATH" --finalDIR "$FINALDIR"  --map_source_file './AST_gridstations/harvester_stations/sources_map.yaml' --contrails_auth './secrets/contrails.yml'
+python ./run_fetch_pipeline_observation.py --stoptime "$stoptime"  --finalLOG "$LOG_PATH" --finalDIR "$FINALDIR"  --map_source_file './AST_gridstations/harvester_stations/sources_map.yaml' --contrails_auth './secrets/contrails.yml' $NDAYSSET
 
 echo "Finished RUN_HARVESTER with status $?"
