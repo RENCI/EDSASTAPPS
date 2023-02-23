@@ -212,7 +212,7 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--ndays', action='store', dest='ndays', default=-2, type=int,
-                        help='Number of look-back days from stoptime (or now): default -2')
+                        help='Number of look-back days from stoptime (or now): default -1')
     parser.add_argument('--stoptime', action='store', dest='stoptime', default=None, type=str,
                         help='Desired stoptime YYYY-mm-dd HH:MM:SS. Default=now')
     parser.add_argument('--sources', action='store_true',
