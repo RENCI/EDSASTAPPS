@@ -116,7 +116,7 @@ def main(args):
     else:
         utilities.log.info('Override with finalDIR setting {}'.format(args.finalDIR))
         rootdir=io_utilities.construct_base_rootdir(args.finalDIR, base_dir_extra=None)
-o
+
     if args.finalLOG is None:
         logdir=rootdir
     else:
