@@ -74,7 +74,7 @@ def find_cast_status(df)->str:
     data_list = df['NAME'].tolist()
     type_pair = list(set(data_list))[0] # fetchj_stations has already ensured these will all be the same grid and type
     utilities.log.info(type_pair)
-    cast_type = type_pair.split('_')[1]
+    cast_type = type_pair.split('_')[-1]
     return cast_type.upper()
 
 dformat='%Y-%m-%d %H:%M:%S'
