@@ -27,7 +27,7 @@ cd /projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/run_harvester
 
 # Observations
 
-stime='2022-08-31 18:00:00'
+stime='2022-12-31 23:00:00'
 
 
 # River data

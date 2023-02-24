@@ -116,6 +116,13 @@ def main(args):
     else:
         utilities.log.info('Override with finalDIR setting {}'.format(args.finalDIR))
         rootdir=io_utilities.construct_base_rootdir(args.finalDIR, base_dir_extra=None)
+o
+    if args.finalLOG is None:
+        logdir=rootdir
+    else:
+        logdir=args.finalLOG
+
+    utilities.log.info(f'Output logger directory specified to be {logdir}')
 
     if args.sources:
          utilities.log.info('Return list of sources')
@@ -187,9 +194,8 @@ def main(args):
         utilities.log.error('Error: ADCIRC: Failed Write {}'.format(e))
         sys.exit(1)
 
-    shutil.copy(utilities.LogFile,'/'.join([rootdir,'adcirc_logs'])) # Copy and rename to logs for apsviz2 pipeline to find
     utilities.log.info('Copy log file')
-
+    shutil.copy(utilities.LogFile,'/'.join([logdir,f'run_harvester_adcirc_{log_time_meta}_log'])) 
     utilities.log.info('Finished with data source {}'.format(data_source))
     utilities.log.info('Finished')
 
@@ -212,5 +218,7 @@ if __name__ == '__main__':
                         help='Boolean: Will inform Harvester to use fort.63.methods to get station nodesids')
     parser.add_argument('--finalDIR', action='store', dest='finalDIR', default=None,
                         help='String: Custom location for the output dicts, PNGs and logs')
+    parser.add_argument('--finalLOG', action='store', dest='finalLOG', default=None,
+                        help='String: Custom location logs. If not specified logs go to the datadir')
     args = parser.parse_args()
     sys.exit(main(args))
