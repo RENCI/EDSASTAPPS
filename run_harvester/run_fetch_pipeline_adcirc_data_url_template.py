@@ -194,6 +194,7 @@ def main(args):
         utilities.log.error('Error: ADCIRC: Failed Write {}'.format(e))
         sys.exit(1)
 
+    log_time_meta = dt.datetime.strptime(rpl.Tmax,'%Y%m%d%H').strftime("%Y%m%d%H%M%S")
     utilities.log.info('Copy log file')
     shutil.copy(utilities.LogFile,'/'.join([logdir,f'run_harvester_adcirc_{log_time_meta}_log'])) 
     utilities.log.info('Finished with data source {}'.format(data_source))
