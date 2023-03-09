@@ -26,7 +26,8 @@ if [ -z "${NDAYS:-}" ]; then
    echo "NDAYS is not set: Use default lookback behavior"
    NDAYSSET=""
 else
-    NDAYSSET="--ndays $NDAYS"
+   echo "Override input NDAYSSET. Reset to zero"
+   NDAYSSET="--ndays 0"
 fi
 
 URL=$1

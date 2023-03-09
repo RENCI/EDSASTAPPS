@@ -144,6 +144,7 @@ def main(args):
     sitename=rpl.sitename
     gridname=rpl.gridname
     ensemble=rpl.ensemble
+    stormnumber=rpl.stormnumber
     # Lastly fetch the final time of the actual data.
     print(data_adc.index)
     earliest_real_time = min(data_adc.index.tolist()).strftime(dformat)
@@ -155,9 +156,13 @@ def main(args):
     # Output the data files for subsequent ingesting
     df_adcirc_data = format_data_frames(data_adc) # WIll reformat time index to strings
     adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+endtime.replace(' ','T')+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
+
+    fileroot='_'.join(['adcirc',stormnumber]) if stormnumber is not 'NONE' else 'adcirc'
+    filerootmeta='_'.join(['adcirc','meta',stormnumber]) if stormnumber is not 'NONE' else 'adcirc_meta'
+
     try:
-        dataf=io_utilities.write_csv(df_adcirc_data, rootdir=rootdir,subdir='',fileroot='adcirc_stationdata',iometadata=adcirc_metadata)
-        metaf=io_utilities.write_csv(meta_adc, rootdir=rootdir,subdir='',fileroot='adcirc_stationdata_meta',iometadata=adcirc_metadata)
+        dataf=io_utilities.write_csv(df_adcirc_data, rootdir=rootdir,subdir='',fileroot=fileroot,iometadata=adcirc_metadata)
+        metaf=io_utilities.write_csv(meta_adc, rootdir=rootdir,subdir='',fileroot=filerootmeta,iometadata=adcirc_metadata)
         utilities.log.info('ADCIRC data has been stored {},{}'.format(dataf,metaf))
     except Exception as e:
         utilities.log.error('Error: ADCIRC: Failed Write {}'.format(e))
@@ -169,7 +174,7 @@ def main(args):
 if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
-    parser.add_argument('--ndays', action='store', dest='ndays', default=-2, type=int,
+    parser.add_argument('--ndays', action='store', dest='ndays', default=0, type=int,
                         help='Number of look-back days from stoptime: default -2')
     parser.add_argument('--stoptime', action='store', dest='stoptime', default=None, type=str,
                         help='Desired stoptime YYYY-mm-dd HH:MM:SS')

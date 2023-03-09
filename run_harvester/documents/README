@@ -86,7 +86,7 @@ python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --ur
 python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url 'http://tds.renci.org:80/thredds/dodsC/2022/nam/2022082306/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc' --ensemble='nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --fort63_style
 
 ##
-## To launch these for mthe provided scripts, the pipline must set one or more ENVs and pass the finalDIR to each of the runs
+## To launch these form the provided scripts, the pipline must set one or more ENVs and pass the finalDIR to each of the runs
 ## We anticipate finalDIR to be a persistant filesystem
 ## The user needs to pass in the 
 
@@ -94,12 +94,14 @@ export PYTHONPATH="xxx"
 export PYTHONPATH="~/AST:~/EDSASTAPPS"
 export CONTRAILS_KEY="xxx"
 export FINALDIR="."
+export LOG_PATH="."
 
 ./execute_run_harvest.sh $FINALDIR
 
 export PYTHONPATH="~/AST:~/EDSASTAPPS"
 export URL="http://tds.renci.org:80/thredds/dodsC/2022/nam/2022082306/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc"
 export FINALDIR="."
+export LOG_PATH="."
 
 ./execute_run_harvest_adcirc.sh $URL $FINALDIR
 
