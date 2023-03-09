@@ -10,10 +10,10 @@ sudo docker image rm -f containers.renci.org/eds/ast_run_harvester:v0.0.6
 sudo docker system prune -a
 
 # Build an image
-sudo docker build . --no-cache -t containers.renci.org/eds/ast_run_harvester:v0.0.6
+sudo docker build . --no-cache -t containers.renci.org/eds/ast_run_harvester:v0.0.7
 
 # Test your image: Start an interactive shell to the image
-sudo docker run -it containers.renci.org/eds/ast_run_harvester:v0.0.6 bash
+sudo docker run -it containers.renci.org/eds/ast_run_harvester:v0.0.7 bash
 
 # Load for actual cluster usage
-#sudo docker push containers.renci.org/eds/ast_run_harvester:v0.0.6
+#sudo docker push containers.renci.org/eds/ast_run_harvester:v0.0.7
