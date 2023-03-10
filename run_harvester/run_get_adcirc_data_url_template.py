@@ -187,7 +187,7 @@ if __name__ == '__main__':
     parser.add_argument('--map_file', action='store', dest='map_file', default=None, type=str,
                         help='Location of the grid_to_stationfile_maps.yml data')
     parser.add_argument('--url', action='store', dest='url', default=None, type=str,
-                        help='ASGS url to fetcb ADCIRC data')
+                        help='ASGS url to fetch ADCIRC data')
     parser.add_argument('--ensemble', action='store',dest='ensemble', default='nowcast',
                         help='str: Select appropriate ensemble Default is nowcast')
     args = parser.parse_args()

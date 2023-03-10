@@ -176,6 +176,7 @@ def main(args):
     sitename=rpl.sitename
     gridname=rpl.gridname
     ensemble=rpl.ensemble
+    stormnumber=rpl.stormnumber
     starttime = dt.datetime.strptime(rpl.Tmin,'%Y%m%d%H').strftime("%Y-%m-%d %H:%M:%S")
     endtime = dt.datetime.strptime(rpl.Tmax,'%Y%m%d%H').strftime("%Y-%m-%d %H:%M:%S")
     utilities.log.info(f'Starttime {starttime}, endtime {endtime}')
@@ -186,9 +187,13 @@ def main(args):
     # Output the data files for subsequent ingesting
     df_adcirc_data = format_data_frames(data_adc)
     adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+endtime.replace(' ','T')+'_'+starttime.replace(' ','T')+'_'+endtime.replace(' ','T')
+
+    fileroot='_'.join(['adcirc',stormnumber]) if stormnumber is not 'NONE' else 'adcirc'
+    filerootmeta='_'.join(['adcirc','meta',stormnumber]) if stormnumber is not 'NONE' else 'adcirc_meta'
+
     try:
-        dataf=io_utilities.write_csv(df_adcirc_data, rootdir=rootdir,subdir='',fileroot='adcirc_stationdata',iometadata=adcirc_metadata)
-        metaf=io_utilities.write_csv(meta_adc, rootdir=rootdir,subdir='',fileroot='adcirc_stationdata_meta',iometadata=adcirc_metadata)
+        dataf=io_utilities.write_csv(df_adcirc_data, rootdir=rootdir,subdir='',fileroot=fileroot,iometadata=adcirc_metadata)
+        metaf=io_utilities.write_csv(meta_adc, rootdir=rootdir,subdir='',fileroot=filerootmeta,iometadata=adcirc_metadata)
         utilities.log.info('ADCIRC data has been stored {},{}'.format(dataf,metaf))
     except Exception as e:
         utilities.log.error('Error: ADCIRC: Failed Write {}'.format(e))

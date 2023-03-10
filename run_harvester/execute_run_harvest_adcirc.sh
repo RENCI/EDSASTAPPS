@@ -22,13 +22,13 @@ if [ -z "${LOG_PATH:-}" ]; then
    LOG_PATH="$FINALDIR"
 fi
 
-if [ -z "${NDAYS:-}" ]; then
-   echo "NDAYS is not set: Use default lookback behavior"
-   NDAYSSET=""
-else
-   echo "Override input NDAYSSET. Reset to zero"
-   NDAYSSET="--ndays 0"
-fi
+#if [ -z "${NDAYS:-}" ]; then
+#   echo "NDAYS is not set: Use default lookback behavior"
+#   NDAYSSET=""
+#else
+#   echo "Override input NDAYSSET. Reset to zero"
+#   NDAYSSET="--ndays 0"
+#fi
 
 URL=$1
 
@@ -40,11 +40,11 @@ git clone https://github.com/RENCI/AST_gridstations.git
 
 # Need to run the actual input URL first without changing the ensemble name
 
-python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url "$URL" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH" $NDAYSSET
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url "$URL" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH" 
 
 # Now we want to rerun the associated nowcast for thie input URL
 
-python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url "$URL" --ensemble='nowcast' --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style  --finalLOG "$LOG_PATH"  --finalDIR "$FINALDIR" $NDAYSSET
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url "$URL" --ensemble='nowcast' --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style  --finalLOG "$LOG_PATH"  --finalDIR "$FINALDIR" 
 
 echo "Finished ADCIRC $URL with status $?"
 
