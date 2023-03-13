@@ -177,16 +177,32 @@ def main(args):
     gridname=rpl.gridname
     ensemble=rpl.ensemble
     stormnumber=rpl.stormnumber
-    starttime = dt.datetime.strptime(rpl.Tmin,'%Y%m%d%H').strftime("%Y-%m-%d %H:%M:%S")
-    endtime = dt.datetime.strptime(rpl.Tmax,'%Y%m%d%H').strftime("%Y-%m-%d %H:%M:%S")
-    utilities.log.info(f'Starttime {starttime}, endtime {endtime}')
+    timemark=rpl.timemark
+    #starttime = dt.datetime.strptime(rpl.Tmin,'%Y%m%d%H').strftime("%Y-%m-%d %H:%M:%S")
+    #endtime = dt.datetime.strptime(rpl.Tmax,'%Y%m%d%H').strftime("%Y-%m-%d %H:%M:%S")
+    #utilities.log.info(f'Starttime {starttime}, endtime {endtime}')
+
+    print(data_adc.index)
+    earliest_real_time = min(data_adc.index.tolist()).strftime(dformat)
+    latest_real_time = max(data_adc.index.tolist()).strftime(dformat)
 
     # Look inside meta and see what kind of data this is NOWCAST/FORECAST
     cast_type = find_cast_status(meta_adc)
 
     # Output the data files for subsequent ingesting
     df_adcirc_data = format_data_frames(data_adc)
-    adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+endtime.replace(' ','T')+'_'+starttime.replace(' ','T')+'_'+endtime.replace(' ','T')
+
+    #timemark=endtime if cast_type is 'NOWCAST' else starttime
+    try:
+        tone=dt.datetime.strptime(timemark,'%Y%m%d%H')
+        timemark=dt.datetime.strftime(tone, dformat)
+        timemark=timemark.replace(' ','T')
+    except Exception as e:
+        pass
+
+    #adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+endtime.replace(' ','T')+'_'+starttime.replace(' ','T')+'_'+endtime.replace(' ','T')
+    adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
+
 
     fileroot='_'.join(['adcirc',stormnumber]) if stormnumber is not 'NONE' else 'adcirc'
     filerootmeta='_'.join(['adcirc','meta',stormnumber]) if stormnumber is not 'NONE' else 'adcirc_meta'

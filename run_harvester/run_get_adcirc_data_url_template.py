@@ -131,11 +131,11 @@ def main(args):
     print(station_file)
 
     rpl = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
-                station_list_file=station_file)
+                station_list_file=station_file, fort63_style=True)
 
     # Ensures URLs are desired fort type. 
-    urls=get_adcirc_stations.convert_urls_to_61style(urls)
-    print(urls)
+    urls=get_adcirc_stations.convert_urls_to_63style(urls)
+    print(f' URLs {urls}')
 
     # Fetch best resolution and no resampling
     data_adc,meta_adc=rpl.fetch_station_product(urls, return_sample_min=return_sample_min ) # Always grab 15mn sampling
@@ -145,6 +145,8 @@ def main(args):
     gridname=rpl.gridname
     ensemble=rpl.ensemble
     stormnumber=rpl.stormnumber
+    timemark=rpl.timemark
+
     # Lastly fetch the final time of the actual data.
     print(data_adc.index)
     earliest_real_time = min(data_adc.index.tolist()).strftime(dformat)
@@ -155,7 +157,16 @@ def main(args):
 
     # Output the data files for subsequent ingesting
     df_adcirc_data = format_data_frames(data_adc) # WIll reformat time index to strings
-    adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+endtime.replace(' ','T')+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
+
+    try:
+        tone=dt.datetime.strptime(timemark,'%Y%m%d%H')
+        timemark=dt.datetime.strftime(tone, dformat)
+        timemark=timemark.replace(' ','T')
+    except Exception as e:
+        pass
+
+    #adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+timemark.replace(' ','T')+'_'+starttime.replace(' ','T')+'_'+endtime.replace(' ','T')
+    adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
 
     fileroot='_'.join(['adcirc',stormnumber]) if stormnumber is not 'NONE' else 'adcirc'
     filerootmeta='_'.join(['adcirc','meta',stormnumber]) if stormnumber is not 'NONE' else 'adcirc_meta'
