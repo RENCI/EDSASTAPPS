@@ -36,5 +36,9 @@ python ../adda.py --instance_name hsofs-nam-bob-2021 --ndays -4  --return_sample
 #
 # Hurricane test using a url approach
 #
- python adda.py --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.63.nc" --ndays -4 --gridname 'hsofs' --map_file ./AST_gridstations/interpolation_stationlist/grid_to_stationfile_maps.yml --ensemble 'nhcOfcl' --fort63_style
+ python adda.py --input_url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.63.nc" --ndays -4 --gridname 'hsofs' --map_file ./AST_gridstations/interpolation_stationlist/grid_to_stationfile_maps.yml --ensemble 'nhcOfcl' --fort63_style
 
+#
+# More examples
+
+python adda.py --input_url "http://tds.renci.org/thredds/dodsC/2022/al09/12/hsofs/hatteras.renci.org/hsofs-al09-bob/nowcast.nodwlc/fort.63.nc" --ndays -4 --gridname 'hsofs' --map_file ./AST_gridstations/interpolation_stationlist/grid_to_stationfile_maps.yml --ensemble 'nowcast.nodwlc' --fort63_style
