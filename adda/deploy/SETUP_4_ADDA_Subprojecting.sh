@@ -30,7 +30,7 @@ cd EDSASTAPPS
 git sparse-checkout add adda io_utilities gridmap
 git checkout
 
-# 7) From within EDSASTAPPS, do a test of adda
+# 7) From within PARTIALADDA, do a test of adda
 
 # Set up the env to find AST
 export PYTHONPATH=/projects/sequence_analysis/vol1/prediction_work/PARTIALADDA/AST:/projects/sequence_analysis/vol1/prediction_work/PARTIALADDA/EDSASTAPPS
