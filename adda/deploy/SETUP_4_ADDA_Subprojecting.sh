@@ -1,5 +1,5 @@
 ##
-## Setup te codes. THis is a procedure one might use to build a functional ADDA/AST sysem without downloaded
+## Setup the codes. This is a procedure one might use to build a functional ADDA/AST system without downloading
 ## all of the EDSASTAPPS codes. Many steps can be modified such as where to clone AST_gridstations but this should
 ## be a decent start
 ##
