@@ -321,10 +321,14 @@ def main(args):
 ##
 ## Combine observations data for the error computations - No Tidal nor NDBC data here
 ##
-    data_obs_smoothed = pd.concat(valid_obs,axis=1)
-    data_adc_full=pd.concat(valid_now,axis=1)
-    meta_obs = pd.concat(valid_obs_meta,axis=0)
-    print(meta_obs)
+    try:
+        if (len(valid_obs)>0): data_obs_smoothed = pd.concat(valid_obs,axis=1)
+        if (len(valid_now)>0): data_adc_full=pd.concat(valid_now,axis=1)
+        if (len(valid_obs_meta)>0):meta_obs = pd.concat(valid_obs_meta,axis=0)
+        print(meta_obs)
+    except Exception as e:
+        utilities.log.error('Faild to concat obs and adcirc data: {}'.format(e))
+        sys,exit(1)
 
 ##
 ## TIDAL PREDICTIONS. Get the NOAA station data

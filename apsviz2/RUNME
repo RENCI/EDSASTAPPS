@@ -40,4 +40,30 @@ python apsviz_station_products.py --url='https://apsviz-thredds-dev.apps.renci.o
 
 python apsviz_station_products.py --url='http://tds.renci.org:80/thredds/dodsC/2022/nam/2022082306/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc' --ndays -4  --return_sample_min 60 --gridname 'NCSC_SAB_v1.23' --ensemble='namforecast'  --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style --construct_jsons 
 
+python apsviz_station_products.py --url 'http://tds.renci.org:80/thredds/dodsC/2022/al05/07/ec95d/hatteras.renci.org/ec95d-al05-bob/nhcOfcl/fort.63.nc' --ndays -4  --return_sample_min 60 --gridname 'ec95d' --fort63_style --construct_jsons --contrails_auth ./secrets/contrails.yml --map_file './supporting_data/grid_to_stationfile_maps.yml'
+
+# New Ian procesing
+python apsviz_station_products.py --url 'http://tds.renci.org/thredds/dodsC/2022/al09/17/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-al09-sb55.01/nhcOfcl/fort.63.nc' --ndays -4 --return_sample_min 60 --gridname 'NCSC_SAB_v1.23' --ensemble='nhcOfcl' --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style --construct_jsons
+#
+
+python apsviz_station_products.py --url 'http://tds.renci.org/thredds/dodsC/2022/al09/06/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-al09-sb55.01/nhcOfcl/fort.63.nc' --ndays -4 --return_sample_min 60 --gridname 'NCSC_SAB_v1.23' --ensemble='nhcOfcl' --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style --construct_jsons
+
+
+python apsviz_station_products.py --url='http://tds.renci.org/thredds/dodsC/2022/nam/2022100112/hsofs/bridges2.psc.edu/hsofs-nam-bob-2022-psc/namforecast/fort.63.nc' --ndays -4  --return_sample_min 60 --gridname 'hsofs' --ensemble 'nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+
+# New Ian runs
+python apsviz_station_products.py --url='http://tds.renci.org:80/thredds/dodsC/2022/al09/06/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.63.nc' --ndays -4  --return_sample_min 60 --gridname 'hsofs' --ensemble 'nhcOfcl' --map_file './supporting_data/grid_to_stationfile_maps.yml' --contrails_auth ./secrets/contrails.yml --fort63_style
+
+
+# New grid test
+
+python ./apsviz_station_products.py --fort63_style --url "http://apsviz-thredds-dev.apps.renci.org/thredds/dodsC/2023/gfs/2023051306/cpra_2023_v18a/bridges2.psc.edu/adcirc_gfs_cpra/gfsforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'cpra_2023_v18a' --ensemble='gfsforecast'  --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --contrails_auth ../secrets/contrails.yml --finalDIR "./TESTNEW"
+
+
+
+
+python ./apsviz_station_products.py --fort63_style --url "http://tds.renci.org/thredds/dodsC/2023/gfs/2023051306/cpra_2023_v18a/bridges2.psc.edu/adcirc_gfs_cpra/gfsforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'cpra_2023_v18a' --ensemble='gfsforecast'  --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --contrails_auth ../secrets/contrails.yml --finalDIR "./TESTNEW"
+
+python ./apsviz_station_products.py --fort63_style --url "http://apsviz-thredds.renci.org/thredds/dodsC/2023/gfs/2023051506/cpra_2023_v18a/bridges2.psc.edu/adcirc_gfs_cpra/gfsforecast/fort.63.nc" --ndays -4  --return_sample_min 60 --gridname 'cpra_2023_v18a' --ensemble='gfsforecast'  --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --contrails_auth ../secrets/contrails.yml --finalDIR "./TESTNEW"
+
 
