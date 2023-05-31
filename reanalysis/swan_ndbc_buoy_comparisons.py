@@ -275,8 +275,8 @@ if __name__ == '__main__':
                         help='Boolean: Will inform Harvester to use fort.63.methods to get station nodesids')
     parser.add_argument('--sources', action='store_true',
                         help='List currently supported data sources')
-    parser.add_argument('--data_source', action='store', dest='data_source', default='ASGS', type=str,
-                        help='choose supported data source: default = ASGS')
+    parser.add_argument('--data_source', action='store', dest='data_source', default='TDS', type=str,
+                        help='choose supported data source: default = TDS')
     parser.add_argument('--data_product', action='store', dest='data_product', default='water_level', type=str,
                         help='choose supported data product: default is water_level')
     parser.add_argument('--map_file', action='store',dest='map_file', default=None,

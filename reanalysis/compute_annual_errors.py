@@ -157,7 +157,7 @@ def main(args):
 # Fetch the observations data
 # Detailed data is collected at maximum frequency. User resample is applied to subsequent smoothing
 #
-    obs = get_obs_stations.get_obs_stations(source='NOAA', product=data_product,
+    obs = get_obs_stations.get_obs_stations(source='NOAAWEB', product=data_product,
             station_list_file=noaa_station_file, knockout_dict=knockout_dict)
     data_obs,meta_obs=obs.fetch_station_product(time_range, return_sample_min=60) # , interval='h' )
     data_obs.replace('-99999',np.nan,inplace=True)
@@ -167,7 +167,7 @@ def main(args):
 # Also go ahead and fetch available Tidal data for reanalysis work
 # No application of thresholding is performed here. Just the returned data gets set to disk
 #
-    tidal = get_obs_stations.get_obs_stations(source='NOAA', product='predictions',
+    tidal = get_obs_stations.get_obs_stations(source='NOAAWEB', product='predictions',
             station_list_file=noaa_station_file, knockout_dict=knockout_dict)
     data_tidal,meta_tidal=tidal.fetch_station_product(time_range, return_sample_min=0, interval='h' )
     data_tidal.replace('-99999',np.nan,inplace=True)
@@ -176,8 +176,17 @@ def main(args):
 #
 # Remove stations with too many nans ( Note Harvester would have previously removed stations that are ALL NANS)
 #
-    data_thresholded = obs.remove_missingness_stations(data_obs, max_nan_percentage_cutoff=10)  # (Maximum allowable nans %)
-    meta_obs_list = set(data_thresholded.columns.tolist()).intersection(meta_obs.index.to_list())
+    #data_thresholded = obs.remove_missingness_stations(data_obs, max_nan_percentage_cutoff=100)  # (Maximum allowable nans %)
+    #meta_obs_list = set(data_thresholded.columns.tolist()).intersection(meta_obs.index.to_list())
+
+    utilities.log.info('OVERRIDE missingness thresholding')
+    data_thresholded=data_obs
+    meta_obs_list=data_thresholded.columns.tolist()
+
+    utilities.log.info(f' OBS list {data_thresholded.columns.tolist()}')
+    utilities.log.info(f' META list {meta_obs.index.to_list()}')
+
+
     #meta_thresholded = meta_obs.loc[data_thresholded.columns.tolist()]
     #meta_obs_list = set(data_thresholded.columns.tolist()).intersection(meta_obs.index.to_list())
     meta_thresholded = meta_obs.loc[meta_obs_list]
@@ -357,8 +366,8 @@ if __name__ == '__main__':
                         help='Boolean: Will inform Harvester to use fort.63.methods to get station nodesids')
     parser.add_argument('--sources', action='store_true',
                         help='List currently supported data sources')
-    parser.add_argument('--data_source', action='store', dest='data_source', default='ASGS', type=str,
-                        help='choose supported data source: default = ASGS')
+    parser.add_argument('--data_source', action='store', dest='data_source', default='TDS', type=str,
+                        help='choose supported data source: default = TDS')
     parser.add_argument('--data_product', action='store', dest='data_product', default='hourly_height', type=str,
                         help='choose supported NOAA data product: default is hourly_height')
     parser.add_argument('--map_file', action='store',dest='map_file', default=None,
