@@ -1,0 +1,31 @@
+SOURCEMAP: &sourcemap
+  NOAAWEB: 
+      STATION_FILE: "./supporting_data/noaa_stations.csv"
+      SOURCES:
+          WATR: "water_level"
+          PRED: "predictions"
+          PRES: "air_pressure"
+          WSPD: "wind_speed"
+
+  CONTRAILSRIVER:
+      STATION_FILE: "./supporting_data/contrails_stations_rivers.csv"
+      SOURCES:
+          WATR: "river_water_level"
+          PRES: "air_pressure"
+
+  CONTRAILSCOASTAL:
+      STATION_FILE: "./supporting_data/contrails_stations_coastal.csv"
+      SOURCES:
+          WATR: "coastal_water_level"
+          PRES: "air_pressure"
+
+  NDBC:
+      STATION_FILE: "./supporting_data/ndbc_buoys.csv"
+      SOURCES:
+          WATR: "wave_height"
+          PRES: "air_pressure"
+          WSPD: "wind_speed"
+
+DESCRIPTION: &description
+   DESCRIBE: 'A list of sources and data products to process using run_harvester'
+
