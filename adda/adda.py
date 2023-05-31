@@ -218,7 +218,7 @@ def main(args):
     #contrails_stations=fname=os.path.join(os.path.dirname(__file__),'./supporting_data','contrails_stations_coastal.csv')
     #contrails_stations=fname=os.path.join(os.path.dirname(__file__),'./supporting_data','contrails_stations_rivers.csv')
 
-    obs = get_obs_stations.get_obs_stations(source='NOAA', product='water_level',
+    obs = get_obs_stations.get_obs_stations(source='NOAAWEB', product='water_level',
                 contrails_yamlname='None',
                 knockout_dict=None, station_list_file=station_file)
     # Get data at highest resolution
