@@ -579,3 +579,40 @@ def ConstructReducedWaterLevelData_from_ds(ds, agdict, agresults, variable_name=
     agresults['final_meta_data']=df_meta
     return agresults
 
+def load_ds(url):
+    """
+    """
+    ds=f63_to_xr(url)
+    if 'fort.63' in url:
+        variable_name='zeta'
+    elif 'swan_HS' in url:
+        variable_name='swan_HS'
+    else:
+        print(f'load_ds error: cannot deterine variable_name {url}')
+        sys.exit(1)
+    return ds, variable_name
+
+def Combined_pipeline(url, geopoints, nearest_neighbors=10):
+    """
+    Simply run the series of steps as part of this method to shield users from some
+    of the details of the processing
+    """
+    ds, variable_name = load_ds(url)
+    agdict=get_adcirc_grid_from_ds(ds)
+    agdict=attach_element_areas(agdict)
+
+    print('Start KDTree pipeline')
+    agdict=ComputeTree(agdict)
+    agresults=ComputeQuery(geopoints, agdict, kmax=nearest_neighbors)
+    agresults=ComputeBasisRepresentation(geopoints, agdict, agresults)
+    agresults=ConstructReducedWaterLevelData_from_ds(ds, agdict, agresults, variable_name=variable_name)
+
+    print(f'List of {len(agresults["outside_elements"])} stations not assigned to any grid element follows for kmax {nearest_neighbors}')
+    print(geopoints.iloc[agresults['outside_elements']])
+
+    df_product_data=agresults['final_reduced_data']
+    df_product_metadata=agresults['final_meta_data']
+    print('Finished')
+    return df_product_data, df_product_metadata
+
+
