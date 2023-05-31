@@ -37,16 +37,16 @@ $PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'CONTR
 $PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'CONTRAILS' --data_product 'river_flow_volume' --config_name "$CONT_AUTH/contrails.yml" --station_list "$STATIONDIR/contrails_stations_rivers.csv"
 
 # NOAA coastal data
-$PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'NOAA' --data_product "water_level" --station_list "$STATIONDIR/noaa_stations.csv"
+$PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'NOAAWEB' --data_product "water_level" --station_list "$STATIONDIR/noaa_stations.csv"
 
 # NOAA predictions (tidal)
-$PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'NOAA' --data_product "predictions" --station_list "$STATIONDIR/noaa_stations.csv"
+$PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'NOAAWEB' --data_product "predictions" --station_list "$STATIONDIR/noaa_stations.csv"
 
 # NDBC buoy data
 $PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'NDBC' --data_product "wave_height" --station_list "$STATIONDIR/ndbc_buoys.csv"
 
 # NOAA air pressure
-$PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'NOAA' --data_product "air_pressure" --station_list "$STATIONDIR/noaa_stations.csv"
+$PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'NOAAWEB' --data_product "air_pressure" --station_list "$STATIONDIR/noaa_stations.csv"
 
 # NDBC wind speed 
 $PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'NDBC' --data_product "wind_speed" --station_list "$STATIONDIR/ndbc_buoys.csv"

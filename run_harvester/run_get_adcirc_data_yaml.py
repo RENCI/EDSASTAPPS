@@ -8,7 +8,7 @@
 #
 # This approach expects to fetch urlsa based on the url_framework.yml
 
-#python get_adcirc_stations.py --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.61.nc" --data_source 'ASGS' --timeout 8  --fort63_style
+#python get_adcirc_stations.py --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.61.nc" --data_source 'TDS' --timeout 8  --fort63_style
 
 
 
@@ -57,7 +57,7 @@ GLOBAL_TIMEZONE='gmt' # Every source is set or presumed to return times in the z
 PRODUCT='water_level'
 
 # Currently supported sources
-SOURCES = ['ASGS']
+SOURCES = ['TDS']
 
 ##
 ## Run stations
@@ -128,7 +128,7 @@ def main(args):
     print(urls)
     print(station_file)
 
-    rpl = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
+    rpl = get_adcirc_stations.get_adcirc_stations(source='TDS', product=args.data_product,
                 station_list_file=station_file)
 
     # Ensures URLs are desired fort type. 
@@ -173,8 +173,8 @@ if __name__ == '__main__':
                         help='Desired stoptime YYYY-mm-dd HH:MM:SS')
     parser.add_argument('--sources', action='store_true',
                         help='List currently supported data sources')
-    parser.add_argument('--data_source', action='store', dest='data_source', default='ASGS', type=str,
-                        help='choose supported data source: default = ASGS')
+    parser.add_argument('--data_source', action='store', dest='data_source', default='TDS', type=str,
+                        help='choose supported data source: default = TDS')
     parser.add_argument('--data_product', action='store', dest='data_product', default='water_level', type=str,
                         help='choose supported data product: default is water_level')
     parser.add_argument('--map_file', action='store', dest='map_file', default=None, type=str,

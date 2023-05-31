@@ -18,9 +18,9 @@ for MONTHS in 01 02 03 04; do
         for HOURS in 00 06 12 18 ; do
             stoptime="2022-$MONTHS-$DAYS $HOURS:00:00" 
             echo "$stoptime"
-            python run_get_adcirc_data_url_template.py --stoptime "$stoptime" --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022020200/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.61.nc" --ensemble 'nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays 0 
-            python run_get_adcirc_data_url_template.py --stoptime "$stoptime" --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022020200/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.61.nc" --ensemble 'namforecast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays 0 
-            #python run_get_adcirc_data_url_template.py --stoptime "$stoptime" --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022020200/ec95d/hatteras.renci.org/ec95d-nam-bob-da-nowcast/nowcast/fort.61.nc" --ensemble 'nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays 0 
+            python run_get_adcirc_data_url_template.py --stoptime "$stoptime" --data_source 'TDS'  --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022020200/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.61.nc" --ensemble 'nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays 0 
+            python run_get_adcirc_data_url_template.py --stoptime "$stoptime" --data_source 'TDS'  --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022020200/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.61.nc" --ensemble 'namforecast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays 0 
+            #python run_get_adcirc_data_url_template.py --stoptime "$stoptime" --data_source 'TDS'  --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022020200/ec95d/hatteras.renci.org/ec95d-nam-bob-da-nowcast/nowcast/fort.61.nc" --ensemble 'nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays 0 
          done
     done
 done

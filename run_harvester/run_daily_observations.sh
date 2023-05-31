@@ -40,11 +40,11 @@ for MONTHS in 01 02 03 04 05 06 07 08 09 10 11 12; do
         $PHOME/python run_get_observation.py --stoptime '2022-'$MONTHS'-'$DAYS' 00:00:00'  --data_source 'CONTRAILS' --data_product 'air_pressure' --config_name "$CONT_AUTH/contrails.yml" --station_list "$STATIONDIR/contrails_stations_coastal.csv"
 
         # NOAA coastal data
-        $PHOME/python run_get_observation.py --stoptime '2022-'$MONTHS'-'$DAYS' 00:00:00'  --data_source 'NOAA' --data_product "water_level" --station_list "$STATIONDIR/noaa_stations.csv"
+        $PHOME/python run_get_observation.py --stoptime '2022-'$MONTHS'-'$DAYS' 00:00:00'  --data_source 'NOAAWEB' --data_product "water_level" --station_list "$STATIONDIR/noaa_stations.csv"
         # NOAA predictions (tidal)
-        $PHOME/python run_get_observation.py --stoptime '2022-'$MONTHS'-'$DAYS' 00:00:00'  --data_source 'NOAA' --data_product "predictions" --station_list "$STATIONDIR/noaa_stations.csv"
+        $PHOME/python run_get_observation.py --stoptime '2022-'$MONTHS'-'$DAYS' 00:00:00'  --data_source 'NOAAWEB' --data_product "predictions" --station_list "$STATIONDIR/noaa_stations.csv"
         # NOAA Air pressure
-        $PHOME/python run_get_observation.py --stoptime '2022-'$MONTHS'-'$DAYS' 00:00:00'  --data_source 'NOAA' --data_product "air_pressure" --station_list "$STATIONDIR/noaa_stations.csv"
+        $PHOME/python run_get_observation.py --stoptime '2022-'$MONTHS'-'$DAYS' 00:00:00'  --data_source 'NOAAWEB' --data_product "air_pressure" --station_list "$STATIONDIR/noaa_stations.csv"
 
         # NDBC BUOY DATA
         #$PHOME/python run_get_observation.py --stoptime '2022-'$MONTHS'-'$DAYS' 00:00:00'  --data_source 'NDBC' --data_product "wave_height" --station_list "$STATIONDIR/ndbc_buoys.csv"

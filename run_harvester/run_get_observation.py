@@ -28,7 +28,7 @@ def format_data_frames(df,product) -> pd.DataFrame:
     """
     A Common formatting used by all sources
     """
-    prod_name = PRODUCT[product].upper() if product in PRODUCT.keys() else 'NOAME'
+    prod_name = PRODUCT[product].upper() if product in PRODUCT.keys() else 'NONAME'
     df.index = df.index.strftime('%Y-%m-%dT%H:%M:%S')
     df.reset_index(inplace=True)
     df_out=pd.melt(df, id_vars=['TIME'])
@@ -58,7 +58,7 @@ PRODUCT={
          }
 
 # Currently supported sources
-SOURCES = ['NOAA','CONTRAILS','NDBC']
+SOURCES = ['NOAAWEB', 'NOAA','CONTRAILS','NDBC']
 
 ##
 ## Run stations
@@ -115,6 +115,13 @@ def main(args):
         station_file=os.path.join(os.path.dirname(__file__),'./supporting_data','noaa_stations.csv') if in_station_list is None else in_station_list
         output_fileroot='noaa_stationdata'
         output_metafileroot='noaa_stationdata_meta'
+    if data_source.upper()=='NOAAWEB':
+        utilities.log.info('Preparing for a NOAAWEB fetch')
+        time_range=(starttime,endtime) # Can be directly used by NOAA 
+        station_file=os.path.join(os.path.dirname(__file__),'./supporting_data','noaa_stations.csv') if in_station_list is None else in_station_list
+        output_fileroot='noaa_stationdata'
+        output_metafileroot='noaa_stationdata_meta'
+
     elif data_source.upper()=='CONTRAILS':
         utilities.log.info('Preparing for a CONTRAILS fetch')
         contrails_config = args.config_name # utilities.load_config(os.path.join(os.path.dirname(__file__),'./secrets','contrails.yml'))['DEFAULT']
@@ -135,7 +142,7 @@ def main(args):
         output_fileroot='ndbc_stationdata'
         output_metafileroot='ndbc_stationdata_meta'
     else:
-        utilities.log.error('Failed: Only NDBC, NDBC_HISTORIC, NOAA or CONTRAILS currently supported')
+        utilities.log.error('Failed: Only NDBC, NDBC_HISTORIC, NOAAWEB, NOAA or CONTRAILS currently supported')
         sys.exit(1)
 
     obs = get_obs_stations.get_obs_stations(source=data_source.upper(), product=args.data_product,
@@ -150,7 +157,7 @@ def main(args):
     try:
         dataf=io_utilities.write_csv(df_data, rootdir=rootdir,subdir='',fileroot=output_fileroot,iometadata=metadata)
         metaf=io_utilities.write_csv(meta, rootdir=rootdir,subdir='',fileroot=output_metafileroot,iometadata=metadata)
-        utilities.log.info('NOAA data has been stored {},{}'.format(dataf,metaf))
+        utilities.log.info('OBS data has been stored {},{}'.format(dataf,metaf))
     except Exception as e:
         utilities.log.error('Error:{} Failed Write {}'.format(args.data_source,e))
         sys.exit(1)
@@ -167,7 +174,7 @@ if __name__ == '__main__':
     parser.add_argument('--sources', action='store_true',
                         help='List currently supported data sources')
     parser.add_argument('--data_source', action='store', dest='data_source', default=None, type=str,
-                        help='choose supported data source (case independant) eg NOAA or CONTRAILS')
+                        help='choose supported data source (case independant) eg NOAA, NOAAWEB or CONTRAILS')
     parser.add_argument('--data_product', action='store', dest='data_product', default=None, type=str,
                         help='choose supported data product eg river_water_level: Only required for Contrails')
     parser.add_argument('--station_list', action='store', dest='station_list', default=None, type=str,
