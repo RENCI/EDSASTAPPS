@@ -1,5 +1,4 @@
 siphon==0.9
-netCDF4==1.5.7
 xarray==0.14.1
 siphon==0.9
 requests==2.24.0
