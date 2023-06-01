@@ -7,3 +7,4 @@ scikit-learn>=0.20.3
 noaa-coops
 pyyaml
 seaborn
+netCDF4
