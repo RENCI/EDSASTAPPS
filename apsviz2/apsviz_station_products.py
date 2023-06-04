@@ -47,6 +47,10 @@ def main(args):
         main_yamlname=args.main_yamlname
     config = utilities.init_logging(subdir=args.instanceId, config_file=main_yamlname)
 
+    # This will summarily remove the earliest nowcast in the generate_urls list of urls
+    # This prevents potentially picking up a nowcast spinup file.
+    keep_earliest_url=args.keep_earliest_url
+
     utilities.log.info('APSVIZ launcher invocation {}'.format(args))
 
     # Set up IO env
@@ -93,10 +97,10 @@ def main(args):
 ##
     t0 = tm.time()
     try:
-        adc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
+        adc = get_adcirc_stations.get_adcirc_stations(source='TDS', product=args.data_product,
                 station_list_file=station_file,
                 knockout_dict=None, fort63_style=fort63_style )
-        data_adc,meta_adc=adc.fetch_station_product( [input_url] , return_sample_min=args.return_sample_min, fort63_style=fort63_style  )
+        data_adc,meta_adc=adc.fetch_station_product( [input_url] , return_sample_min=args.return_sample_min, fort63_style=fort63_style, keep_earliest_url=True) # Always keep all for the forecasts
         # Revert Harvester filling of nans to -99999 back to nans
         data_adc.replace('-99999',np.nan,inplace=True)
         meta_adc.replace('-99999',np.nan,inplace=True)
@@ -128,14 +132,18 @@ def main(args):
     # Need to build a set of NOWCASTs from the input url.
     nowadc = genurls.generate_urls_from_times(url=input_url,ndays=args.ndays)
     now_urls = nowadc.build_url_list_from_template_url_and_offset(ensemble='nowcast')
+    if not keep_earliest_url:
+        utilities.log.info('Removing earliest URL from the nowcast list to sidestep potentially picking up a very large nowcast the was intended for spinup')
+        now_urls=now_urls[1:]
+    utilities.log.info(f'Number of total nowcast urls kept is {len(now_urls)}')
     print(now_urls)
 
     t0 = tm.time()
     try:
-        nowadc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
+        nowadc = get_adcirc_stations.get_adcirc_stations(source='TDS', product=args.data_product,
                 station_list_file=station_file,
                 knockout_dict=None, fort63_style=fort63_style )
-        data_now_adc,meta_now_adc=nowadc.fetch_station_product(now_urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style  )
+        data_now_adc,meta_now_adc=nowadc.fetch_station_product(now_urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style, keep_earliest_url=keep_earliest_url  )
         data_now_adc.replace('-99999',np.nan,inplace=True)
         meta_now_adc.replace('-99999',np.nan,inplace=True)
         outputs_dict['Nowcast']=data_now_adc
@@ -236,10 +244,10 @@ def main(args):
         else:
             contrails_coastal_url=get_adcirc_stations.convert_urls_to_61style([args.url])[0]
         try:
-            adc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
+            adc = get_adcirc_stations.get_adcirc_stations(source='TDS', product=args.data_product,
                     station_list_file=contrails_coastal_station_file,
                     knockout_dict=None, fort63_style=fort63_style )
-            data_contrail_coastal_adc,meta_contrail_coastal_adc=adc.fetch_station_product( [contrails_coastal_url] , return_sample_min=args.return_sample_min, fort63_style=fort63_style)
+            data_contrail_coastal_adc,meta_contrail_coastal_adc=adc.fetch_station_product( [contrails_coastal_url] , return_sample_min=args.return_sample_min, fort63_style=fort63_style, keep_earliest_url=keep_earliest_url)
             # Revert Harvester filling of nans to -99999 back to nans
             ##print(data_contrail_coastal_adc['30048'].sum())
             data_contrail_coastal_adc.replace('-99999',np.nan,inplace=True)
@@ -273,10 +281,10 @@ def main(args):
             contrails_coastal_now_urls = get_adcirc_stations.convert_urls_to_61style(contrails_coastal_now_urls)
 
         try:
-            contrails_coastal_nowadc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
+            contrails_coastal_nowadc = get_adcirc_stations.get_adcirc_stations(source='TDS', product=args.data_product,
                     station_list_file=contrails_coastal_station_file,
                     knockout_dict=None, fort63_style=fort63_style )
-            data_now_adc,meta_now_adc=contrails_coastal_nowadc.fetch_station_product(contrails_coastal_now_urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style)
+            data_now_adc,meta_now_adc=contrails_coastal_nowadc.fetch_station_product(contrails_coastal_now_urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style, keep_earliest_url=keep_earliest_url)
             ##print(data_contrail_coastal_adc['30048'].sum())
             data_now_adc.replace('-99999',np.nan,inplace=True)
             meta_now_adc.replace('-99999',np.nan,inplace=True)
@@ -313,6 +321,9 @@ def main(args):
             valid_obs.append(cont_coastal_data)
             valid_obs_meta.append(cont_coastal_meta)
             utilities.log.info('Finished with Contrails Coastal Observations')
+            print(f' CONT OBS {cont_coastal_data}')
+            cont_coastal_data.to_csv('junk.csv') # Doesn't exist
+            print(f' CONT SHIT {cont_coastal_data["EGHN7"]}') # Doesnt exist
         except Exception as e:
             utilities.log.error('CONTRAILS: Broad failure. Failed to find any CONTRAILS Coastal data. System key supplied ?: {}'.format(e))
     total_time = tm.time() - t0
@@ -388,10 +399,10 @@ def main(args):
         swan_input_url=get_adcirc_stations.convert_urls_to_swan_63style([args.url])[0]
         print(swan_input_url)
         try:
-            adc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
+            adc = get_adcirc_stations.get_adcirc_stations(source='TDS', product=args.data_product,
                     station_list_file=ndbc_station_file,
                     knockout_dict=None, fort63_style=fort63_style )
-            data_adc,meta_adc=adc.fetch_station_product( [swan_input_url] , return_sample_min=args.return_sample_min, fort63_style=fort63_style, variable_name='swan_HS'  )
+            data_adc,meta_adc=adc.fetch_station_product( [swan_input_url] , return_sample_min=args.return_sample_min, fort63_style=fort63_style, variable_name='swan_HS', keep_earliest_url=True)
             # Revert Harvester filling of nans to -99999 back to nans
             data_adc.replace('-99999',np.nan,inplace=True)
             meta_adc.replace('-99999',np.nan,inplace=True)
@@ -421,10 +432,10 @@ def main(args):
         swan_now_urls = nowadc.build_url_list_from_template_url_and_offset(ensemble='nowcast')
         swan_now_urls = get_adcirc_stations.convert_urls_to_swan_63style(swan_now_urls)
         try:
-            swan_nowadc = get_adcirc_stations.get_adcirc_stations(source='ASGS', product=args.data_product,
+            swan_nowadc = get_adcirc_stations.get_adcirc_stations(source='TDS', product=args.data_product,
                     station_list_file=ndbc_station_file,
                     knockout_dict=None, fort63_style=fort63_style )
-            data_now_adc,meta_now_adc=swan_nowadc.fetch_station_product(swan_now_urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style,variable_name='swan_HS')
+            data_now_adc,meta_now_adc=swan_nowadc.fetch_station_product(swan_now_urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style,variable_name='swan_HS',keep_earliest_url=keep_earliest_url)
             data_now_adc.replace('-99999',np.nan,inplace=True)
             meta_now_adc.replace('-99999',np.nan,inplace=True)
             outputs_dict['SWAN Nowcast']=data_now_adc
@@ -469,7 +480,6 @@ def main(args):
 
     t0 = tm.time()
 
-
 ##
 ## Select from RUNTIMEDIR, where to write these files
 ##
@@ -501,11 +511,10 @@ def main(args):
     df_station_nodes = pd.concat(meta_list,axis=1)
     df_station_nodes.bfill(axis="columns", inplace=True)
     df_station_nodes = df_station_nodes.iloc[:, 0].to_frame()
-
-    df_station_file_png_locations = pd.concat([df_station_file_png_locations,df_station_nodes],axis=1)
+    dx = pd.concat([df_station_file_png_locations,df_station_nodes],axis=1)
+    df_station_file_png_locations = dx.loc[df_station_file_png_locations.index].copy()
     df_station_file_png_locations.index.name='StationId'
     utilities.log.info('Update station_props file with Node information')
-    
     station_props = io_utilities.write_csv(df_station_file_png_locations[['StationName','State','Lat','Lon','Node','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationProps',iometadata='')
     utilities.log.info('Wrote out station_properties file to {}'.format(station_props))
 
@@ -552,11 +561,11 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument('--url', action='store', dest='url', default=None, type=str,
-                        help='ASGS url to fetch ADCIRC data')
+                        help='TDS url to fetch ADCIRC data')
     parser.add_argument('--sources', action='store_true',
                         help='List currently supported data sources')
-    parser.add_argument('--data_source', action='store', dest='data_source', default='ASGS', type=str,
-                        help='choose supported data source (case independant) eg ASGS')
+    parser.add_argument('--data_source', action='store', dest='data_source', default='TDS', type=str,
+                        help='choose supported data source (case independant) eg TDS')
     parser.add_argument('--data_product', action='store', dest='data_product', default='water_level', type=str,
                         help='choose supported data product eg water_level')
     parser.add_argument('--return_sample_min', action='store', dest='return_sample_min', default=60, type=int,
@@ -590,5 +599,7 @@ if __name__ == '__main__':
                         help='String: Custom location for the output dicts, PNGs and logs')
     parser.add_argument('--instanceId', action='store', dest='instanceId', default=None,
                         help='String: Extra optional ID for use by the logger for specifying log location')
+    parser.add_argument('--keep_earliest_url', action='store_true', default=False,
+                        help='Boolean: Will not remove the earliest nowcast in the generate_url nowcast list')
     args = parser.parse_args()
     sys.exit(main(args))
