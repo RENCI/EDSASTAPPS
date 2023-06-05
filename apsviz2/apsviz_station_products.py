@@ -167,7 +167,7 @@ def main(args):
     noaa_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='NOAA_STATIONS')
     if noaa_station_file is not None:
         try:
-            obs = get_obs_stations.get_obs_stations(source='NOAA', product='water_level',
+            obs = get_obs_stations.get_obs_stations(source='NOAAWEB', product='water_level',
                 station_list_file=noaa_station_file)
             data_obs,meta_obs=obs.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=0, interval='None' )
             data_obs.replace('-99999',np.nan,inplace=True)
@@ -346,7 +346,7 @@ def main(args):
 ##
     # Want times from beginning of the nowcasts to the end of the ADCIRC forecasts
 
-    pred = get_obs_stations.get_obs_stations(source='NOAA', product='predictions',
+    pred = get_obs_stations.get_obs_stations(source='NOAAWEB', product='predictions',
                 station_list_file=station_file)
 
     t0 = tm.time()
