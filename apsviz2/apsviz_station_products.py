@@ -512,15 +512,19 @@ def main(args):
             meta_list.append(meta_data)
         except Exception as e:
             pass
-    df_station_nodes = pd.concat(meta_list,axis=1)
-    df_station_nodes.bfill(axis="columns", inplace=True)
-    df_station_nodes = df_station_nodes.iloc[:, 0].to_frame()
-    dx = pd.concat([df_station_file_png_locations,df_station_nodes],axis=1)
-    df_station_file_png_locations = dx.loc[df_station_file_png_locations.index].copy()
-    df_station_file_png_locations.index.name='StationId'
-    utilities.log.info('Update station_props file with Node information')
-    station_props = io_utilities.write_csv(df_station_file_png_locations[['StationName','State','Lat','Lon','Node','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationProps',iometadata='')
-    utilities.log.info('Wrote out station_properties file to {}'.format(station_props))
+    try:
+        df_station_nodes = pd.concat(meta_list,axis=1)
+        df_station_nodes.bfill(axis="columns", inplace=True)
+        df_station_nodes = df_station_nodes.iloc[:, 0].to_frame()
+        dx = pd.concat([df_station_file_png_locations,df_station_nodes],axis=1)
+        df_station_file_png_locations = dx.loc[df_station_file_png_locations.index].copy()
+        df_station_file_png_locations.index.name='StationId'
+        utilities.log.info('Update station_props file with Node information')
+        station_props = io_utilities.write_csv(df_station_file_png_locations[['StationName','State','Lat','Lon','Node','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationProps',iometadata='')
+        utilities.log.info(f'Wrote out station_properties file to {station_props}')
+    except Exception as e:
+        utilities.log.error(f'Failed to write out station_properties file to {station_props}')
+        sys.exit(1)
 
 ##
 ## Optionally create temporary CSV files to grab the actual timeseries data for each station that was used to create the pngs. Also improve the data by including the ADCIRC Node number
