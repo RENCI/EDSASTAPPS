@@ -494,8 +494,12 @@ def main(args):
 ##
 ## Generate PER_STATION plots for APSVIZ2 insets
 ##
-    df_station_file_png_locations = station_plotter.generate_station_specific_PNGs(outputs_dict, 
-        outputs_metadict, outputdir=rootdir, station_id_list=None)
+    try:
+        df_station_file_png_locations = station_plotter.generate_station_specific_PNGs(outputs_dict, 
+            outputs_metadict, outputdir=rootdir, station_id_list=None)
+    except Exception as e:
+        utilities.log.error(f'No stations generated any plots {e}')
+        sys.exit(1)
 
 ## 
 ## Improve the PER_STATION metadata object by adding Node metadata. These are either from fort63 or fort61 adcirc updates

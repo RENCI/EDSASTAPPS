@@ -347,6 +347,8 @@ def build_station_filename_map_to_csv(station_dict)->pd.DataFrame:
     return df[['StationName','State','Lat','Lon','Type']]
 
 # Build a station-specific plot
+
+# Disabled dashes=dashlist caused by some mismatch between seaborn and matplotlib with no apparent solution
 def create_station_specific_plot(fig, stationid, station_name, df_concat, time_range):
     """
     the input fig is updated in-place
@@ -361,7 +363,7 @@ def create_station_specific_plot(fig, stationid, station_name, df_concat, time_r
     df_concat = update_headers_concat_dataframe(df_concat)
     #
     sns.set_style('darkgrid')
-    ax=sns.lineplot(data=df_concat, palette=colorlist, dashes=dashlist)
+    ax=sns.lineplot(data=df_concat, palette=colorlist) #, dashes=dashlist)
     ax.legend(loc = 4,fontsize = 6)
     ax.set_ylabel('meters', fontsize=7)
     ax.set_ylim([ymin, ymax])
