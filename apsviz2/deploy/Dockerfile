@@ -1,18 +1,20 @@
 ##############
 # Docker file for the creation of the adcirc support tools (AST).
 ##############
-FROM continuumio/miniconda3
+#FROM continuumio/miniconda3-centos7
+
+FROM conda/miniconda3-centos7
+
+# As it reads
+RUN yum install -y git
 
 # get some credit
 LABEL maintainer="jtilson@renci.org"
 
-# update sources list, and install basic apps, one per line for better caching
-RUN apt-get clean && apt-get --allow-releaseinfo-change update &&\
-    apt-get install -qy vim
+# update conda and set the download channel. This will bost python to 3.10+ and update ssl certs code
 
-# update conda and set the download channel
-RUN conda update conda && \
-    conda config --add channels conda-forge
+RUN conda config --add channels conda-forge
+RUN conda update -y conda
 
 # tell conda what the shell is
 RUN conda init bash
@@ -34,10 +36,6 @@ RUN git clone https://github.com/RENCI/buoypy.git
 
 # move to the deploy directory
 WORKDIR /home/nru/repo/EDSASTAPPS/apsviz2/deploy
-
-# Create the environment, initialize conda in bash config files, and install repos:
-COPY environment.yml .
-RUN conda env create -f environment.yml
                                 
 # install the pip requirements
 RUN pip install -r pip_requirements.txt
@@ -54,6 +52,12 @@ USER nru
 
 # change to the apsviz2 pipelines directory                        
 WORKDIR /home/nru/repo/EDSASTAPPS/apsviz2
+
+# This is just a reminder. SuperV will set these in k8s at launch time 
+#export http_proxy=http://proxy.renci.org:8080
+#export https_proxy=http://proxy.renci.org:8080
+#export HTTP_PROXY=http://proxy.renci.org:8080
+#export HTTPS_PROXY=http://proxy.renci.org:8080
 
 ## set the python path
 ENV PYTHONPATH=/home/nru/repo/AST:/home/nru/repo/EDSASTAPPS
