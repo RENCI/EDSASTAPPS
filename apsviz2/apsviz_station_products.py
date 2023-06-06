@@ -531,28 +531,38 @@ def main(args):
 ## No NODE data is captured here
 
     if args.construct_csvs:
-        for stationid in df_station_nodes.index:
-            df_station = station_plotter.build_source_concat_dataframe(outputs_dict, stationid)
-            df_station_file_csv_locations = station_plotter.generate_station_specific_CSVs(outputs_dict, outputs_metadict, outputdir=rootdir, station_id_list=None )
-            print(f'Location {df_station_file_csv_locations}')
-            station_csvs = io_utilities.write_csv(df_station_file_csv_locations[['StationName','State','Lat','Lon','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationPropsCSV',iometadata='')
+        try:
+            for stationid in df_station_nodes.index:
+                df_station = station_plotter.build_source_concat_dataframe(outputs_dict, stationid)
+                df_station_file_csv_locations = station_plotter.generate_station_specific_CSVs(outputs_dict, outputs_metadict, outputdir=rootdir, station_id_list=None )
+                print(f'Location {df_station_file_csv_locations}')
+                station_csvs = io_utilities.write_csv(df_station_file_csv_locations[['StationName','State','Lat','Lon','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationPropsCSV',iometadata='')
+        except Exception as e:
+            utilities.log.error(f'Failed to write out csv files: {e}')
+            sys.exit(1)
+        
 ##
 ## Optionally grab the actual timeseries data for each station that was used to create the pngs. Also improve the data by including the ADCIRC Node number
 ##
     if args.construct_jsons:
-        utilities.log.info('Construct and save individual per-station json fles')
-        stations_dicts, df_station_file_json_locations = station_plotter.generate_station_specific_DICTS(outputs_dict, outputs_metadict, station_id_list=None)
-        print(df_station_file_json_locations)
-        json_files=list()
-        for key,item in stations_dicts.items():
-            json_file = io_utilities.write_dict_to_json(item, rootdir=rootdir,subdir='',fileroot=f'{key}_WL',iometadata='')
-            json_files.append(json_file)
-            print(f'Wrote json timeseries file {json_file}')
-        df_json_files = pd.DataFrame(json_files,columns=['Filename'], index=df_station_file_json_locations.index)
-        df_station_file_json_locations = pd.concat([df_station_file_json_locations,df_station_nodes,df_json_files],axis=1)
-        df_station_file_json_locations.index.name='StationId'
-        station_timeseries_props = io_utilities.write_csv(df_station_file_json_locations[['StationName','State','Lat','Lon','Node','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationJsons',iometadata='')
-        utilities.log.info('Update station_json file with Node information')
+        try:
+            utilities.log.info('Construct and save individual per-station json fles')
+            stations_dicts, df_station_file_json_locations = station_plotter.generate_station_specific_DICTS(outputs_dict, outputs_metadict, station_id_list=None)
+            #print(df_station_file_json_locations)
+            json_files=list()
+            for key,item in stations_dicts.items():
+                json_file = io_utilities.write_dict_to_json(item, rootdir=rootdir,subdir='',fileroot=f'{key}_WL',iometadata='')
+                json_files.append(json_file)
+                #print(f'Wrote json timeseries file {json_file}')
+            df_json_files = pd.DataFrame(json_files,columns=['Filename'], index=df_station_file_json_locations.index)
+            df_station_file_json_locations = pd.concat([df_station_file_json_locations,df_station_nodes,df_json_files],axis=1)
+            df_station_file_json_locations.index.name='StationId'
+            station_timeseries_props = io_utilities.write_csv(df_station_file_json_locations[['StationName','State','Lat','Lon','Node','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationJsons',iometadata='')
+            utilities.log.info('Update station_json file with Node information')
+        except Exception as e:
+            utilities.log.error(f'Failed to write out json files: {e}')
+            sys.exit(1)
+
 ##
 ## Copy over logfile into the rootdir so as to reside with the output data sets
 ##
