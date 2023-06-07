@@ -504,6 +504,7 @@ def main(args):
 ## 
 ## Improve the PER_STATION metadata object by adding Node metadata. These are either from fort63 or fort61 adcirc updates
 ## process all metadata entries, see which ones have a Node column, and if true keep it
+## For station that had no Node data simply insert 'None'
 ##
     meta_list = list()
     for key,item in outputs_metadict.items():
@@ -532,7 +533,7 @@ def main(args):
 
     if args.construct_csvs:
         try:
-            for stationid in df_station_nodes.index:
+            for stationid in df_station_file_png_locations.index:
                 df_station = station_plotter.build_source_concat_dataframe(outputs_dict, stationid)
                 df_station_file_csv_locations = station_plotter.generate_station_specific_CSVs(outputs_dict, outputs_metadict, outputdir=rootdir, station_id_list=None )
                 print(f'Location {df_station_file_csv_locations}')
