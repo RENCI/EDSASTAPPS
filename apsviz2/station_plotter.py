@@ -144,7 +144,7 @@ def union_station_types( outputs_dict, station_id_list=None) ->dict:
             if station in station_types.keys():
                 # Check and compare: Stop if inconsistency
                 testtype=station_types[station]
-                if testtype is 'None':
+                if testtype == 'None':
                     station_types[station]=datatype
                 if testtype is not datatype:
                     print('Unexpected mixed station types found {} vs {} at station {}'.format(testtype,station_types[station],station))
