@@ -55,7 +55,7 @@ dashdict['misc']=(3,2)
 ## Build more informative plots by better annotating the Legends
 ##
 
-LEGENDS_MAP={
+OLDLEGENDS_MAP={
      'NOAA Tidal': 'NOAA Tidal: Water level',
      'NOAA NOS': 'NOAA NOS: Water level',
      'NDBC': 'NDBC: Wave height (WVHT)',
@@ -69,6 +69,22 @@ LEGENDS_MAP={
      'Forecast': 'Forecast: Water level',
      'Difference': 'Difference: Water level',
      'Nowcast': 'Nowcast: Water level'}
+
+LEGENDS_MAP={
+     'NOAA Tidal': 'NOAA Tidal Prediction',
+     'NOAA NOS': 'Observations',
+     'NDBC': 'Observations',
+     'SWAN': 'SWAN: Wave height',
+     'SWAN Forecast': 'APS Forecast',
+     'SWAN Nowcast': 'APS Norecast',
+     'Contrails Forecast': 'APS Forecast',
+     'Contrails Nowcast': 'APS Nowcast',
+     'Contrails': 'Observations',
+     'Contrails Coastal': 'Observations',
+     'Forecast': 'APS Forecast',
+     'Difference': 'Difference',
+     'Nowcast': 'APS Nowcast'}
+
 
 def union_all_source_stations(outputs_dict, station_id_list=None)->list:
     """
@@ -153,7 +169,7 @@ def union_station_types( outputs_dict, station_id_list=None) ->dict:
                 station_types[station]=datatype
     return station_types
 
-def union_station_names( outputs_meta_dict, station_id_list=None) ->dict:
+def union_station_names( outputs_meta_dict, outputs_meta_dict_sources, station_id_list=None) ->dict:
     """
     Starting with a complete list of possible stations (derived from union_all_source_stations)
     compute the associated list of actual station name. These are used as Title for subsequent
@@ -173,14 +189,14 @@ def union_station_names( outputs_meta_dict, station_id_list=None) ->dict:
     
     s_metadata=dict()
     for key in outputs_meta_dict.keys(): # possible_source_keys:
-        #print(key)
         try:
             df_meta=outputs_meta_dict[key]
             df_meta.fillna("-99999", inplace=True)
+            source = outputs_meta_dict_sources[key]
             for station in df_meta.index:
                 df_meta.loc[station]
                 lon,lat,name,state=df_meta.loc[station][['LON','LAT','NAME','STATE']]
-                s_metadata[station]={'LON':lon,'LAT':lat,'NAME': name, 'STATE':state}
+                s_metadata[station]={'LON':lon,'LAT':lat,'NAME': name, 'STATE':state, 'SOURCE':source}
         except KeyError:
             pass
     if len(s_metadata)==0:
@@ -260,6 +276,8 @@ def source_to_style(source_list):
 
 # Build a concatenated dataframe with headers of the indicated source
 
+# Modify the Mappings so that the output files and metadata conform to the UI punch list V1, June 2023
+
 def build_source_concat_dataframe(outputs_dict, stationid)->pd.DataFrame:
     """
     For the input dictionary, grab each SOURCE and find the data for the desired station (if any)
@@ -320,11 +338,11 @@ def build_filename_map_to_csv(png_dict)->pd.DataFrame:
     """
     df=pd.DataFrame(png_dict['STATIONS']).T
     #df.columns=('Lat','Lon','State','StationName','Filename')
-    df.rename(columns = {'LON':'Lon', 'LAT':'Lat', 'FILENAME':'Filename', 'TYPE':'Type', 'STATE':'State','STATIONNAME':'StationName'}, inplace = True)
+    df.rename(columns = {'LON':'Lon', 'SOURCE':'Source', 'LAT':'Lat', 'FILENAME':'Filename', 'TYPE':'Type', 'STATE':'State','STATIONNAME':'StationName'}, inplace = True)
     df.index.name='StationId'
     df['Lat'] = df['Lat'].astype(float)
     df['Lon'] = df['Lon'].astype(float)
-    return df[['StationName','State','Lat','Lon','Filename','Type']]
+    return df[['StationName','Source','State','Lat','Lon','Filename','Type']]
 
 def build_station_filename_map_to_csv(station_dict)->pd.DataFrame:
     """
@@ -340,11 +358,11 @@ def build_station_filename_map_to_csv(station_dict)->pd.DataFrame:
     """
     df=pd.DataFrame(station_dict['STATIONS']).T
     #df.columns=('Lat','Lon','State','StationName','Filename')
-    df.rename(columns = {'ID':'Id','LON':'Lon','LAT':'Lat', 'TIMESERIES':'Timeseries', 'TYPE':'Type', 'STATE':'State','STATIONNAME':'StationName'}, inplace = True)
+    df.rename(columns = {'ID':'Id','SOURCE':'Source','LON':'Lon','LAT':'Lat', 'TIMESERIES':'Timeseries', 'TYPE':'Type', 'STATE':'State','STATIONNAME':'StationName'}, inplace = True)
     df.index.name='StationId'
     df['Lat'] = df['Lat'].astype(float)
     df['Lon'] = df['Lon'].astype(float)
-    return df[['StationName','State','Lat','Lon','Type']]
+    return df[['StationName','Source','State','Lat','Lon','Type']]
 
 # Build a station-specific plot
 
@@ -406,7 +424,7 @@ def find_widest_timerange(outputs_dict):
 
 # The After NAN can happen, for example, if a station has No OBS and l the ADC data are nans.
 
-def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.', station_id_list=None )->pd.DataFrame:
+def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputs_meta_dict_sources, outputdir='.', station_id_list=None )->pd.DataFrame:
     """
     The input dicts will be processed to build individual FIGS for each fund station id 
     Once a figure is created it cannot be put into a dict and then closed. So we MUST write out the file here.
@@ -420,7 +438,7 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
     # How to handle DUPLICATE variable names?
 
     stations_union_source_list = union_all_source_stations(outputs_dict, station_id_list = station_id_list)
-    station_names = union_station_names( outputs_meta_dict, station_id_list=station_id_list)
+    station_names = union_station_names( outputs_meta_dict, outputs_meta_dict_sources, station_id_list=station_id_list)
     station_types = union_station_types( outputs_dict, station_id_list = station_id_list)
 
     tmin,tmax = find_widest_timerange(outputs_dict)
@@ -437,6 +455,7 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
             lon = station_names[station]['LON']
             lat = station_names[station]['LAT']
             state = station_names[station]['STATE']
+            source = station_names[station]['SOURCE']
             st_type = station_types[station]
             # Build fig
             plt.close()
@@ -446,8 +465,7 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
             filename=outputdir+'/'+station+'_WL.png'
             try:
                 plt.savefig(filename)
-                print('Wrote PNG to {}'.format(filename))
-                data_dict[station]={'LAT':str(lat), 'LON':str(lon), 'STATE': state, 'STATIONNAME': station_name, 'TYPE': st_type, 'FILENAME':filename}
+                data_dict[station]={'SOURCE': source, 'LAT':str(lat), 'LON':str(lon), 'STATE': state, 'STATIONNAME': station_name, 'TYPE': st_type, 'FILENAME':filename}
             except Exception as e:
                 print('Failed writing PNG {}'.format(e))
         else:
@@ -456,7 +474,7 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputdir='.
     figure_dataframe = build_filename_map_to_csv(figures_dict)
     return figure_dataframe 
 
-def generate_station_specific_CSVs(outputs_dict, outputs_meta_dict, outputdir='.', station_id_list=None )->pd.DataFrame:
+def generate_station_specific_CSVs(outputs_dict, outputs_meta_dict, outputs_meta_dict_sources, outputdir='.', station_id_list=None )->pd.DataFrame:
     """
     The input dicts will be processed to build individual CSV files for each station id 
     This is only a temporary solution until the new plotting software gets designed
@@ -469,7 +487,7 @@ def generate_station_specific_CSVs(outputs_dict, outputs_meta_dict, outputdir='.
     # How to handle DUPLICATE variable names?
 
     stations_union_source_list = union_all_source_stations(outputs_dict, station_id_list = station_id_list)
-    station_names = union_station_names( outputs_meta_dict, station_id_list=station_id_list)
+    station_names = union_station_names( outputs_meta_dict, outputs_meta_dict_sources, station_id_list=station_id_list)
     station_types = union_station_types( outputs_dict, station_id_list = station_id_list)
 
     tmin,tmax = find_widest_timerange(outputs_dict)
@@ -479,6 +497,7 @@ def generate_station_specific_CSVs(outputs_dict, outputs_meta_dict, outputdir='.
     for station in station_names.keys(): # Only want stations that have known ID names. 
         df_concat = build_source_concat_dataframe(outputs_dict, station)
         # Remove completely nan remaining stations
+        df_concat = update_headers_concat_dataframe(df_concat)
         df_concat.dropna(axis=1, how='all', inplace=True)
         print('After NAN reduction remaining sources is {}.Shape was {}'.format(station, df_concat.shape[1]))
         if df_concat.shape[1] > 0:
@@ -486,18 +505,18 @@ def generate_station_specific_CSVs(outputs_dict, outputs_meta_dict, outputdir='.
             lon = station_names[station]['LON']
             lat = station_names[station]['LAT']
             state = station_names[station]['STATE']
+            source = station_names[station]['SOURCE']
             st_type = station_types[station]
             filename=outputdir+'/'+station+'_WL.csv'
             df_concat.to_csv(filename)
-            print(f'Wrote file {filename}')
-            data_dict[station]={'LAT':str(lat), 'LON':str(lon), 'STATE': state, 'STATIONNAME': station_name, 'TYPE': st_type, 'FILENAME':filename}
+            data_dict[station]={'SOURCE': source, 'LAT':str(lat), 'LON':str(lon), 'STATE': state, 'STATIONNAME': station_name, 'TYPE': st_type, 'FILENAME':filename}
         else:
             print(f'Station {station} had no surviving CSV data to plot')
     csv_dict = {'STATIONS':data_dict} # Conform to current apsviz2 procedure
     csv_dataframe = build_filename_map_to_csv(csv_dict)
     return csv_dataframe 
 
-def generate_station_specific_DICTS(outputs_dict, outputs_meta_dict, station_id_list=None):
+def generate_station_specific_DICTS(outputs_dict, outputs_meta_dict, outputs_meta_dict_sources, station_id_list=None):
     """
     Construct dicts for each station containing the actual plot data that would be used to create pngs. 
     Store them into an overall dict and return the dict for subsequent storage as a series of jsons
@@ -505,27 +524,30 @@ def generate_station_specific_DICTS(outputs_dict, outputs_meta_dict, station_id_
     Also, return a dataframe that lists the set of dicts created and their stationid.
     """
     stations_union_source_list = union_all_source_stations(outputs_dict, station_id_list = station_id_list)
-    station_names = union_station_names( outputs_meta_dict, station_id_list=station_id_list)
+    station_names = union_station_names( outputs_meta_dict, outputs_meta_dict_sources, station_id_list=station_id_list)
     station_types = union_station_types( outputs_dict, station_id_list = station_id_list)
     station_dict=dict()
     for station in station_names.keys(): # Only want stations that have known ID names. 
         df_concat = build_source_concat_dataframe(outputs_dict, station)
+        df_concat = update_headers_concat_dataframe(df_concat)
         # Remove completely nan remaining stations
         df_concat.dropna(axis=1, how='all', inplace=True)
         df_concat.index = df_concat.index.strftime('%Y-%m-%d %H:%M:%S')
         df_concat.fillna(-99999, inplace=True)
-        #df_concat.replace(np.nan,'-99999',inplace=True)
-        print('JSON: After NAN reduction remaining sources is {}.Shape was {}'.format(station, df_concat.shape[1]))
-        station_name = station_names[station]['NAME']
-        lon = station_names[station]['LON']
-        lat = station_names[station]['LAT']
-        state = station_names[station]['STATE']
-        st_type = station_types[station]
-        # Build station-specific dicts
-        station_dict[station]={'ID':station,'LAT':str(lat), 'LON':str(lon), 'STATE': state, 'STATIONNAME': station_name, 'TYPE': st_type, 'TIMESERIES':df_concat.to_dict()}
+        if df_concat.shape[1] > 0:
+            station_name = station_names[station]['NAME']
+            lon = station_names[station]['LON']
+            lat = station_names[station]['LAT']
+            state = station_names[station]['STATE']
+            source = station_names[station]['SOURCE']
+            st_type = station_types[station]
+            station_dict[station]={'ID':station,'SOURCE': source,'LAT':str(lat), 'LON':str(lon), 'STATE': state, 'STATIONNAME': station_name, 'TYPE': st_type, 'TIMESERIES':df_concat.to_dict()}
+        else:
+            print(f'Station {station} had no surviving data for DICT`')
     station_all_dict={'STATIONS':station_dict}
-    station_all_dict_clean = {k: {k2: "-99999" if v2 == 'NaN' else v2 for k2, v2 in v.items()} \
-                    for k, v in station_all_dict.items()}
+
+    # Do we need this?
+    #station_all_dict_clean = {k: {k2: "-99999" if v2 == 'NaN' else v2 for k2, v2 in v.items()} \
+    #                for k, v in station_all_dict.items()}
     station_dataframe=build_station_filename_map_to_csv(station_all_dict) 
-    print(f'station specific dicts of len {len(station_dict)}')
     return station_dict, station_dataframe

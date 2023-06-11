@@ -59,6 +59,7 @@ def main(args):
 
     outputs_dict=dict()
     outputs_metadict=dict()
+    outputs_metadict_sources=dict()
 
     # Basic checks
     if args.config_name is None:
@@ -106,6 +107,7 @@ def main(args):
         meta_adc.replace('-99999',np.nan,inplace=True)
         outputs_dict['Forecast']=data_adc
         outputs_metadict['Forecast']=meta_adc
+        outputs_metadict_sources['Forecast']='NOAA/NOS'
         utilities.log.info('Finished with ADCIRC Forecasts')
 
         # Grab the stop and start times from the data set. Will be needed for tidal predictions data
@@ -148,6 +150,7 @@ def main(args):
         meta_now_adc.replace('-99999',np.nan,inplace=True)
         outputs_dict['Nowcast']=data_now_adc
         outputs_metadict['Nowcast']=meta_now_adc
+        outputs_metadict_sources['Nowcast']='NOAA/NOS'
         valid_now.append(data_now_adc)
         utilities.log.info('Finished with ADCIRC Nowcasts')
         #print(now_urls)
@@ -181,6 +184,7 @@ def main(args):
             data_obs_smoothed = obs.fetch_smoothed_station_product(data_thresholded, return_sample_min=args.return_sample_min, window=11)
             outputs_dict['NOAA NOS']=data_obs_smoothed
             outputs_metadict['NOAA NOS']=meta_obs_thresholded
+            outputs_metadict_sources['NOAA NOS']='NOAA/NOS'
             valid_obs.append(data_obs_smoothed)
             valid_obs_meta.append(meta_obs)
             utilities.log.info('Finished with NOAA Observations')
@@ -212,6 +216,7 @@ def main(args):
             cont_meta = cont_meta.loc[cont_meta_list]
             outputs_dict['Contrails']=cont_data
             outputs_metadict['Contrails']=cont_meta
+            outputs_metadict_sources['Contrails']='CONTRAILS'
             #valid_obs.append(cont_data)
             #valid_obs_meta.append(cont_meta)
             utilities.log.info('Finished with Contrails Observations')
@@ -254,6 +259,7 @@ def main(args):
             meta_contrail_coastal_adc.replace('-99999',np.nan,inplace=True)
             outputs_dict['Contrails Forecast']=data_contrail_coastal_adc
             outputs_metadict['Contrails Forecast']=meta_contrail_coastal_adc
+            outputs_metadict_sources['Contrails Forecast']='CONTRAILS'
             utilities.log.info('Finished with Contrails Coastal Forecasts')
             # Grab the stop and start times from the data set. Will be needed for tidal predictions data
             time_index=data_contrail_coastal_adc.index.tolist()
@@ -290,6 +296,7 @@ def main(args):
             meta_now_adc.replace('-99999',np.nan,inplace=True)
             outputs_dict['Contrails Nowcast']=data_now_adc
             outputs_metadict['Contrails Nowcast']=meta_now_adc
+            outputs_metadict_sources['Contrails Nowcast']='CONTRAILS'
             utilities.log.info('Finished with Contrails Coastal Nowcasts')
             valid_now.append(data_now_adc)
             print(contrails_coastal_now_urls)
@@ -317,13 +324,12 @@ def main(args):
             cont_coastal_meta = cont_coastal_meta.loc[cont_coastal_meta_list]
             outputs_dict['Contrails Coastal']=cont_coastal_data
             outputs_metadict['Contrails Coastal']=cont_coastal_meta
+            outputs_metadict_sources['Contrails Coastal']='CONTRAILS'
             # DO we want to smooth these data too?
             valid_obs.append(cont_coastal_data)
             valid_obs_meta.append(cont_coastal_meta)
             utilities.log.info('Finished with Contrails Coastal Observations')
-            print(f' CONT OBS {cont_coastal_data}')
             cont_coastal_data.to_csv('junk.csv') # Doesn't exist
-            print(f' CONT SHIT {cont_coastal_data["EGHN7"]}') # Doesnt exist
         except Exception as e:
             utilities.log.error('CONTRAILS: Broad failure. Failed to find any CONTRAILS Coastal data. System key supplied ?: {}'.format(e))
     total_time = tm.time() - t0
@@ -336,7 +342,6 @@ def main(args):
         if (len(valid_obs)>0): data_obs_smoothed = pd.concat(valid_obs,axis=1)
         if (len(valid_now)>0): data_adc_full=pd.concat(valid_now,axis=1)
         if (len(valid_obs_meta)>0):meta_obs = pd.concat(valid_obs_meta,axis=0)
-        print(meta_obs)
     except Exception as e:
         utilities.log.error('Faild to concat obs and adcirc data: {}'.format(e))
         sys,exit(1)
@@ -358,6 +363,7 @@ def main(args):
         meta_pred = meta_pred.loc[meta_pred_list]
         outputs_dict['NOAA Tidal']=data_pred
         outputs_metadict['NOAA Tidal']=meta_pred
+        outputs_metadict_sources['NOAA Tidal']='NOAA/NOS'
         utilities.log.info('Finished with Tidal Predictions')
     except Exception as e:
         utilities.log.error('TIDAL: Broad failure. Failed to find any TIDAL data: {}'.format(e))
@@ -408,6 +414,7 @@ def main(args):
             meta_adc.replace('-99999',np.nan,inplace=True)
             outputs_dict['SWAN Forecast']=data_adc
             outputs_metadict['SWAN Forecast']=meta_adc
+            outputs_metadict_sources['SWAN Forecast']='NDBC'
             utilities.log.info('Finished with SWAN Forecasts')
             # Grab the stop and start times from the data set. Will be needed for tidal predictions data
             time_index=data_adc.index.tolist()
@@ -440,6 +447,7 @@ def main(args):
             meta_now_adc.replace('-99999',np.nan,inplace=True)
             outputs_dict['SWAN Nowcast']=data_now_adc
             outputs_metadict['SWAN Nowcast']=meta_now_adc
+            outputs_metadict_sources['SWAN Nowcast']='NDBC'
             utilities.log.info('Finished with SWAN Nowcasts')
             print(swan_now_urls)
             print('SWAN Nowcast time range is from {} through {}'.format(obs_starttime, obs_endtime))
@@ -470,6 +478,7 @@ def main(args):
             meta_ndbc_thresholded = meta_ndbc.loc[meta_ndbc_list]
             outputs_dict['NDBC']=data_ndbc_thresholded
             outputs_metadict['NDBC']=meta_ndbc_thresholded
+            outputs_metadict_sources['NDBC']='NDBC'
             utilities.log.info('Finished with NDBC Observations')
             #valid_obs.append(data_ndbc) # Not needed for now but in the future if we choose to applt compute_error then ?
             #valid_obs_meta.append(meta_ndbc)
@@ -484,6 +493,7 @@ def main(args):
 ## Select from RUNTIMEDIR, where to write these files
 ##
 # More to the end of the script becasue we must enforce the fort63_style to retrieve these data
+
     if args.finalDIR is None:
         rootdir=io_utilities.construct_base_rootdir(config['DEFAULT']['RDIR'], base_dir_extra=None)
     else:
@@ -496,16 +506,18 @@ def main(args):
 ##
     try:
         df_station_file_png_locations = station_plotter.generate_station_specific_PNGs(outputs_dict, 
-            outputs_metadict, outputdir=rootdir, station_id_list=None)
+            outputs_metadict, outputs_metadict_sources, outputdir=rootdir, station_id_list=None)
     except Exception as e:
         utilities.log.error(f'No stations generated any plots {e}')
         sys.exit(1)
-
 ## 
 ## Improve the PER_STATION metadata object by adding Node metadata. These are either from fort63 or fort61 adcirc updates
 ## process all metadata entries, see which ones have a Node column, and if true keep it
 ## For station that had no Node data simply insert 'None'
 ##
+
+## Need to acount for Name Kludge
+
     meta_list = list()
     for key,item in outputs_metadict.items():
         try:
@@ -513,6 +525,7 @@ def main(args):
             meta_list.append(meta_data)
         except Exception as e:
             pass
+
     try:
         df_station_nodes = pd.concat(meta_list,axis=1)
         df_station_nodes.bfill(axis="columns", inplace=True)
@@ -521,7 +534,7 @@ def main(args):
         df_station_file_png_locations = dx.loc[df_station_file_png_locations.index].copy()
         df_station_file_png_locations.index.name='StationId'
         utilities.log.info('Update station_props file with Node information')
-        station_props = io_utilities.write_csv(df_station_file_png_locations[['StationName','State','Lat','Lon','Node','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationProps',iometadata='')
+        station_props = io_utilities.write_csv(df_station_file_png_locations[['StationName','Source','State','Lat','Lon','Node','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationProps',iometadata='')
         utilities.log.info(f'Wrote out station_properties file to {station_props}')
     except Exception as e:
         utilities.log.error(f'Failed to write out station_properties file to {station_props}')
@@ -534,10 +547,9 @@ def main(args):
     if args.construct_csvs:
         try:
             for stationid in df_station_file_png_locations.index:
-                df_station = station_plotter.build_source_concat_dataframe(outputs_dict, stationid)
-                df_station_file_csv_locations = station_plotter.generate_station_specific_CSVs(outputs_dict, outputs_metadict, outputdir=rootdir, station_id_list=None )
-                print(f'Location {df_station_file_csv_locations}')
-                station_csvs = io_utilities.write_csv(df_station_file_csv_locations[['StationName','State','Lat','Lon','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationPropsCSV',iometadata='')
+                ##df_station = station_plotter.build_source_concat_dataframe(outputs_dict, stationid)
+                df_station_file_csv_locations = station_plotter.generate_station_specific_CSVs(outputs_dict, outputs_metadict, outputs_metadict_sources, outputdir=rootdir, station_id_list=None )
+                station_csvs = io_utilities.write_csv(df_station_file_csv_locations[['StationName','Source', 'State','Lat','Lon','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationPropsCSV',iometadata='')
         except Exception as e:
             utilities.log.error(f'Failed to write out csv files: {e}')
             sys.exit(1)
@@ -545,20 +557,24 @@ def main(args):
 ##
 ## Optionally grab the actual timeseries data for each station that was used to create the pngs. Also improve the data by including the ADCIRC Node number
 ##
+ 
+# df_station_file_json_locations but the png list does not.has the erroneous EGHN7 station
+    
     if args.construct_jsons:
         try:
-            utilities.log.info('Construct and save individual per-station json fles')
-            stations_dicts, df_station_file_json_locations = station_plotter.generate_station_specific_DICTS(outputs_dict, outputs_metadict, station_id_list=None)
-            #print(df_station_file_json_locations)
+            utilities.log.info('Construct and save individual per-station json files')
+            stations_dicts, df_station_file_json_locations = station_plotter.generate_station_specific_DICTS(outputs_dict, outputs_metadict, outputs_metadict_sources, station_id_list=None)
             json_files=list()
-            for key,item in stations_dicts.items():
+            for stationid in df_station_file_png_locations.index:
+                key=stationid
+                item=stations_dicts[key]
                 json_file = io_utilities.write_dict_to_json(item, rootdir=rootdir,subdir='',fileroot=f'{key}_WL',iometadata='')
                 json_files.append(json_file)
-                #print(f'Wrote json timeseries file {json_file}')
             df_json_files = pd.DataFrame(json_files,columns=['Filename'], index=df_station_file_json_locations.index)
-            df_station_file_json_locations = pd.concat([df_station_file_json_locations,df_station_nodes,df_json_files],axis=1)
+            df_station_file_json_locations = pd.concat([df_station_file_json_locations, df_station_nodes.loc[df_station_file_json_locations.index], df_json_files.loc[df_station_file_json_locations.index]],axis=1)
+
             df_station_file_json_locations.index.name='StationId'
-            station_timeseries_props = io_utilities.write_csv(df_station_file_json_locations[['StationName','State','Lat','Lon','Node','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationJsons',iometadata='')
+            station_timeseries_props = io_utilities.write_csv(df_station_file_json_locations[['StationName','Source', 'State','Lat','Lon','Node','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationJsons',iometadata='')
             utilities.log.info('Update station_json file with Node information')
         except Exception as e:
             utilities.log.error(f'Failed to write out json files: {e}')
