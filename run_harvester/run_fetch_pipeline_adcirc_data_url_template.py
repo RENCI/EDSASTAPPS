@@ -167,10 +167,14 @@ def main(args):
     station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=grid_name, mapfile=map_file)
     utilities.log.info(f'Station file determined to be {station_file}')
 
-    rpl = get_adcirc_stations.get_adcirc_stations(source='TDS', product=args.data_product,
+    try:
+        rpl = get_adcirc_stations.get_adcirc_stations(source='TDS', product=args.data_product,
                 station_list_file=station_file, fort63_style=args.fort63_style )
 
-    data_adc,meta_adc=rpl.fetch_station_product(urls, return_sample_min=return_sample_min, fort63_style=args.fort63_style, variable_name=variable_name )
+        data_adc,meta_adc=rpl.fetch_station_product(urls, return_sample_min=return_sample_min, fort63_style=args.fort63_style, variable_name=variable_name )
+    except Exception as e:
+        utilities.log.error(f' Hard fail on fetching APS data {e}')
+        sys.exit(1)
 
     # Get extra info for amending output filenames
     sitename=rpl.sitename
