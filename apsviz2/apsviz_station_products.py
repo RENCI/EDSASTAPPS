@@ -571,8 +571,8 @@ def main(args):
                 json_file = io_utilities.write_dict_to_json(item, rootdir=rootdir,subdir='',fileroot=f'{key}_WL',iometadata='')
                 json_files.append(json_file)
             df_json_files = pd.DataFrame(json_files,columns=['Filename'], index=df_station_file_json_locations.index)
-            df_station_file_json_locations = pd.concat([df_station_file_json_locations, df_station_nodes.loc[df_station_file_json_locations.index], df_json_files.loc[df_station_file_json_locations.index]],axis=1)
-
+            dx = pd.concat([df_station_file_json_locations, df_station_nodes, df_json_files],axis=1)
+            df_station_file_json_locations = dx.loc[df_station_file_json_locations.index].copy()
             df_station_file_json_locations.index.name='StationId'
             station_timeseries_props = io_utilities.write_csv(df_station_file_json_locations[['StationName','Source', 'State','Lat','Lon','Node','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationJsons',iometadata='')
             utilities.log.info('Update station_json file with Node information')
