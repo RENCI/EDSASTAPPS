@@ -178,7 +178,7 @@ def main(args):
             # Remove stations with too many nans ( Note Harvester would have previously removed stations that are ALL NANS)
             data_thresholded = obs.remove_missingness_stations(data_obs, max_nan_percentage_cutoff=10)  # (Maximum allowable nans %)
             meta_thresholded = meta_obs.loc[data_thresholded.columns.tolist()]
-            meta_obs_list = set(data_thresholded.columns.tolist()).intersection(meta_obs.index.to_list())
+            meta_obs_list = list(set(data_thresholded.columns.tolist()).intersection(meta_obs.index.to_list()))
             meta_obs_thresholded = meta_obs.loc[meta_obs_list]
             # Apply a moving average (smooth) the data performed the required resampling to the desired rate followed by interpolating
             data_obs_smoothed = obs.fetch_smoothed_station_product(data_thresholded, return_sample_min=args.return_sample_min, window=11)
