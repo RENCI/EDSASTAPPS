@@ -348,7 +348,7 @@ def main(args):
 
 ##
 ## TIDAL PREDICTIONS. Get the NOAA station data
-##
+## Replace endtime with obs_endtime
     # Want times from beginning of the nowcasts to the end of the ADCIRC forecasts
 
     pred = get_obs_stations.get_obs_stations(source='NOAAWEB', product='predictions',
@@ -356,7 +356,7 @@ def main(args):
 
     t0 = tm.time()
     try:
-        data_pred,meta_pred=pred.fetch_station_product((obs_starttime,endtime), return_sample_min=args.return_sample_min, interval='None' )
+        data_pred,meta_pred=pred.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=args.return_sample_min, interval='None' )
         data_pred.replace('-99999',np.nan,inplace=True)
         meta_pred.replace('-99999',np.nan,inplace=True)
         meta_pred_list = set(data_pred.columns.tolist()).intersection(meta_pred.index.to_list())
