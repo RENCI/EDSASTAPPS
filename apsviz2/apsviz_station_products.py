@@ -356,7 +356,7 @@ def main(args):
 
     t0 = tm.time()
     try:
-        data_pred,meta_pred=pred.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=args.return_sample_min, interval='None' )
+        data_pred,meta_pred=pred.fetch_station_product((obs_starttime,endtime), return_sample_min=args.return_sample_min, interval='None' )
         data_pred.replace('-99999',np.nan,inplace=True)
         meta_pred.replace('-99999',np.nan,inplace=True)
         meta_pred_list = set(data_pred.columns.tolist()).intersection(meta_pred.index.to_list())
@@ -418,8 +418,6 @@ def main(args):
             utilities.log.info('Finished with SWAN Forecasts')
             # Grab the stop and start times from the data set. Will be needed for tidal predictions data
             time_index=data_adc.index.tolist()
-            starttime = min(time_index).strftime('%Y-%m-%d %H:%M:%S')
-            endtime = max(time_index).strftime('%Y-%m-%d %H:%M:%S')
         except Exception as e:
             utilities.log.error('SWAN Forecast: Broad failure. Failed to find any forecast data: {}'.format(e))
     total_time = tm.time() - t0
