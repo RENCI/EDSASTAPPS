@@ -534,6 +534,7 @@ def main(args):
         df_station_file_png_locations = dx.loc[df_station_file_png_locations.index].copy()
         df_station_file_png_locations.index.name='StationId'
         utilities.log.info('Update station_props file with Node information')
+        df_station_file_png_locations=df_station_file_png_locations.fillna('-99999')
         station_props = io_utilities.write_csv(df_station_file_png_locations[['StationName','Source','State','Lat','Lon','Node','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationProps',iometadata='')
         utilities.log.info(f'Wrote out station_properties file to {station_props}')
     except Exception as e:
@@ -549,6 +550,7 @@ def main(args):
             for stationid in df_station_file_png_locations.index:
                 ##df_station = station_plotter.build_source_concat_dataframe(outputs_dict, stationid)
                 df_station_file_csv_locations = station_plotter.generate_station_specific_CSVs(outputs_dict, outputs_metadict, outputs_metadict_sources, outputdir=rootdir, station_id_list=None )
+                df_station_file_csv_locations=df_station_file_csv_locations.fillna('-99999')
                 station_csvs = io_utilities.write_csv(df_station_file_csv_locations[['StationName','Source', 'State','Lat','Lon','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationPropsCSV',iometadata='')
         except Exception as e:
             utilities.log.error(f'Failed to write out csv files: {e}')
