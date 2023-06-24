@@ -222,7 +222,7 @@ def main(args):
                 contrails_yamlname='None',
                 knockout_dict=None, station_list_file=station_file)
     # Get data at highest resolution
-    data_obs,meta_obs=obs.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=0, interval='None' )
+    data_obs,meta_obs=obs.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=0)
     data_obs.replace('-99999',np.nan,inplace=True)
     meta_obs.replace('-99999',np.nan,inplace=True)
     # Remove stations with too many nans ( Note Harvester would have previously removed stations that are ALL NANS)
