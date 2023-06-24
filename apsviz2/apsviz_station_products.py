@@ -238,8 +238,8 @@ def main(args):
 ##
 ## Forecast
 ##
-    utilities.log.info('Switch to fort63_style lookups for the Contrails coastal data')
     fort63_style = False
+    utilities.log.info('Contrails lookup in ADCIRC: If fort63 switch url else try fort61')
 
     t0 = tm.time()
     contrails_coastal_station_file, fort63_compliant = grid_to_station_maps.find_station_list_from_map(gridname=args.gridname, mapfile=args.map_file, datatype='CONTRAILS_COASTAL')
@@ -252,7 +252,7 @@ def main(args):
             adc = get_adcirc_stations.get_adcirc_stations(source='TDS', product=args.data_product,
                     station_list_file=contrails_coastal_station_file,
                     knockout_dict=None, fort63_style=fort63_style )
-            data_contrail_coastal_adc,meta_contrail_coastal_adc=adc.fetch_station_product( [contrails_coastal_url] , return_sample_min=args.return_sample_min, fort63_style=fort63_style, keep_earliest_url=keep_earliest_url)
+            data_contrail_coastal_adc,meta_contrail_coastal_adc=adc.fetch_station_product( [contrails_coastal_url] , return_sample_min=args.return_sample_min, fort63_style=fort63_style, keep_earliest_url=True)
             # Revert Harvester filling of nans to -99999 back to nans
             ##print(data_contrail_coastal_adc['30048'].sum())
             data_contrail_coastal_adc.replace('-99999',np.nan,inplace=True)
@@ -291,7 +291,6 @@ def main(args):
                     station_list_file=contrails_coastal_station_file,
                     knockout_dict=None, fort63_style=fort63_style )
             data_now_adc,meta_now_adc=contrails_coastal_nowadc.fetch_station_product(contrails_coastal_now_urls, return_sample_min=args.return_sample_min, fort63_style=fort63_style, keep_earliest_url=keep_earliest_url)
-            ##print(data_contrail_coastal_adc['30048'].sum())
             data_now_adc.replace('-99999',np.nan,inplace=True)
             meta_now_adc.replace('-99999',np.nan,inplace=True)
             outputs_dict['Contrails Nowcast']=data_now_adc
