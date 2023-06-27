@@ -71,7 +71,7 @@ OLDLEGENDS_MAP={
      'Nowcast': 'Nowcast: Water level'}
 
 LEGENDS_MAP={
-     'NOAA Tidal': 'NOAA Tidal Prediction',
+     'NOAA Tidal': 'NOAA Tidal Predictions',
      'NOAA NOS': 'Observations',
      'NDBC': 'Observations',
      'SWAN': 'SWAN',
@@ -82,7 +82,7 @@ LEGENDS_MAP={
      'Contrails': 'Observations',
      'Contrails Coastal': 'Observations',
      'Forecast': 'APS Forecast',
-     'Difference': 'Difference',
+     'Difference': 'Difference (APS-Obs)',
      'Nowcast': 'APS Nowcast'}
 
 
