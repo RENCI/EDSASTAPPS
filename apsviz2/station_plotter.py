@@ -85,6 +85,27 @@ LEGENDS_MAP={
      'Difference': 'Difference (APS-Obs)',
      'Nowcast': 'APS Nowcast'}
 
+##
+## This ordering is only performed by the geberate CSV steps and is included to satisfy DHS preferences for APSViz
+## related plpotting
+##
+
+COLUMN_ORDER=['APS Forecast','APS Nowcast','Observations','Difference (APS-Obs)','NOAA Tidal Predictions']
+
+def reorder_columns(df_concat):
+    """
+    Take input single station DF (times x data_products) and
+    attempt to reorder the columns to best match the order in COLUMN_ORDER
+    Return the order df
+    """
+    newcols=list()
+    df=df_concat.copy()
+    cols = df.columns.tolist()
+    for col in COLUMN_ORDER:
+        if col in cols:
+            newcols.append(col) 
+    return df[newcols]
+
 
 def union_all_source_stations(outputs_dict, station_id_list=None)->list:
     """
@@ -474,10 +495,18 @@ def generate_station_specific_PNGs(outputs_dict, outputs_meta_dict, outputs_meta
     figure_dataframe = build_filename_map_to_csv(figures_dict)
     return figure_dataframe 
 
+##
+## Attempt to generally order columns in a manner consistent with the APSViz/DHS preferences. Namely, 
+## APS Forecast, APS Nowcast, Observations, Differences, Tidal. Note Missing columns can happen at any time for any station.
+## NO blank column stubbing is enabled. 
+##
+## COLUMN_ORDER
 def generate_station_specific_CSVs(outputs_dict, outputs_meta_dict, outputs_meta_dict_sources, outputdir='.', station_id_list=None )->pd.DataFrame:
     """
     The input dicts will be processed to build individual CSV files for each station id 
     This is only a temporary solution until the new plotting software gets designed
+
+    Also reorder the final CDV dataframe to align ( as best as possible) with the order in the list: COLUMN_ORDER
 
     Return
         csv_dict: A dictionary with the keys LAT,LON,STATE,STATIONNAME,CSV 
@@ -496,10 +525,9 @@ def generate_station_specific_CSVs(outputs_dict, outputs_meta_dict, outputs_meta
     data_dict=dict()
     for station in station_names.keys(): # Only want stations that have known ID names. 
         df_concat = build_source_concat_dataframe(outputs_dict, station)
-        # Remove completely nan remaining stations
         df_concat = update_headers_concat_dataframe(df_concat)
+        df_concat = reorder_columns(df_concat)
         df_concat.dropna(axis=1, how='all', inplace=True)
-        print('After NAN reduction remaining sources is {}.Shape was {}'.format(station, df_concat.shape[1]))
         if df_concat.shape[1] > 0:
             station_name = station_names[station]['NAME']
             lon = station_names[station]['LON']
