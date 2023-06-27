@@ -548,7 +548,7 @@ def main(args):
 ## For station that had no Node data simply insert 'None'
 ##
 
-## Need to acount for Name Kludge
+## Need to account for Name Kludge
 
     meta_list = list()
     for key,item in outputs_metadict.items():
