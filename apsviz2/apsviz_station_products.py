@@ -34,6 +34,23 @@ from argparse import ArgumentParser
 
 dformat='%Y-%m-%d %H:%M:%S'
 
+def check_for_forecast_casting(meta_data):
+    """
+    Check the 'CAST' column (if available) for the indicated values: FORECAST/NOWCAST/NOCAST
+    If all station report FORECAST, then set keep_input_url to True
+    else set it to false and that data will not be retained for the remaining calculations
+    If No 'CAST' column is specified in the metadata, retain old behavior and set keep_input_url = True
+    """
+    keep_input_url = True
+
+    if 'CAST' in meta_data.columns:
+        casts = list(set(meta_data['CAST'].tolist()))
+        if len(casts) != 1:
+            utilities.log.warning('APS META data had multiple cast types: this should never happen: {meta_data["CAST"]}') 
+            raise
+        keep_input_url= True if casts[0]=='FORECAST' else False
+    return keep_input_url
+
 def main(args):
     """
     assumes the existance of a proper main.yml to get IO information
@@ -105,10 +122,15 @@ def main(args):
         # Revert Harvester filling of nans to -99999 back to nans
         data_adc.replace('-99999',np.nan,inplace=True)
         meta_adc.replace('-99999',np.nan,inplace=True)
-        outputs_dict['Forecast']=data_adc
-        outputs_metadict['Forecast']=meta_adc
-        outputs_metadict_sources['Forecast']='NOAA/NOS'
-        utilities.log.info('Finished with ADCIRC Forecasts')
+
+        keep_input_url = check_for_forecast_casting(meta_adc)
+        if keep_input_url:
+            outputs_dict['Forecast']=data_adc
+            outputs_metadict['Forecast']=meta_adc
+            outputs_metadict_sources['Forecast']='NOAA/NOS'
+            utilities.log.info('Finished with ADCIRC Forecasts')
+        else:
+            utilities.log.warning(f'The input URL was determined to not be a FORECAST. So it will be excluded from the final data set')
 
         # Grab the stop and start times from the data set. Will be needed for tidal predictions data
         time_index=data_adc.index.tolist()
@@ -172,7 +194,7 @@ def main(args):
         try:
             obs = get_obs_stations.get_obs_stations(source='NOAAWEB', product='water_level',
                 station_list_file=noaa_station_file)
-            data_obs,meta_obs=obs.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=0, interval='None' )
+            data_obs,meta_obs=obs.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=0, interval=None )
             data_obs.replace('-99999',np.nan,inplace=True)
             meta_obs.replace('-99999',np.nan,inplace=True)
             # Remove stations with too many nans ( Note Harvester would have previously removed stations that are ALL NANS)
@@ -209,7 +231,7 @@ def main(args):
             contrails = get_obs_stations.get_obs_stations(source='CONTRAILS', product=rivers_data_product,
                 contrails_yamlname=contrails_config, station_list_file=contrails_station_file)
             # Get data at highest resolution. Return at 15min intervals
-            cont_data,cont_meta=contrails.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=args.return_sample_min, interval='None' )
+            cont_data,cont_meta=contrails.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=args.return_sample_min, interval=None )
             cont_data.replace('-99999',np.nan,inplace=True)
             cont_meta.replace('-99999',np.nan,inplace=True)
             cont_meta_list = set(cont_data.columns.tolist()).intersection(cont_meta.index.to_list())
@@ -257,10 +279,14 @@ def main(args):
             ##print(data_contrail_coastal_adc['30048'].sum())
             data_contrail_coastal_adc.replace('-99999',np.nan,inplace=True)
             meta_contrail_coastal_adc.replace('-99999',np.nan,inplace=True)
-            outputs_dict['Contrails Forecast']=data_contrail_coastal_adc
-            outputs_metadict['Contrails Forecast']=meta_contrail_coastal_adc
-            outputs_metadict_sources['Contrails Forecast']='CONTRAILS'
-            utilities.log.info('Finished with Contrails Coastal Forecasts')
+            keep_input_url = check_for_forecast_casting(meta_contrail_coastal_adc)
+            if keep_input_url:
+                outputs_dict['Contrails Forecast']=data_contrail_coastal_adc
+                outputs_metadict['Contrails Forecast']=meta_contrail_coastal_adc
+                outputs_metadict_sources['Contrails Forecast']='CONTRAILS'
+                utilities.log.info('Finished with Contrails Coastal Forecasts')
+            else:
+                utilities.log.warning(f'The Contrails input URL was determined to not be a FORECAST. So it will be excluded from the final data set')
             # Grab the stop and start times from the data set. Will be needed for tidal predictions data
             time_index=data_contrail_coastal_adc.index.tolist()
             starttime = min(time_index).strftime('%Y-%m-%d %H:%M:%S')
@@ -316,7 +342,7 @@ def main(args):
             contrails_coastal = get_obs_stations.get_obs_stations(source='CONTRAILS', product=coastal_data_product,
                 contrails_yamlname=contrails_config, station_list_file=contrails_station_file)
             # Get data at highest resolution. Return at 15min intervals
-            cont_coastal_data,cont_coastal_meta=contrails_coastal.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=args.return_sample_min, interval='None' )
+            cont_coastal_data,cont_coastal_meta=contrails_coastal.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=args.return_sample_min, interval=None )
             cont_coastal_data.replace('-99999',np.nan,inplace=True)
             cont_coastal_meta.replace('-99999',np.nan,inplace=True)
             cont_coastal_meta_list = set(cont_coastal_data.columns.tolist()).intersection(cont_coastal_meta.index.to_list())
@@ -355,7 +381,7 @@ def main(args):
 
     t0 = tm.time()
     try:
-        data_pred,meta_pred=pred.fetch_station_product((obs_starttime,endtime), return_sample_min=args.return_sample_min, interval='None' )
+        data_pred,meta_pred=pred.fetch_station_product((obs_starttime,endtime), return_sample_min=args.return_sample_min, interval=None )
         data_pred.replace('-99999',np.nan,inplace=True)
         meta_pred.replace('-99999',np.nan,inplace=True)
         meta_pred_list = set(data_pred.columns.tolist()).intersection(meta_pred.index.to_list())
@@ -395,6 +421,11 @@ def main(args):
     utilities.log.info('Switch to fort63_style lookups for the SWAN/Buoy data')
     fort63_style = True
 
+## 
+## NOTE NDBC metadata can be tricky. Eg, one can have nodata/metadata returned for a stationid but acquire SWAN data. When this happens
+## The resulting data/plot will report station_name name from SWAN simply as stationid.
+##
+
 ##
 ## SWAN Forecast: Currently for these steps the input data MUST BE fort63 compliant
 ##
@@ -411,11 +442,16 @@ def main(args):
             # Revert Harvester filling of nans to -99999 back to nans
             data_adc.replace('-99999',np.nan,inplace=True)
             meta_adc.replace('-99999',np.nan,inplace=True)
-            outputs_dict['SWAN Forecast']=data_adc
-            outputs_metadict['SWAN Forecast']=meta_adc
-            outputs_metadict_sources['SWAN Forecast']='NDBC'
-            utilities.log.info('Finished with SWAN Forecasts')
-            # Grab the stop and start times from the data set. Will be needed for tidal predictions data
+            keep_input_url = check_for_forecast_casting(meta_adc)
+            if keep_input_url:
+                outputs_dict['SWAN Forecast']=data_adc
+                outputs_metadict['SWAN Forecast']=meta_adc
+                outputs_metadict_sources['SWAN Forecast']='NDBC'
+                utilities.log.info('Finished with SWAN Forecasts')
+            else:
+                utilities.log.warning(f'The input (SWAN) URL was determined to not be a FORECAST. So it will be excluded from the final data set')
+
+             # Grab the stop and start times from the data set. Will be needed for tidal predictions data
             time_index=data_adc.index.tolist()
         except Exception as e:
             utilities.log.error('SWAN Forecast: Broad failure. Failed to find any forecast data: {}'.format(e))
@@ -464,7 +500,7 @@ def main(args):
     if ndbc_station_file is not None:
         ndbc = get_obs_stations.get_obs_stations(source='NDBC', product='wave_height',
             station_list_file=ndbc_station_file)
-        data_ndbc,meta_ndbc=ndbc.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=0, interval='None' )
+        data_ndbc,meta_ndbc=ndbc.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=0, interval=None )
         data_ndbc.replace('-99999',np.nan,inplace=True)
         meta_ndbc.replace('-99999',np.nan,inplace=True)
         # Remove stations with too many nans ( Note Harvester would have previously removed stations that are ALL NANS)
@@ -485,7 +521,6 @@ def main(args):
     utilities.log.info('NDBC Buoy OBS: Time was {}'.format(total_time))
 
     t0 = tm.time()
-
 ##
 ## Select from RUNTIMEDIR, where to write these files
 ##
