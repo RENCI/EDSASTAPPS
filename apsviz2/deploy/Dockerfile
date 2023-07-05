@@ -7,9 +7,9 @@ FROM conda/miniconda3-centos7
 
 # As it reads
 RUN yum install -y git
-RUN yum install libxml2-devel
-RUN yum install libxslt-devel
-RUN yum install gcc
+RUN yum install -y libxml2-devel
+RUN yum install -y libxslt-devel
+RUN yum install -y gcc
 
 # get some credit
 LABEL maintainer="jtilson@renci.org"
