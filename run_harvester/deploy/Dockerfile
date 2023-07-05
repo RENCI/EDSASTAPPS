@@ -1,10 +1,14 @@
 ##############
 # Docker file for the creation of the adcirc support tools (AST).
 ##############
+
 FROM conda/miniconda3-centos7
 
 # As it reads
 RUN yum install -y git
+RUN yum install -y libxml2-devel
+RUN yum install -y libxslt-devel
+RUN yum install -y gcc
 
 # get some credit
 LABEL maintainer="jtilson@renci.org"
