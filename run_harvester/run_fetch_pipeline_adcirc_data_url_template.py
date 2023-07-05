@@ -148,13 +148,13 @@ def main(args):
 
     # Ensure the input URL is of the proper style (63 vs 61)
     if args.fort63_style:
-        if variable_name is 'zeta':
+        if variable_name == 'zeta':
             input_url=get_adcirc_stations.convert_urls_to_63style([url])[0] # Assumed to only have one of them
         else:
             input_url=get_adcirc_stations.convert_urls_to_63style_customfilename([url],filename='swan_HS.63.nc')[0] # Assumed to only have one of them
             utilities.log.info('SWAN style data file')
     else:
-        if variable_name is 'zeta':
+        if variable_name == 'zeta':
             input_url=get_adcirc_stations.convert_urls_to_61style([url])[0]
         else:
             utilities.log.info("No fort61_style approach for dara other than fort63/61.nc")
@@ -208,8 +208,8 @@ def main(args):
     adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
 
 
-    fileroot='_'.join(['adcirc',stormnumber]) if stormnumber is not 'NONE' else 'adcirc'
-    filerootmeta='_'.join(['adcirc','meta',stormnumber]) if stormnumber is not 'NONE' else 'adcirc_meta'
+    fileroot='_'.join(['adcirc',stormnumber]) if stormnumber != 'NONE' else 'adcirc'
+    filerootmeta='_'.join(['adcirc','meta',stormnumber]) if stormnumber != 'NONE' else 'adcirc_meta'
 
     try:
         dataf=io_utilities.write_csv(df_adcirc_data, rootdir=rootdir,subdir='',fileroot=fileroot,iometadata=adcirc_metadata)
