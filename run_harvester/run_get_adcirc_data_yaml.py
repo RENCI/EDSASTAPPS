@@ -130,8 +130,6 @@ def main(args):
     rpl = get_adcirc_stations.get_adcirc_stations(source='TDS', product=args.data_product,
                 station_list_file=station_file)
 
-    timemark=rpl.timemark
-
     # Ensures URLs are desired fort type. 
     urls=get_adcirc_stations.convert_urls_to_61style(urls)
     print(urls)
@@ -154,14 +152,7 @@ def main(args):
     # Output the data files for subsequent ingesting
     df_adcirc_data = format_data_frames(data_adc)
 
-    try:
-        tone=dt.datetime.strptime(timemark,'%Y%m%d%H')
-        timemark=dt.datetime.strftime(tone, dformat)
-        timemark=timemark.replace(' ','T')
-    except Exception as e:
-        pass
-
-    adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
+    adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+endtime.replace(' ','T')+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
 
     try:
         dataf=io_utilities.write_csv(df_adcirc_data, rootdir=rootdir,subdir='',fileroot='adcirc_stationdata',iometadata=adcirc_metadata)
