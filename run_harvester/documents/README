@@ -56,11 +56,11 @@ optional arguments:
   -h, --help            show this help message and exit
   --sources             List currently supported data sources
   --data_source DATA_SOURCE
-                        choose supported data source: default = ASGS
+                        choose supported data source: default = TDS
   --data_product DATA_PRODUCT
                         choose supported data product: default is water_level
   --map_file MAP_FILE   Location of the grid_to_stationfile_maps.yml data
-  --url URL             ASGS url to fetcb ADCIRC data
+  --url URL             TDS url to fetcb ADCIRC data
   --ensemble ENSEMBLE   str: Select appropriate ensemble Default is nowcast
   --fort63_style        Boolean: Will inform Harvester to use fort.63.methods
                         to get station nodesids
@@ -77,13 +77,13 @@ python run_fetch_pipeline_observation.py --stoptime '2022-02-20 00:00:00'  --map
 
 python run_fetch_pipeline_observation.py --stoptime '2022-02-20 00:00:00'  --map_source_file './AST_gridstations/harvester_stations/sources_map.yaml' --contrails_auth './secrets/contrails.yml' --finalDIR './TEST2'
 
-python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.61.nc" --ensemble 'nhcOfcl' --map_file './supporting_data/grid_to_stationfile_maps.yml'
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'TDS'  --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.61.nc" --ensemble 'nhcOfcl' --map_file './supporting_data/grid_to_stationfile_maps.yml'
 
-python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.61.nc" --ensemble 'nhcOfcl' --map_file './supporting_data/grid_to_stationfile_maps.yml'
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'TDS'  --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.61.nc" --ensemble 'nhcOfcl' --map_file './supporting_data/grid_to_stationfile_maps.yml'
 
-python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url 'http://tds.renci.org:80/thredds/dodsC/2022/nam/2022082306/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc' --ensemble='namforecast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --fort63_style
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'TDS'  --url 'http://tds.renci.org:80/thredds/dodsC/2022/nam/2022082306/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc' --ensemble='namforecast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --fort63_style
 
-python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url 'http://tds.renci.org:80/thredds/dodsC/2022/nam/2022082306/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc' --ensemble='nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --fort63_style
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'TDS'  --url 'http://tds.renci.org:80/thredds/dodsC/2022/nam/2022082306/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc' --ensemble='nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --fort63_style
 
 ##
 ## To launch these form the provided scripts, the pipline must set one or more ENVs and pass the finalDIR to each of the runs
@@ -232,14 +232,14 @@ if __name__ == '__main__':
                         help='Desired stoptime YYYY-mm-dd HH:MM:SS')
     parser.add_argument('--sources', action='store_true',
                         help='List currently supported data sources')
-    parser.add_argument('--data_source', action='store', dest='data_source', default='ASGS', type=str,
-                        help='choose supported data source: default = ASGS')
+    parser.add_argument('--data_source', action='store', dest='data_source', default='TDS', type=str,
+                        help='choose supported data source: default = TDS')
     parser.add_argument('--data_product', action='store', dest='data_product', default='water_level', type=str,
                         help='choose supported data product: default is water_level')
     parser.add_argument('--map_file', action='store', dest='map_file', default=None, type=str,
                         help='Location of the grid_to_stationfile_maps.yml data')
     parser.add_argument('--url', action='store', dest='url', default=None, type=str,
-                        help='ASGS url to fetcb ADCIRC data')
+                        help='TDS url to fetcb ADCIRC data')
     parser.add_argument('--ensemble', action='store',dest='ensemble', default='nowcast',
                         help='str: Select appropriate ensemble Default is nowcast')
 
@@ -255,8 +255,8 @@ if __name__ == '__main__':
                         help='Desired stoptime YYYY-mm-dd HH:MM:SS')
     parser.add_argument('--sources', action='store_true',
                         help='List currently supported data sources')
-    parser.add_argument('--data_source', action='store', dest='data_source', default='ASGS', type=str,
-                        help='choose supported data source: default = ASGS')
+    parser.add_argument('--data_source', action='store', dest='data_source', default='TDS', type=str,
+                        help='choose supported data source: default = TDS')
     parser.add_argument('--data_product', action='store', dest='data_product', default='water_level', type=str,
                         help='choose supported data product: default is water_level')
     parser.add_argument('--map_file', action='store', dest='map_file', default=None, type=str,
@@ -293,47 +293,47 @@ All outputs files will be deposited into $RUNTIMEDIR
 # Example invocations - YAML construction type
 # So now, the lookback of -1 days should generate a url list 
 
-python run_get_adcirc_data_yaml.py --stoptime '2022-02-20 00:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-nam-bob-2021' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml'
+python run_get_adcirc_data_yaml.py --stoptime '2022-02-20 00:00:00' --data_source 'TDS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-nam-bob-2021' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml'
 
 # Normal run change default ndays value
-python run_get_adcirc_data_yaml.py --stoptime '2022-02-02 00:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-nam-bob-2021' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+python run_get_adcirc_data_yaml.py --stoptime '2022-02-02 00:00:00' --data_source 'TDS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-nam-bob-2021' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
 
 # Change up the ensemble
-python run_get_adcirc_data_yaml.py --stoptime '2022-02-02 00:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-nam-bob-2021' --ensemble 'namforecast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+python run_get_adcirc_data_yaml.py --stoptime '2022-02-02 00:00:00' --data_source 'TDS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-nam-bob-2021' --ensemble 'namforecast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
 
 # Try a different grid available with the hatteras machine name
-python run_get_adcirc_data_yaml.py --stoptime '2022-04-21 00:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-da-nowcast' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+python run_get_adcirc_data_yaml.py --stoptime '2022-04-21 00:00:00' --data_source 'TDS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-da-nowcast' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
 
 # Try a different grid that was executed at PSC
-python run_get_adcirc_data_yaml.py --stoptime '2022-04-22 12:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-psc' --ensemble 'nowcast' --config_file './secrets/url_framework_psc.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+python run_get_adcirc_data_yaml.py --stoptime '2022-04-22 12:00:00' --data_source 'TDS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-psc' --ensemble 'nowcast' --config_file './secrets/url_framework_psc.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
 
 # Data availble from BOTH systems. Do a comparison
 # Hatteras
-python run_get_adcirc_data_yaml.py --stoptime '2022-04-22 06:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-da-nowcast' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+python run_get_adcirc_data_yaml.py --stoptime '2022-04-22 06:00:00' --data_source 'TDS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-da-nowcast' --ensemble 'nowcast' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
 # PSC
-python run_get_adcirc_data_yaml.py --stoptime '2022-04-22 06:00:00' --data_source 'ASGS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-psc' --ensemble 'nowcast' --config_file './secrets/url_framework_psc.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
+python run_get_adcirc_data_yaml.py --stoptime '2022-04-22 06:00:00' --data_source 'TDS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-nam-bob-psc' --ensemble 'nowcast' --config_file './secrets/url_framework_psc.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -1
 
 # Test building a Hurricane url. NOTE because of the very different url nomenclature for hurricanes you must utilize the additional CLI varibles. Also, Time inputs (stoptime) is polymorpjic. So for hurricanes,
 # the stoptime woulds be the stop ADVISORY number. The number of URL (advisories) generated assumes a 6 hour step
 
-python run_get_adcirc_data_yaml.py --stoptime 11 --data_source 'ASGS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-al09-bob' --ensemble 'nhcOfcl' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml'  --hurricane_year='2021' --hurricane_source='al09' --ndays -1
+python run_get_adcirc_data_yaml.py --stoptime 11 --data_source 'TDS' --data_product 'water_level' --grid_name 'hsofs' --instance_name 'hsofs-al09-bob' --ensemble 'nhcOfcl' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml'  --hurricane_year='2021' --hurricane_source='al09' --ndays -1
 
-python run_get_adcirc_data_yaml.py --stoptime 11 --data_source 'ASGS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-al09-bob' --ensemble 'nhcOfcl' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml'  --hurricane_year='2021' --hurricane_source='al09' --ndays -1
+python run_get_adcirc_data_yaml.py --stoptime 11 --data_source 'TDS' --data_product 'water_level' --grid_name 'ec95d' --instance_name 'ec95d-al09-bob' --ensemble 'nhcOfcl' --config_file './secrets/url_framework.yml' --map_file './supporting_data/grid_to_stationfile_maps.yml'  --hurricane_year='2021' --hurricane_source='al09' --ndays -1
 
 
 # Example invocations - url_template construction type
 # So now, the lookback of -2 days should generate a url list 
 
-python run_get_adcirc_data_url_template.py --stoptime '2022-04-22 06:00:00' --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022020200/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.61.nc" --ensemble 'nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -2
+python run_get_adcirc_data_url_template.py --stoptime '2022-04-22 06:00:00' --data_source 'TDS'  --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022020200/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.61.nc" --ensemble 'nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -2
 
 # Demonstration that the DATE word is arbitrary (given the proper formatting) and that we can change the ensemble
-python run_get_adcirc_data_url_template.py --stoptime '2022-04-22 06:00:00' --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2022/nam/1900000000/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.61.nc" --ensemble 'namforecast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -2
+python run_get_adcirc_data_url_template.py --stoptime '2022-04-22 06:00:00' --data_source 'TDS'  --url "http://tds.renci.org/thredds/dodsC/2022/nam/1900000000/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.61.nc" --ensemble 'namforecast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -2
 
 
 # Grab a hurricane WL dataset
 # NOTE: DO NOT need the extra hurricane variables
 
-python run_get_adcirc_data_url_template.py --stoptime 11 --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.61.nc" --ensemble 'nhcOfcl' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -2
+python run_get_adcirc_data_url_template.py --stoptime 11 --data_source 'TDS'  --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.61.nc" --ensemble 'nhcOfcl' --map_file './supporting_data/grid_to_stationfile_maps.yml' --ndays -2
 
 # The two outputs files have a more complex nomenclature than the observations files. 
     $RUNTIMEDIR/adcirc_stationdata_RENCI_NHCOFCL_HSOFS_FORECAST_11_2021-08-27T06:00:00_2021-09-02T12:00:00.csv
