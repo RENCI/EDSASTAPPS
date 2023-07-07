@@ -47,10 +47,9 @@ def find_cast_status(df)->str:
     Return
         cast_type: (str) either NOWCAST or FORECAST
     """
-    data_list = df['NAME'].tolist()
-    type_pair = list(set(data_list))[0] # fetchj_stations has already ensured these will all be the same grid and type
-    print(type_pair)
-    cast_type = type_pair.split('_')[1]
+    data_list = df['CAST'].tolist()
+    cast_type = list(set(data_list))[0] # fetch_stations has already ensured these will all be the same grid and type
+    utilities.log.info(cast_type)
     return cast_type.upper()
 
 dformat='%Y-%m-%d %H:%M:%S'

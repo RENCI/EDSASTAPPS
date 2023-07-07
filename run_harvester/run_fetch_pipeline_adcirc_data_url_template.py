@@ -71,10 +71,9 @@ def find_cast_status(df)->str:
     Return
         cast_type: (str) either NOWCAST or FORECAST
     """
-    data_list = df['NAME'].tolist()
-    type_pair = list(set(data_list))[0] # fetchj_stations has already ensured these will all be the same grid and type
-    utilities.log.info(type_pair)
-    cast_type = type_pair.split('_')[-1]
+    data_list = df['CAST'].tolist()
+    cast_type = list(set(data_list))[0] # fetch_stations has already ensured these will all be the same grid and type
+    utilities.log.info(cast_type)
     return cast_type.upper()
 
 dformat='%Y-%m-%d %H:%M:%S'
@@ -206,7 +205,6 @@ def main(args):
 
     #adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+endtime.replace(' ','T')+'_'+starttime.replace(' ','T')+'_'+endtime.replace(' ','T')
     adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
-
 
     fileroot='_'.join(['adcirc',stormnumber]) if stormnumber != 'NONE' else 'adcirc'
     filerootmeta='_'.join(['adcirc','meta',stormnumber]) if stormnumber != 'NONE' else 'adcirc_meta'

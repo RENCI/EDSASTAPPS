@@ -46,10 +46,9 @@ def find_cast_status(df)->str:
     Return
         cast_type: (str) either NOWCAST or FORECAST
     """
-    data_list = df['NAME'].tolist()
-    type_pair = list(set(data_list))[0] # fetchj_stations has already ensured these will all be the same grid and type
-    print(type_pair)
-    cast_type = type_pair.split('_')[1]
+    data_list = df['CAST'].tolist()
+    cast_type = list(set(data_list))[0] # fetch_stations has already ensured these will all be the same grid and type
+    utilities.log.info(cast_type)
     return cast_type.upper()
 
 dformat='%Y-%m-%d %H:%M:%S'
@@ -131,6 +130,8 @@ def main(args):
     rpl = get_adcirc_stations.get_adcirc_stations(source='TDS', product=args.data_product,
                 station_list_file=station_file)
 
+    timemark=rpl.timemark
+
     # Ensures URLs are desired fort type. 
     urls=get_adcirc_stations.convert_urls_to_61style(urls)
     print(urls)
@@ -152,7 +153,16 @@ def main(args):
 
     # Output the data files for subsequent ingesting
     df_adcirc_data = format_data_frames(data_adc)
-    adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+endtime.replace(' ','T')+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
+
+    try:
+        tone=dt.datetime.strptime(timemark,'%Y%m%d%H')
+        timemark=dt.datetime.strftime(tone, dformat)
+        timemark=timemark.replace(' ','T')
+    except Exception as e:
+        pass
+
+    adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
+
     try:
         dataf=io_utilities.write_csv(df_adcirc_data, rootdir=rootdir,subdir='',fileroot='adcirc_stationdata',iometadata=adcirc_metadata)
         metaf=io_utilities.write_csv(meta_adc, rootdir=rootdir,subdir='',fileroot='adcirc_stationdata_meta',iometadata=adcirc_metadata)
