@@ -73,7 +73,7 @@ PRODUCT={
          }
 
 # Currently supported sources
-SOURCES = ['NOAAWEB','CONTRAILS','NDBC']
+SOURCES = ['NOAA','CONTRAILS','NDBC']
 
 ##
 def construct_root_filenames(data_source):
@@ -191,10 +191,10 @@ def main(args):
                 contrails_yamlname=args.contrails_auth, knockout_dict=None, station_list_file=station_file)
             # Get data at highest resolution. Return at 15min intervals
             try: # DO this in case we got no data from any station
-                data,meta=obs.fetch_station_product(time_range, return_sample_min=15, interval='None' )
+                data,meta=obs.fetch_station_product(time_range, return_sample_min=15)
                 df_data = format_data_frames(data, data_product) # Melt data to support later database updates
                 dataf,metaf = write_data_todisk(rootdir,data_source_short,df_data,meta,metadata,output_fileroot,output_metafileroot)
-            except IndexError as e:
+            except Exception as e: # IndexError as e:
                 utilities.log.info(f'No data products {data_product} for source {data_source}. Skip')
                 pass
             utilities.log.info(f'Finished with data source {data_source}')
