@@ -262,7 +262,8 @@ def main(args):
     except Exception as e:
         pass
 
-    adcirc_metadata=sitename.upper()+'_'+data_provider.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
+    #adcirc_metadata=sitename.upper()+'_'+data_provider.upper().replace('_','')_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
+    adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+data_provider.upper().replace("_","")+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
 
     fileroot='_'.join(['adcirc',stormnumber]) if stormnumber != 'NONE' else 'adcirc'
     filerootmeta='_'.join(['adcirc','meta',stormnumber]) if stormnumber != 'NONE' else 'adcirc_meta'
