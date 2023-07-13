@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/bash -l
 #
 # apsviz launcher script/wrapper. This script is intended to be used by our k8s apsviz2 pipeline to generate 
 # station/buoy insets figures.

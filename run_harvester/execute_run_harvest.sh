@@ -1,4 +1,4 @@
-#!/bin/bash -eu
+#!/bin/bash -l
 #
 # run_harvester launcher script/wrapper. This script is intended to be used by our k8s system to generate 
 # observation timeseries files for subsequent ingestion to the Harvester database. It is expected this script will
@@ -35,9 +35,6 @@ if [ -z "${NDAYS:-}" ]; then
 else
     NDAYSSET="--ndays $NDAYS"
 fi
-
-
-
 
 # TEMP
 #nru@4292a7f1007b:~/repo/EDSASTAPPS/run_harvester$ export HTTP_PROXY=http://proxy.renci.org:8080
