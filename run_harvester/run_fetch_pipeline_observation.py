@@ -72,8 +72,9 @@ PRODUCT={
         'wind_speed':'wind_speed'
          }
 
-# Currently supported sources
+# Currently supported broad scoped source providers # Need this for calling get_observations code
 SOURCES = ['NOAA','CONTRAILS','NDBC']
+DICT_SOURCES={'NOAA_STATIONS':'NOAAWEB','NDBC_BUOYS':'NDBC','CONTRAILS_COASTAL':'CONTRAILS','CONTRAILS_RIVERS':'CONTRAILS'}
 
 ##
 def construct_root_filenames(data_source):
@@ -165,8 +166,6 @@ def main(args):
     shutil.copy(utilities.LogFile,'/'.join([rootdir,f'logs'])) # Copy and rename to logs for apsviz2 pipeline to find
     utilities.log.info('Copy log file')
 
-
-
     time_range=(starttime,endtime)
 
     # metadata are used to augment filename
@@ -176,19 +175,28 @@ def main(args):
     data_sources = list(source_config.keys())
 
     # Process all products for the given source
-    for data_source in data_sources:
-        output_fileroot,output_metafileroot = construct_root_filenames(data_source)
-        source_products = source_config[data_source]['SOURCES'].values() 
-        station_file=source_config[data_source]['STATION_FILE']
-        data_source_short = 'CONTRAILS' if 'CONTRAILS' in data_source else data_source
+    print(data_sources)
+    for data_source_in in data_sources:
+        data_source=DICT_SOURCES[data_source_in]
+        utilities.log.info(f'Found the provider name for {data_source}')
+
+        output_fileroot,output_metafileroot = construct_root_filenames(data_source_in)
+        source_products = source_config[data_source_in]['SOURCES'].values() 
+
+        station_file=source_config[data_source_in]['STATION_FILE']
+
+        data_source_short = 'CONTRAILS' if 'CONTRAILS' in data_source_in else DICT_SOURCES[data_source_in]
         output_fileroot,output_metafileroot = construct_root_filenames(data_source_short)
         utilities.log.info(f'File rootnames are {output_fileroot} and {output_metafileroot}')
+
         for data_product in source_products:
             print(f'Processing source {data_source} and product {data_product}')
             metadata = construct_metadata(data_product, endt)
             utilities.log.info(f'Preparing to fetch {data_product} from {data_source}')
+
             obs = get_obs_stations.get_obs_stations(source=data_source_short.upper(), product=data_product,
                 contrails_yamlname=args.contrails_auth, knockout_dict=None, station_list_file=station_file)
+
             # Get data at highest resolution. Return at 15min intervals
             try: # DO this in case we got no data from any station
                 data,meta=obs.fetch_station_product(time_range, return_sample_min=15)

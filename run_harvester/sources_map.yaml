@@ -1,5 +1,5 @@
 SOURCEMAP: &sourcemap
-  NOAAWEB: 
+  NOAA_STATIONS: 
       STATION_FILE: "./supporting_data/noaa_stations.csv"
       SOURCES:
           WATR: "water_level"
@@ -7,19 +7,19 @@ SOURCEMAP: &sourcemap
           PRES: "air_pressure"
           WSPD: "wind_speed"
 
-  CONTRAILSRIVER:
+  CONTRAILS_RIVERS:
       STATION_FILE: "./supporting_data/contrails_stations_rivers.csv"
       SOURCES:
           WATR: "river_water_level"
           PRES: "air_pressure"
 
-  CONTRAILSCOASTAL:
+  CONTRAILS_COASTAL:
       STATION_FILE: "./supporting_data/contrails_stations_coastal.csv"
       SOURCES:
           WATR: "coastal_water_level"
           PRES: "air_pressure"
 
-  NDBC:
+  NDBC_BUOYS:
       STATION_FILE: "./supporting_data/ndbc_buoys.csv"
       SOURCES:
           WATR: "wave_height"
