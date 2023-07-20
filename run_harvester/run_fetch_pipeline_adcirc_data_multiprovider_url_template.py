@@ -108,6 +108,8 @@ def main(args):
 
     main_config = utilities.init_logging(subdir=None,config_file=os.path.join(os.path.dirname(__file__),'./config','main.yml'))
 
+    fort63_style=args.fort63_style
+
     # Grab the args
     map_file=args.map_file
     source_file=args.source_file
@@ -131,6 +133,9 @@ def main(args):
         utilities.log.error('data_provider must be specified')
         sys.exit(1)
 
+    if data_provider=='NDBC_BUOYS':
+        fort63_style=True
+        utilities.log.info('Reset NDBC_BUOY style to fort63_style')
 
     # Get the IO basic setep
     if args.finalDIR is None:
@@ -205,7 +210,7 @@ def main(args):
 ##
 
     # Ensure the input URL is of the proper style (63 vs 61)
-    if args.fort63_style:
+    if fort63_style:
         if variable_name == 'zeta':
             input_url=get_adcirc_stations.convert_urls_to_63style([url])[0] # Assumed to only have one of them
         else:
@@ -228,8 +233,8 @@ def main(args):
     print(f' Try data lookup a {urls}')
     try:
         rpl = get_adcirc_stations.get_adcirc_stations(source='TDS', product=args.data_product,
-                station_list_file=station_file, fort63_style=args.fort63_style )
-        data_adc,meta_adc=rpl.fetch_station_product(urls, return_sample_min=return_sample_min, fort63_style=args.fort63_style, variable_name=variable_name )
+                station_list_file=station_file, fort63_style=fort63_style )
+        data_adc,meta_adc=rpl.fetch_station_product(urls, return_sample_min=return_sample_min, fort63_style=fort63_style, variable_name=variable_name )
     except Exception as e:
         utilities.log.error(f'Hard fail on fetching APS data for url {urls}: Abort quietly {e}')
         sys.exit(0)
