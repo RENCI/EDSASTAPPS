@@ -9,6 +9,8 @@ RUN yum install -y git
 RUN yum install -y libxml2-devel
 RUN yum install -y libxslt-devel
 RUN yum install -y gcc
+RUN sudo yum install google-chrome-stable.x86_64 --nogpgcheck
+RUN yum update
 
 # get some credit
 LABEL maintainer="jtilson@renci.org"
