@@ -6,11 +6,11 @@ FROM conda/miniconda3-centos7
 
 # As it reads
 RUN yum install -y git
-RUN yum update
+RUN yum -y update
 RUN yum install -y libxml2-devel
 RUN yum install -y libxslt-devel
 RUN yum install -y gcc
-#RUN yum install google-chrome-stable.x86_64 --nogpgcheck
+#RUN yum install -y google-chrome-stable.x86_64 --nogpgcheck
 
 # get some credit
 LABEL maintainer="jtilson@renci.org"
