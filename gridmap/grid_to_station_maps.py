@@ -92,9 +92,20 @@ def find_water_control_points_from_map( gridname=None, mapfile=None ):
     The default mapfile, points to known map files in the ../supporting_data directory
     User specified mapfiles, should probably include full pathnames in the yml file
     """
-    landcontrolFile = read_specified_filename_from_map(gridname, mapfile, datatype='WATERCONTROL')
-    print('water control file is {}'.format(landcontrolFile))
-    return landcontrolFile
+    watercontrolFile = read_specified_filename_from_map(gridname, mapfile, datatype='WATERCONTROL')
+    print('water control file is {}'.format(watercontrolFile))
+    return watercontrolFile
+
+def find_secondary_water_control_points_from_map( gridname=None, mapfile=None ):
+    """
+    This method abstracts finding appropriate secondary water_control lists for use for EDS applications.
+    Each dataframe MUST contains the columns: lon,lat,val, where val==0. These are always zero clamps
+    The default mapfile, points to known map files in the ../supporting_data directory
+    User specified mapfiles, should probably include full pathnames in the yml file
+    """
+    watercontrolFile = read_specified_filename_from_map(gridname, mapfile, datatype='SECONDARY_WATERCONTROL')
+    print('secondary water control file is {}'.format(watercontrolFile))
+    return watercontrolFile
 
 def check_for_fort63_compliance(stationfile):
     """
