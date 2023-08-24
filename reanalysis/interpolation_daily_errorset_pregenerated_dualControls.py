@@ -170,10 +170,10 @@ def main(args):
     #print(f' SLR fit {df_slr_stations_interpolated}')
 
 ##
-## Build the SUM data sets as slr+mid_vlf
+## Build the SUM data sets as mid_vlf-slr
 ##
     df_sum_stations_interpolated=df_vlf_stations_interpolated # MID and VLF always have the FINAL set of stations to keep
-    df_sum_stations_interpolated['VAL']=df_slr_stations_interpolated['VAL']+df_mid_stations_interpolated['VAL']+df_vlf_stations_interpolated['VAL']
+    df_sum_stations_interpolated['VAL']=df_mid_stations_interpolated['VAL']+df_vlf_stations_interpolated['VAL']-df_slr_stations_interpolated['VAL']
     print(f' SUMMED {df_sum_stations_interpolated}')
     print(f' SLR {df_slr_stations_interpolated}')
 
