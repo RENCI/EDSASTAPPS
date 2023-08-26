@@ -542,6 +542,7 @@ def main(args):
     except Exception as e:
         utilities.log.error(f'No stations generated any plots {e}')
         sys.exit(1)
+
 ## 
 ## Improve the PER_STATION metadata object by adding Node metadata. These are either from fort63 or fort61 adcirc updates
 ## process all metadata entries, see which ones have a Node column, and if true keep it
@@ -558,6 +559,7 @@ def main(args):
         except Exception as e:
             pass
 
+    ## OKAY up to here
     try:
         df_station_nodes = pd.concat(meta_list,axis=1)
         df_station_nodes.bfill(axis="columns", inplace=True)
@@ -579,11 +581,9 @@ def main(args):
 
     if args.construct_csvs:
         try:
-            for stationid in df_station_file_png_locations.index:
-                ##df_station = station_plotter.build_source_concat_dataframe(outputs_dict, stationid)
-                df_station_file_csv_locations = station_plotter.generate_station_specific_CSVs(outputs_dict, outputs_metadict, outputs_metadict_sources, outputdir=rootdir, station_id_list=None )
-                df_station_file_csv_locations=df_station_file_csv_locations.fillna('-99999')
-                station_csvs = io_utilities.write_csv(df_station_file_csv_locations[['StationName','Source', 'State','Lat','Lon','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationPropsCSV',iometadata='')
+            df_station_file_csv_locations = station_plotter.generate_station_specific_CSVs(outputs_dict, outputs_metadict, outputs_metadict_sources, outputdir=rootdir, station_id_list=None )
+            df_station_file_csv_locations=df_station_file_csv_locations.fillna('-99999')
+            station_csvs = io_utilities.write_csv(df_station_file_csv_locations[['StationName','Source', 'State','Lat','Lon','Filename','Type']], rootdir=rootdir,subdir='',fileroot='stationPropsCSV',iometadata='')
         except Exception as e:
             utilities.log.error(f'Failed to write out csv files: {e}')
             sys.exit(1)
