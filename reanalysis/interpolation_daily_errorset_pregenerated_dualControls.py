@@ -130,8 +130,9 @@ def main(args):
 ##
 ## Fetch the ADCIRC triangular grid file
 ##
-#   griddir='/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/reanalysis/ec95d.v1/YEARLY-2019'
+#   griddir='/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/reanalysis/hsofs.V2/YEARLY-2019'
 #   adc_coord_file = f'{griddir}/adc_coord.json'
+
     # Use this for HSOFS
     #adc_coords = io_utilities.read_json_file(f'{topdir}/adc_coord.json')
     #adc_grid_style = 'points' # Needed to guide the final interpolation
@@ -139,11 +140,14 @@ def main(args):
 
 ##Fetch the EC95D coordinates
 
-    griddir='/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/reanalysis/ec95d.v1/YEARLY-2019'
-    adc_coord_file = f'{griddir}/adc_coord.json'
+    griddir='/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/reanalysis/ADCCOORDS'
+    adc_coord_file = f'{griddir}/ec95d_adc_coord.json'
+
+    #adc_coord_file = f'{griddir}/hsofs_adc_coord.json'
+
     adc_coords = io_utilities.read_json_file(adc_coord_file)
     adc_grid_style = 'points' # Needed to guide the final interpolation
-    print(f' EC95D ADC_COORDS {adc_coords}')
+    #print(f' READ DC_COORDS {adc_coord_file}, {adc_coords}')
 
 ##
 ## Fetch station_coords for which ALL data sets will be interpolated PRIOR to SUMMING
@@ -155,27 +159,20 @@ def main(args):
     station_coords = {'LON':station_x[:].tolist(),'LAT':station_y[:].tolist()}
 
 ##
-## Prepare input data (SLR) to have the same input stations 
-## No need to have CLAMPS for theaes model-specific interpolations
+## Prepare input data to have the same input stations 
+## No need to have CLAMPS for these model-specific interpolations
 ##
+
     df_slr_stations_interpolated=station_list_interpolation(df_slr_stations, station_coords, station_list)
     df_mid_stations_interpolated=station_list_interpolation(df_mid_stations, station_coords, station_list)
     df_vlf_stations_interpolated=station_list_interpolation(df_vlf_stations, station_coords, station_list)
 
-    #model = interpolate_scaled_offset_field.interpolation_model_fit(df_slr_stations, interpolation_type='LinearRBF')
-    #df_slr_stations_interpolated = interpolate_scaled_offset_field.interpolation_model_transform(station_coords, model=model, input_grid_type='points',pathpoly=None)
-    #df_slr_stations_interpolated.index=df_vlf_stations.index
-
-    #print(f' SLR input {df_slr_stations}')
-    #print(f' SLR fit {df_slr_stations_interpolated}')
-
 ##
 ## Build the SUM data sets as mid_vlf-slr
 ##
-    df_sum_stations_interpolated=df_vlf_stations_interpolated # MID and VLF always have the FINAL set of stations to keep
+
+    df_sum_stations_interpolated=df_vlf_stations_interpolated.copy() # MID and VLF always have the FINAL set of stations to keep
     df_sum_stations_interpolated['VAL']=df_mid_stations_interpolated['VAL']+df_vlf_stations_interpolated['VAL']-df_slr_stations_interpolated['VAL']
-    print(f' SUMMED {df_sum_stations_interpolated}')
-    print(f' SLR {df_slr_stations_interpolated}')
 
 ##
 ## Define new inteprolator function
@@ -189,7 +186,9 @@ def main(args):
         set_of_poly_clamp_dfs=list()
         set_of_all_clamp_dfs=list()
     
-        set_of_dfs.append(df_stations.rename(columns = {dataname:'VAL'})) # Always need this
+        # This is not needed
+        ##set_of_dfs.append(df_stations.rename(columns = {dataname:'VAL'})) # Always need this
+        set_of_dfs.append(df_stations)
 
         if df_water_controls is not None:
             set_of_dfs.append(df_water_controls)
@@ -241,20 +240,17 @@ def main(args):
 
 # NEED to send in the secondary water controls
 
-    model_slr,df_interpolated_ADCIRC_GRID_SLR=df_model_surface_interpolation(df_slr_stations_interpolated, adc_coords, station_list, dataname='SLR', df_land_controls=df_land_controls, df_water_controls=df_water_controls, 
+    model_slr,df_interpolated_ADCIRC_GRID_SLR=df_model_surface_interpolation(df_slr_stations_interpolated, adc_coords, station_list, dataname=None, df_land_controls=df_land_controls, df_water_controls=df_water_controls, 
 				df_secondary_water_controls=df_water_controls_pr, cv_testing=None)
 
-    model_mid,df_interpolated_ADCIRC_GRID_MID=df_model_surface_interpolation(df_mid_stations_interpolated, adc_coords, station_list, dataname='SLR', df_land_controls=df_land_controls, df_water_controls=df_water_controls, 
+    model_mid,df_interpolated_ADCIRC_GRID_MID=df_model_surface_interpolation(df_mid_stations_interpolated, adc_coords, station_list, dataname=None, df_land_controls=df_land_controls, df_water_controls=df_water_controls, 
 				df_secondary_water_controls=df_water_controls_pr, cv_testing=None)
 
-    model_vlf,df_interpolated_ADCIRC_GRID_VLF=df_model_surface_interpolation(df_vlf_stations_interpolated, adc_coords, station_list, dataname='SLR', df_land_controls=df_land_controls, df_water_controls=df_water_controls, 
+    model_vlf,df_interpolated_ADCIRC_GRID_VLF=df_model_surface_interpolation(df_vlf_stations_interpolated, adc_coords, station_list, dataname=None, df_land_controls=df_land_controls, df_water_controls=df_water_controls, 
 				df_secondary_water_controls=df_water_controls_pr, cv_testing=None)
 
-    model_sum,df_interpolated_ADCIRC_GRID_SUM=df_model_surface_interpolation(df_sum_stations_interpolated, adc_coords, station_list, dataname='SLR', df_land_controls=df_land_controls, df_water_controls=df_water_controls, 
+    model_sum,df_interpolated_ADCIRC_GRID_SUM=df_model_surface_interpolation(df_sum_stations_interpolated, adc_coords, station_list, dataname=None, df_land_controls=df_land_controls, df_water_controls=df_water_controls, 
 				df_secondary_water_controls=df_water_controls_pr, cv_testing=None)
-    print('After interpolations')
-    print(f' shit1 {df_slr_stations_interpolated}')
-    print(f' shit2 {df_sum_stations_interpolated}')
 
 ##
 ## Write out datafiles for the chgosen models
