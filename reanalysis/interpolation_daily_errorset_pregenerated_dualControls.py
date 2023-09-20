@@ -130,21 +130,17 @@ def main(args):
 ##
 ## Fetch the ADCIRC triangular grid file
 ##
-#   griddir='/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/reanalysis/hsofs.V2/YEARLY-2019'
+    griddir='/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/reanalysis/ADCCOORDS'
+
 #   adc_coord_file = f'{griddir}/adc_coord.json'
 
     # Use this for HSOFS
     #adc_coords = io_utilities.read_json_file(f'{topdir}/adc_coord.json')
-    #adc_grid_style = 'points' # Needed to guide the final interpolation
     #print(f' ADC_COORDS {adc_coords}')
 
 ##Fetch the EC95D coordinates
-
-    griddir='/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/reanalysis/ADCCOORDS'
     adc_coord_file = f'{griddir}/ec95d_adc_coord.json'
-
     #adc_coord_file = f'{griddir}/hsofs_adc_coord.json'
-
     adc_coords = io_utilities.read_json_file(adc_coord_file)
     adc_grid_style = 'points' # Needed to guide the final interpolation
     #print(f' READ DC_COORDS {adc_coord_file}, {adc_coords}')
