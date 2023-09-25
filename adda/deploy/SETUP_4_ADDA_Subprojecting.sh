@@ -25,7 +25,7 @@ git clone https://github.com/RENCI/AST_gridstations.git
 # 6) Fetch only the ADDA bits and pieces required for adda
 #    into the target directory of choice
 
-git clone --filter=blob:none --no-checkout --depth 1 --sparse https://github.com/RENCI/EDSASTAPPS.git
+git clone --no-checkout --depth 1 --sparse https://github.com/RENCI/EDSASTAPPS.git
 cd EDSASTAPPS
 git sparse-checkout add adda io_utilities gridmap
 git checkout
