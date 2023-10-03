@@ -33,8 +33,11 @@ $PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'CONTR
 # Contrails coastal data
 $PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'CONTRAILS' --data_product 'coastal_water_level' --config_name "$CONT_AUTH/contrails.yml" --station_list "$STATIONDIR/contrails_stations_coastal.csv"
 
-# Coastal River Volume
+# Contrails River Volume
 $PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'CONTRAILS' --data_product 'river_flow_volume' --config_name "$CONT_AUTH/contrails.yml" --station_list "$STATIONDIR/contrails_stations_rivers.csv"
+
+# Contrails River Stream Elevation
+$PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'CONTRAILS' --data_product 'river_stream_elevation' --config_name "$CONT_AUTH/contrails.yml" --station_list "$STATIONDIR/contrails_stations_rivers.csv"
 
 # NOAA coastal data
 $PHOME/python run_get_observation.py --stoptime "$stoptime" --data_source 'NOAAWEB' --data_product "water_level" --station_list "$STATIONDIR/noaa_stations.csv"

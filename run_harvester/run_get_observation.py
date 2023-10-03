@@ -54,6 +54,7 @@ PRODUCT={
         'wave_height':'water_level',
         'air_pressure':'air_pressure',
         'river_flow_volume': 'river_flow_volume',
+        'river_stream_elevation':'water_level',
         'wind_speed':'wind_speed'
          }
 
@@ -126,7 +127,7 @@ def main(args):
         utilities.log.info('Preparing for a CONTRAILS fetch')
         contrails_config = args.config_name # utilities.load_config(os.path.join(os.path.dirname(__file__),'./secrets','contrails.yml'))['DEFAULT']
         utilities.log.info('Got Contrails access information {}'.format(contrails_config))
-        if data_product=='river_water_level':
+        if data_product=='river_water_level' or data_product=='river_stream_elevation':
             station_file=os.path.join(os.path.dirname(__file__),'./supporting_data','contrails_stations_rivers.csv') if in_station_list is None else in_station_list
             meta='RIVERS'
         else:
