@@ -43,7 +43,7 @@ def format_data_frames(df,product) -> pd.DataFrame:
     """
     A Common formatting used by all sources
     """
-    prod_name = PRODUCT[product].upper() if product in PRODUCT.keys() else 'NOAME'
+    prod_name = PRODUCT[product].upper() if product in PRODUCT.keys() else 'NONAME'
     print(f'Data Product: {PRODUCT[product]}')
     df.index = df.index.strftime('%Y-%m-%dT%H:%M:%S')
     df.reset_index(inplace=True)
@@ -65,6 +65,7 @@ PRODUCT={
         'hourly_height':'water_level',
         'predictions':'water_level',
         'river_water_level':'water_level',
+        'river_stream_elevation':'water_level',
         'river_flow_volume':'river_flow_volume',
         'coastal_water_level':'water_level',
         'wave_height':'water_level',
@@ -89,6 +90,8 @@ def construct_metadata(data_product, endt):
     A convenience function used by the Harvester ingest processor
     """
     if 'river_water_level' in data_product:
+         metadata=f'{data_product}_{endt}_RIVERS'
+    elif 'river_stream_elevation' in data_product:
          metadata=f'{data_product}_{endt}_RIVERS'
     elif 'coastal_water_level' in data_product:
          metadata=f'{data_product}_{endt}_COASTAL'
@@ -175,7 +178,6 @@ def main(args):
     data_sources = list(source_config.keys())
 
     # Process all products for the given source
-    print(data_sources)
     for data_source_in in data_sources:
         data_source=DICT_SOURCES[data_source_in]
         utilities.log.info(f'Found the provider name for {data_source}')
@@ -190,10 +192,8 @@ def main(args):
         utilities.log.info(f'File rootnames are {output_fileroot} and {output_metafileroot}')
 
         for data_product in source_products:
-            print(f'Processing source {data_source} and product {data_product}')
             metadata = construct_metadata(data_product, endt)
             utilities.log.info(f'Preparing to fetch {data_product} from {data_source}')
-
             obs = get_obs_stations.get_obs_stations(source=data_source_short.upper(), product=data_product,
                 contrails_yamlname=args.contrails_auth, knockout_dict=None, station_list_file=station_file)
 
