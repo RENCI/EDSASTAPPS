@@ -86,7 +86,7 @@ def main(args):
     hurricane_source=args.hurricane_source
     hurricane_year=args.hurricane_year
 
-    # Generally we expect this to be False. sinbce many of the stations will not have ADCIRC Nodeid data
+    # Generally we expect this to be False. since many of the stations will not have ADCIRC Nodeid data
     fort63_style=args.fort63_style # Need to see if we actually want to use fort63 approaches
 
     # Specify stations (NOAA) to use for ADCIRC sources
