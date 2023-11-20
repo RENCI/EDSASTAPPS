@@ -265,6 +265,12 @@ def main(args):
         timemark=dt.datetime.strftime(tone, dformat)
         timemark=timemark.replace(' ','T')
     except Exception as e:
+        ## If here we expect this is a hurricane advisory and format it to be three digits with a preceding 0. Else die
+        try:
+            timemark=f'{int(timemark):03d}'
+        except Exception as e:
+            utilities.log.error('Expected a Hurricane by timemark is not an integer: {timemark}')
+            sys.exit(1)
         pass
 
     #adcirc_metadata=sitename.upper()+'_'+data_provider.upper().replace('_','')_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
