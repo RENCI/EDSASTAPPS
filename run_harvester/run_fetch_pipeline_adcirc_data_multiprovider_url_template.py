@@ -9,6 +9,7 @@
 #!/usr/bin/env python
 
 # SPDX-FileCopyrightText: 2022 Renaissance Computing Institute. All rights reserved.
+# SPDX-FileCopyrightText: 2023 Renaissance Computing Institute. All rights reserved.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 # SPDX-License-Identifier: LicenseRef-RENCI
@@ -56,7 +57,7 @@ def find_variable_name(url)->str:
     if "swan_HS" in url: return varnamedict['swan_HS']
     if "swan_TPS" in url: return varnamedict['swan_TPS']
     if "swan_DIR" in url: return varnamedict['swan_DIR']
-    utilities.log.info(f'Failed to find varname {url}')
+    utilities.log.critical(f'Failed to find varname {url}')
     sys.exit(1)
 
 
@@ -82,7 +83,7 @@ def find_cast_status(df)->str:
     """
     data_list = df['CAST'].tolist()
     cast_type = list(set(data_list))[0] # fetch_stations has already ensured these will all be the same grid and type
-    utilities.log.info(cast_type)
+    utilities.log.debug(cast_type)
     return cast_type.upper()
 
 dformat='%Y-%m-%d %H:%M:%S'
@@ -118,19 +119,19 @@ def main(args):
     return_sample_min=15
 
     if url is None:
-        utilities.log.error('For template URL-based approaches a FQFN template url must be specified')
+        utilities.log.critical('For template URL-based approaches a FQFN template url must be specified')
         sys.exit(1)
 
     if map_file is None: 
-        utilities.log.error('map_file must be specified')
+        utilities.log.critical('map_file must be specified')
         sys.exit(1)
 
     if source_file is None:
-        utilities.log.error('source_file must be specified')
+        utilities.log.critical('source_file must be specified')
         sys.exit(1)
 
     if data_provider is None:
-        utilities.log.error('data_provider must be specified')
+        utilities.log.critical('data_provider must be specified')
         sys.exit(1)
 
     if data_provider=='NDBC_BUOYS':
@@ -151,33 +152,32 @@ def main(args):
     utilities.log.info(f'Output logger directory specified to be {logdir}')
 
     if args.sources:
-         utilities.log.info('Return list of sources')
+         utilities.log.debug('Return list of sources')
          return SOURCES
-         sys.exit(0)
 
     data_source = args.data_source # This is just a placeholder for future considerations
     data_product = args.data_product
 
     if data_source.upper() in SOURCES:
-        utilities.log.info('Found selected data source {}'.format(data_source))
+        utilities.log.debug('Found selected data source {}'.format(data_source))
     else:
         utilities.log.error('Invalid data source {}'.format(data_source))
         sys.exit(1)
 
     if data_provider.upper() in PROVIDERS:
-        utilities.log.info(f'Found valid data_provider {data_provider}')
+        utilities.log.debug(f'Found valid data_provider {data_provider}')
     else:
         utilities.log.error(f'Invalid data provider input: {data_provider}, case insentitive choices {PROVIDERS}') 
         sys.exit(1)
 
     if args.ensemble is not None:
         url = change_ensemble_name(url, args.ensemble)
-        utilities.log.info(f'Override ensemble name to {args.ensemble}')
+        utilities.log.debug(f'Override ensemble name to {args.ensemble}')
 
     ####
     # This gets var name from the URL. we need to input this instead
     variable_name = find_variable_name(url)
-    utilities.log.info(f'Found variable name of {variable_name}')
+    utilities.log.debug(f'Found variable name of {variable_name}')
 
 ##
 ## BEGIN
@@ -200,9 +200,9 @@ def main(args):
     # Fetch the provider specific variable name
     try:
         variable_name = utilities.load_config(source_file)['SOURCEMAP'][data_provider.upper()]['VARIABLE']
-        utilities.log.info(f' Fetched variable name {variable_name}')
+        utilities.log.debug(f' Fetched variable name {variable_name}')
     except Exception as e:
-        utilities.log.error(f' Problem with getting variable name:{e}')
+        utilities.log.critical(f' Problem with getting variable name:{e}')
         sys.exit(0)
 
 ##
@@ -215,12 +215,12 @@ def main(args):
             input_url=get_adcirc_stations.convert_urls_to_63style([url])[0] # Assumed to only have one of them
         else:
             input_url=get_adcirc_stations.convert_urls_to_63style_customfilename([url],filename='swan_HS.63.nc')[0] # Assumed to only have one of them
-            utilities.log.info('SWAN style data file')
+            utilities.log.debug('SWAN style data file')
     else:
         if variable_name == 'zeta':
             input_url=get_adcirc_stations.convert_urls_to_61style([url])[0]
         else:
-            utilities.log.info("No fort61_style approach for data other than fort63/61.nc")
+            utilities.log.critical("No fort61_style approach for data other than fort63/61.nc")
             sys.exit(0)
 
     utilities.log.info(input_url)
@@ -288,9 +288,9 @@ def main(args):
         sys.exit(1)
 
     log_time_meta = dt.datetime.strptime(rpl.Tmax,'%Y%m%d%H').strftime("%Y%m%d%H%M%S")
-    utilities.log.info('Copy log file')
+    utilities.log.debug('Copy log file')
     shutil.copy(utilities.LogFile,'/'.join([logdir,f'run_harvester_adcirc_{log_time_meta}.log'])) 
-    utilities.log.info('Finished with data source {}'.format(data_source))
+    utilities.log.debug('Finished with data source {}'.format(data_source))
     utilities.log.info('Finished')
 
 if __name__ == '__main__':
