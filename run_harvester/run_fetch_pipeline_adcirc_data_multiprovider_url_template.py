@@ -325,7 +325,7 @@ if __name__ == '__main__':
                         help='String: Custom location for the output dicts, PNGs and logs')
     parser.add_argument('--finalLOG', action='store', dest='finalLOG', default=None,
                         help='String: Custom location logs. If not specified logs go to the datadir')
-    parser.add_argument('--modelid', action='store', dest='modelid', default=None, type=str,
-                        help='Optional information to include in the output datra and metadata filenames')
+    parser.add_argument('--modelid', action='store', dest='modelid', default=None,
+                        help='Optional information to include in the output data and metadata filenames')
     args = parser.parse_args()
     sys.exit(main(args))
