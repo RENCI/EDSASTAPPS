@@ -174,6 +174,9 @@ def main(args):
         url = change_ensemble_name(url, args.ensemble)
         utilities.log.debug(f'Override ensemble name to {args.ensemble}')
 
+    modelid = args.modelid # The usual nnnn-string value past by the SuperV 
+    utilities.log.debug(f'Optional ModelID value of {modelid}') 
+
     ####
     # This gets var name from the URL. we need to input this instead
     variable_name = find_variable_name(url)
@@ -274,7 +277,11 @@ def main(args):
         pass
 
     #adcirc_metadata=sitename.upper()+'_'+data_provider.upper().replace('_','')_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
-    adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+data_provider.upper().replace("_","")+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
+
+    if modelid is None:
+        adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+data_provider.upper().replace("_","")+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
+    else:
+        adcirc_metadata=modelid.upper()+'_'+sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+data_provider.upper().replace("_","")+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
 
     fileroot='_'.join(['adcirc',stormnumber]) if stormnumber != 'NONE' else 'adcirc'
     filerootmeta='_'.join(['adcirc','meta',stormnumber]) if stormnumber != 'NONE' else 'adcirc_meta'
@@ -318,5 +325,7 @@ if __name__ == '__main__':
                         help='String: Custom location for the output dicts, PNGs and logs')
     parser.add_argument('--finalLOG', action='store', dest='finalLOG', default=None,
                         help='String: Custom location logs. If not specified logs go to the datadir')
+    parser.add_argument('--modelid', action='store', dest='modelid', default=None, type=str,
+                        help='Optional information to include in the output datra and metadata filenames')
     args = parser.parse_args()
     sys.exit(main(args))
