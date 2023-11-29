@@ -278,7 +278,7 @@ def main(args):
 
     #adcirc_metadata=sitename.upper()+'_'+data_provider.upper().replace('_','')_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
 
-    if modelid is None:
+    if modelid is None or modelid=='':
         adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+data_provider.upper().replace("_","")+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
     else:
         adcirc_metadata=modelid.upper()+'_'+sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+data_provider.upper().replace("_","")+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
