@@ -3,6 +3,7 @@
 import sys,os
 import yaml
 import json
+import xmltodict
 
 def construct_base_rootdir(inconfig=None, base_dir_extra='None')->str:
     """
@@ -203,3 +204,33 @@ def write_ADCIRC_formatted_gridfield_to_Disk(df, value_name='VAL',rootdir=None,s
         myfile.write('\n'.join(d))
     print('Wrote current extrapolated ADCIRC grid to disk')
     return newfilename
+
+def write_dict_to_xml(dictdata, rootdir=None,subdir=None,fileroot=None,iometadata=None)->str:
+    """
+    Convert the input dict to an XML and write to disk
+    The addition of root is required for the conversion
+    If the index/keys are datetime (or equiv) you must have converted thenm to strings
+
+    Parameters:
+        dictdata <dict>: of data to write to disk
+        rootdir <str>: top of the output FS tree
+        subdir <str>: additional subdirectory into which to place file
+        fileroot <str : filename with no extension
+        iometadata <str>: additional data to append to fileroot before extension.
+
+    Returns full filename for written data
+    """
+    fileroot = '_'.join([fileroot,iometadata]) if iometadata != '' else fileroot
+    try:
+        xml_string=xmltodict.unparse({'root':dictdata})
+        newfilename = get_full_filename_with_subdirectory_prepended(rootdir, subdir, fileroot+'.xml')
+        with open(newfilename, 'w') as fp:
+            fp.write(xml_string)
+        print('Wrote dictdata to XML file {}'.format(newfilename))
+    except OSError:
+        raise OSError("Failed to write dictdata to XML file %s" % (newfilename))
+    return newfilename
+
+
+
+
