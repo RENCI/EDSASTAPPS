@@ -20,7 +20,7 @@ month="$(date +'%m')"
 year="$(date +'%Y')"
 hour="$(date +'%H')"
 printf "Current date in dd/mm/yyyy format %s\n" "$day-$month-$year $hour:00:00"
-stoptime="$year-$month-$day 00:00:00"
+stoptime="$year-$month-$day $hour:00:00"
 
 FINALDIR=$1
 
