@@ -17,6 +17,7 @@
 
 # NOSITE is being returned from the rpl class.
 
+
 import os,sys
 import shutil
 import numpy as np
@@ -58,6 +59,8 @@ def find_variable_name(url)->str:
     if "swan_DIR" in url: return varnamedict['swan_DIR']
     utilities.log.critical(f'Failed to find varname {url}')
     sys.exit(1)
+
+
 
 def change_ensemble_name(url, ensemble)->str:
     """
@@ -230,7 +233,7 @@ def main(args):
 ## Get the data
 ## If no fort623.nc listed in the map it will hard fail with status (1). Need to fix this
 
-    utilities.log.debug(f' Try data lookup a {urls}')
+    print(f' Try data lookup a {urls}')
     try:
         rpl = get_adcirc_stations.get_adcirc_stations(source='TDS', product=args.data_product,
                 station_list_file=station_file, fort63_style=fort63_style )
@@ -249,9 +252,6 @@ def main(args):
     ensemble=rpl.ensemble
     stormnumber=rpl.stormnumber
     timemark=rpl.timemark
-    instance=rpl.instance
-    provider=data_provider
-    lookup_style='Fort63' if fort63_style else 'Fort61'
 
     earliest_real_time = min(data_adc.index.tolist()).strftime(dformat)
     latest_real_time = max(data_adc.index.tolist()).strftime(dformat)
@@ -276,63 +276,25 @@ def main(args):
             sys.exit(1)
         pass
 
-## Use these to build a new complete run.properties type dict for storage as JSON
-    model_metadata=dict()
-    model_metadata['SITENAME']=sitename
-    model_metadata['GRIDNAME']=gridname
-    model_metadata['ENSEMBLE']=ensemble
-    model_metadata['STORMNUMBER']=stormnumber
-    model_metadata['TIMEMARK']=timemark
-    model_metadata['INSTANCE']=instance
-    model_metadata['CAST_TYPE']=cast_type
-    model_metadata['START_TIME']=earliest_real_time.replace(' ','T')
-    model_metadata['FINAL_TIME']=latest_real_time.replace(' ','T')  
-    model_metadata['MODELID']=modelid
-    model_metadata['PROVIDER']=provider
-    model_metadata['DATA_PRODUCT']=data_product
-    model_metadata['URL']=url
-    model_metadata['LOOKUP_STYLE']=lookup_style
-
-# Merge the metadata sets
-    for stationid, row in meta_adc.iterrows():
-        station_meta=dict()
-        station_meta['LAT']=row['LAT']
-        station_meta['LON']=row['LON']
-        #station_meta['NAME']=row['NAME'] The actual name has been excluded as requested by Jim/Lisa
-        station_meta['UNITS']=row['UNITS']
-        station_meta['OWNER']=row['OWNER']
-        station_meta['STATE']=row['STATE']
-        station_meta['COUNTY']=row['COUNTY']
-        station_meta['Node']=row['Node']
-
-    adcirc_metadata=data_provider.upper().replace("_","")
+    #adcirc_metadata=sitename.upper()+'_'+data_provider.upper().replace('_','')_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
 
     if modelid is None or modelid=='':
-        subdir=''
+        adcirc_metadata=sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+data_provider.upper().replace("_","")+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
     else:
-        subdir=modelid
+        adcirc_metadata=modelid.upper()+'_'+sitename.upper()+'_'+ensemble.upper()+'_'+grid_name.upper()+'_'+cast_type+'_'+data_provider.upper().replace("_","")+'_'+timemark+'_'+earliest_real_time.replace(' ','T')+'_'+latest_real_time.replace(' ','T')
 
-    fileroot=cast_type
-    filerootmeta=f'meta_{cast_type}'
+    fileroot='_'.join(['adcirc',stormnumber]) if stormnumber != 'NONE' else 'adcirc'
+    filerootmeta='_'.join(['adcirc','meta',stormnumber]) if stormnumber != 'NONE' else 'adcirc_meta'
 
     try:
-        dataf=io_utilities.write_csv(df_adcirc_data, rootdir=rootdir,subdir=subdir,fileroot=fileroot,iometadata=adcirc_metadata)
-        metaf=io_utilities.write_csv(meta_adc, rootdir=rootdir,subdir=subdir,fileroot=filerootmeta,iometadata=adcirc_metadata)
+        dataf=io_utilities.write_csv(df_adcirc_data, rootdir=rootdir,subdir='',fileroot=fileroot,iometadata=adcirc_metadata)
+        metaf=io_utilities.write_csv(meta_adc, rootdir=rootdir,subdir='',fileroot=filerootmeta,iometadata=adcirc_metadata)
         utilities.log.info('ADCIRC data has been stored {},{}'.format(dataf,metaf))
     except Exception as e:
         utilities.log.error('Error: ADCIRC: Failed Write {}'.format(e))
         sys.exit(1)
 
-    db_iometa=adcirc_metadata
-    
-    filerootmeta='meta_job_'+cast_type
-
-    ## Write out a JSON formatted metadata file
-    utilities.log.debug(f' DB_IOMETA {db_iometa}')
-    newjsonfile=io_utilities.write_dict_to_json(model_metadata, rootdir=rootdir,subdir=subdir, fileroot=filerootmeta,iometadata=db_iometa)
     log_time_meta = dt.datetime.strptime(rpl.Tmax,'%Y%m%d%H').strftime("%Y%m%d%H%M%S")
-
-    # Handle the final log file
     utilities.log.debug('Copy log file')
     shutil.copy(utilities.LogFile,'/'.join([logdir,f'run_harvester_adcirc_{log_time_meta}.log'])) 
     utilities.log.debug('Finished with data source {}'.format(data_source))
