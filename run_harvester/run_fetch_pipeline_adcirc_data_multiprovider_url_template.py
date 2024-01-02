@@ -330,7 +330,12 @@ def main(args):
     ## Write out a JSON formatted metadata file
     utilities.log.debug(f' DB_IOMETA {db_iometa}')
     newjsonfile=io_utilities.write_dict_to_json(model_metadata, rootdir=rootdir,subdir=subdir, fileroot=filerootmeta,iometadata=db_iometa)
-    log_time_meta = dt.datetime.strptime(rpl.Tmax,'%Y%m%d%H').strftime("%Y%m%d%H%M%S")
+
+    if modelid is None or modelid=='':
+        log_time_meta = dt.datetime.strptime(rpl.Tmax,'%Y%m%d%H').strftime("%Y%m%d%H%M%S")
+    else:
+        log_time_meta=modelid
+    #log_time_meta = dt.datetime.strptime(rpl.Tmax,'%Y%m%d%H').strftime("%Y%m%d%H%M%S")
 
     # Handle the final log file
     utilities.log.debug('Copy log file')
