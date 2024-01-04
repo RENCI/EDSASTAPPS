@@ -26,9 +26,7 @@ if [ -z "${LOG_PATH:-}" ]; then
    LOG_PATH="$FINALDIR"
 fi
 
-PROVIDER=$3
-
-INSTANCEID=$4
+INSTANCEID=$3
 if [ -z "$INSTANCEID" ]
 then
     echo "No INSTANCEID"
@@ -36,6 +34,7 @@ else
     echo "Got an INSTANCEID of $INSTANCEID"
 fi
 
+PROVIDER=$4
 
 # git clone the grid data. The underlying directory structure is implied within the provided grid_to_stationfile_maps.yml file
 git clone https://github.com/RENCI/AST_gridstations.git
