@@ -1,0 +1,12 @@
+export PYTHONPATH=/projects/prediction_work/AST:/projects/prediction_work/EDSASTAPPS
+export RUNTIMEDIR=./TEST
+
+# Where are the station files
+STATIONDIR="/projects/prediction_work/EDSASTAPPS/MAIN_GRID_DEFINITIONS"
+
+# Where is Contrails authentication yml
+CONT_AUTH="/projects/prediction_work/EDSASTAPPS/run_harvester/secrets"
+
+python run_get_observation.py --stoptime '2022-02-20 00:00:00' --data_source 'CONTRAILS' --data_product 'coastal_water_level' --config_name "$CONT_AUTH/contrails.yml" --station_list "$STATIONDIR/contrails_stations_coastal.csv"
+
+

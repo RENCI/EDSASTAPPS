@@ -1,0 +1,17 @@
+export PYTHONPATH=/projects/prediction_work/AST:/projects/prediction_work/EDSASTAPPS
+export RUNTIMEDIR=./JUNK
+
+
+#python run_fetch_pipeline_adcirc_data_multiprovider_url_template.py --data_source 'TDS'  --url "http://tds.renci.org/thredds/dodsC/2023/al03/12/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-al03-sb55.01/nhcOfcl/fort.63.nc" --map_file '../../AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml'  --source_file '../../AST_gridstations/harvester_stations/sources_map.yaml' --fort63_style --data_provider 'CONTRAILS_RIVERS`' --ensemble 'nowcast'
+
+
+python run_fetch_pipeline_adcirc_data_multiprovider_url_template.py --data_source 'TDS'  --url "https://tds.renci.org/thredds/dodsC/2023/gfs/2023121812/NCSC_SAB_v1.23/ht-ncfs.renci.org/ncsc123_gfs_da/gfsforecast/fort.63.nc"  --map_file '../../AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml'  --source_file '../../AST_gridstations/harvester_stations/sources_map.yaml' --fort63_style --data_provider 'NOAA_STATIONS' 
+
+python run_fetch_pipeline_adcirc_data_multiprovider_url_template.py --data_source 'TDS'  --url "http://tds.renci.org/thredds/dodsC/2023/gfs/2023121812/NCSC_SAB_v1.23/ht-ncfs.renci.org/ncsc123_gfs_sb55.01/gfsforecast/fort.63.nc" --map_file '../../AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml'  --source_file '../../AST_gridstations/harvester_stations/sources_map.yaml' --fort63_style --data_provider 'NOAA_STATIONS'
+
+
+
+#http://tds.renci.org/thredds/dodsC/2023/gfs/2023121812/NCSC_SAB_v1.23/ht-ncfs.renci.org/ncsc123_gfs_sb55.01/gfsforecast/fort.63.nc
+
+#http://tds.renci.org/thredds/dodsC/2023/gfs/2023121812/NCSC_SAB_v1.23/ht-ncfs.renci.org/ncsc123_gfs_da/gfsforecast/fort.63.nc
+

@@ -1,24 +1,24 @@
 #
-# Setup the basic env values relative to /projects/sequence_analysis/vol1/prediction_work/HARVESTOR/fetch_station_data
+# Setup the basic env values relative to /projects/prediction_work/HARVESTOR/fetch_station_data
 
-export PYTHONPATH=/projects/sequence_analysis/vol1/prediction_work/AST:/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS
+export PYTHONPATH=/projects/prediction_work/AST:/projects/prediction_work/EDSASTAPPS
 export RUNTIMEDIR=./DAILY-TEST-NEW
 #export RUNTIMEDIR=/projects/ees/TDS/DataHarvesting/DAILY_HARVESTING
 
 # Which PYTHON
-PHOME="/projects/sequence_analysis/vol1/prediction_work/PythonMethods/anaconda3/bin"
+PHOME="/projects/prediction_work/PythonMethods/anaconda3/bin"
 
 # Where is AST?
-SRC="/projects/sequence_analysis/vol1/prediction_work/AST/harvester"
+SRC="/projects/prediction_work/AST/harvester"
 
 # Where are the station files
-STATIONDIR="/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/MAIN_GRID_DEFINITIONS"
+STATIONDIR="/projects/prediction_work/EDSASTAPPS/MAIN_GRID_DEFINITIONS"
 
 # Where is Contrails authentication yml
-CONT_AUTH="/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/run_harvester/secrets"
+CONT_AUTH="/projects/prediction_work/EDSASTAPPS/run_harvester/secrets"
 
 # Where is my WD 
-cd /projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/run_harvester
+cd /projects/prediction_work/EDSASTAPPS/run_harvester
 
 day="$(date +'%d')"
 month="$(date +'%m')"

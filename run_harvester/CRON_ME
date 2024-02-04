@@ -1,0 +1,7 @@
+# 
+#
+# (base) [jtilson@lynch run_harvester]$ crontab -l
+# 0 0 * * * /projects/prediction_work/EDSASTAPPS/run_harvester/daily_observation_update.sh
+# 5 */6 * * * /projects/prediction_work/EDSASTAPPS/run_harvester/daily_adcirc_update.sh
+#
+

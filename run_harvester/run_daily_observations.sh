@@ -8,21 +8,21 @@
 
 ## A quick script to process all preceding January days to now.
 
-export PYTHONPATH=/projects/sequence_analysis/vol1/prediction_work/AST:/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS
+export PYTHONPATH=/projects/prediction_work/AST:/projects/prediction_work/EDSASTAPPS
 export RUNTIMEDIR=/projects/ees/TDS/DataHarvesting/DAILY_HARVESTING
 #export RUNTIMEDIR=./DAILIES
 
 # Which PYTHON
-PHOME="/projects/sequence_analysis/vol1/prediction_work/PythonMethods/anaconda3/bin"
+PHOME="/projects/prediction_work/PythonMethods/anaconda3/bin"
 
 # Where are the station files
-STATIONDIR="/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/MAIN_GRID_DEFINITIONS"
+STATIONDIR="/projects/prediction_work/EDSASTAPPS/MAIN_GRID_DEFINITIONS"
 
 # Where is Contrails authentication yml
-CONT_AUTH="/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/run_harvester/secrets"
+CONT_AUTH="/projects/prediction_work/EDSASTAPPS/run_harvester/secrets"
 
 # Prepare invocation
-cd /projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/run_harvester
+cd /projects/prediction_work/EDSASTAPPS/run_harvester
 
 # Observations
 

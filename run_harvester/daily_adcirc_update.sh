@@ -1,5 +1,5 @@
 #
-# Setup the basic env values relative to /projects/sequence_analysis/vol1/prediction_work/HARVESTOR/fetch_station_data
+# Setup the basic env values relative to /projects/prediction_work/HARVESTOR/fetch_station_data
 #
 # This job is to be run every 6 hours to check for adcirc files
 # Run the cron at 6 hours + 15 mins to help ensure the data actually got to the TDS site
@@ -7,25 +7,25 @@
 
 # NOTE: The [provided urls are as "templates" from which new urls are created
 
-export PYTHONPATH=/projects/sequence_analysis/vol1/prediction_work/AST:/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS
+export PYTHONPATH=/projects/prediction_work/AST:/projects/prediction_work/EDSASTAPPS
 #export RUNTIMEDIR=./JUNK
 export RUNTIMEDIR=/projects/ees/TDS/DataHarvesting/DAILY_HARVESTING
 
 
 # Which PYTHON
-PHOME="/projects/sequence_analysis/vol1/prediction_work/PythonMethods/anaconda3/bin"
+PHOME="/projects/prediction_work/PythonMethods/anaconda3/bin"
 
 # Where is AST?
-SRC="/projects/sequence_analysis/vol1/prediction_work/AST/run_harvester"
+SRC="/projects/prediction_work/AST/run_harvester"
 
 # Where are the station files
-STATIONDIR="/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/MAIN_GRID_DEFINITIONS"
+STATIONDIR="/projects/prediction_work/EDSASTAPPS/MAIN_GRID_DEFINITIONS"
 
 # Where is Contrails authentication yml
-CONT_AUTH="/projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/run_harvester/secrets"
+CONT_AUTH="/projects/prediction_work/EDSASTAPPS/run_harvester/secrets"
 
 # Prepare invocation
-cd /projects/sequence_analysis/vol1/prediction_work/EDSASTAPPS/run_harvester
+cd /projects/prediction_work/EDSASTAPPS/run_harvester
 
 # Dig out the DAY, MONTH, and YEAR values. Always set hour:min:sec to 00:00:00
 

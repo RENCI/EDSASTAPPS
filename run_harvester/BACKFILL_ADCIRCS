@@ -1,0 +1,51 @@
+export PYTHONPATH=/projects/prediction_work/AST:/projects/prediction_work/EDSASTAPPS
+export FINALDIR="/projects/ees/TDS/DataHarvesting/DAILY_HARVESTING"
+export LOG_PATH="/projects/ees/TDS/DataHarvesting/DAILY_HARVESTING"
+
+
+
+# Hurricane 
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2021/al09/10/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2021/al09/09/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS'  --url "http://tds.renci.org/thredds/dodsC/2021/al09/08/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+# Hurricane Nowcast
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS' --ensemble='nowcast' --url "http://tds.renci.org/thredds/dodsC/2021/al09/11/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS' --ensemble='nowcast' --url "http://tds.renci.org/thredds/dodsC/2021/al09/10/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS' --ensemble='nowcast' --url "http://tds.renci.org/thredds/dodsC/2021/al09/09/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS' --ensemble='nowcast' --url "http://tds.renci.org/thredds/dodsC/2021/al09/08/hsofs/hatteras.renci.org/hsofs-al09-bob/nhcOfcl/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+# A standard namforecast
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS' --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022042206/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/namforecast/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS' --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022042212/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/namforecast/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS' --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022042218/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/namforecast/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS' --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022042300/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/namforecast/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+# Nowcasts
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS' --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022042206/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS' --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022042212/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS' --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022042218/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'ASGS' --url "http://tds.renci.org/thredds/dodsC/2022/nam/2022042300/hsofs/hatteras.renci.org/hsofs-nam-bob-2021/nowcast/fort.63.nc" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH"
+
+
+# Special request from J.M.
+
+
+
+

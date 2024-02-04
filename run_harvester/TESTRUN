@@ -1,0 +1,30 @@
+
+export PYTHONPATH=/projects/prediction_work/AST:/projects/prediction_work/EDSASTAPPS
+export RUNTIMEDIR=./JUNK
+
+
+
+export CONTRAILS_KEY="7b2f8dfc-6e3c-493a-8855-2e0840883f64"
+export FINALDIR="./JUNK"
+export LOG_PATH="./JUNK"
+export stoptime="2022-02-02 00:00:00"
+
+git clone https://github.com/RENCI/AST_gridstations.git
+sed -i 's/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/'"$CONTRAILS_KEY"'/g' ./secrets/contrails.yml
+
+python ./run_fetch_pipeline_observation.py --stoptime "$stoptime"  --finalLOG "$LOG_PATH" --finalDIR "$FINALDIR"  --map_source_file './AST_gridstations/harvester_stations/sources_map.yaml' --contrails_auth './secrets/contrails.yml'
+
+
+# URL outputs
+# NOTE THE servername below are WRONG! Should be 199.90.60.180:8080 for RENCI data
+
+http://contrail.nc.gov:8080/OneRain/DataAPI?method=GetSensorData&class=20&system_key=7b2f8dfc-6e3c-493a-8855-2e0840883f64&site_id=02089000&tz=gmt&data_start=2022-01-31+00%3A00%3A00&data_end=2022-01-31+23%3A59%3A59
+
+http://contrail.nc.gov:8080/OneRain/DataAPI?method=GetSensorData&class=20&system_key=7b2f8dfc-6e3c-493a-8855-2e0840883f64&site_id=02089000&tz=gmt&data_start=2022-02-01+00%3A00%3A00&data_end=2022-02-01+23%3A59%3A59
+
+http://contrail.nc.gov:8080/OneRain/DataAPI?method=GetSensorData&class=20&system_key=7b2f8dfc-6e3c-493a-8855-2e0840883f64&site_id=02091500&tz=gmt&data_start=2022-01-31+00%3A00%3A00&data_end=2022-01-31+23%3A59%3A59
+
+
+# This works
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'TDS'  --url "http://tds.renci.org/thredds/dodsC/2023/al03/12/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-al03-sb55.01/nhcOfcl/fort.63.nc" --ensemble 'nhcOfcl' --map_file './supporting_data/grid_to_stationfile_maps.yml' --fort63_style
+
