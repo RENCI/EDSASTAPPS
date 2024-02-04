@@ -45,7 +45,7 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_co
     Results:
         A plot in the USA East Coast region
     """
-    coastline=np.loadtxt('/projects/sequence_analysis/vol1/prediction_work/ADCIRCSupportTools-v2/test_data/coarse_us_coast.dat')
+    coastline=np.loadtxt('/projects/prediction_work/ADCIRCSupportTools-v2/test_data/coarse_us_coast.dat')
     #N=16
     #base_cmap='tab20c' # Or simply use None tab20c is also okay
     #cmap= plt.cm.get_cmap(base_cmap, N)
@@ -102,10 +102,10 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_co
 
 def main(args):
     # Grab the test data
-    f_land_control = '/projects/sequence_analysis/vol1/prediction_work/ADCIRCSupportTools-v2/test_data/df_land_controls.csv'
-    f_water_control = '/projects/sequence_analysis/vol1/prediction_work/ADCIRCSupportTools-v2/test_data/df_water_controls.csv'
-    f_surface = '/projects/sequence_analysis/vol1/prediction_work/ADCIRCSupportTools-v2/test_data/df_surface.csv'
-    f_grid = '/projects/sequence_analysis/vol1/prediction_work/ADCIRCSupportTools-v2/test_data/adc_plot_grid.json'
+    f_land_control = '/projects/prediction_work/ADCIRCSupportTools-v2/test_data/df_land_controls.csv'
+    f_water_control = '/projects/prediction_work/ADCIRCSupportTools-v2/test_data/df_water_controls.csv'
+    f_surface = '/projects/prediction_work/ADCIRCSupportTools-v2/test_data/df_surface.csv'
+    f_grid = '/projects/prediction_work/ADCIRCSupportTools-v2/test_data/adc_plot_grid.json'
      
     df_land_control=pd.read_csv(f_land_control,header=0,index_col=0)
     df_water_control=pd.read_csv(f_water_control,header=0, index_col=0)
