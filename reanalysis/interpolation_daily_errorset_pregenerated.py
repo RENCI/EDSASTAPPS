@@ -4,8 +4,6 @@
 
 # The interpolator has been changed to LinearRBF. This requires an additional call to build a polygon boundary
 
-# This code handles havong a separate water control line around PR
-
 ###########################################################################
 
 ## Added code to capture the set of scores for subsequenct analysis
@@ -90,7 +88,6 @@ def main(args):
     outputdir=io_utilities.construct_base_rootdir(args.output_directory.strip(), base_dir_extra='')
 
     cv_testing = args.cv_testing
-    utilities.log.info(f' CV_TESTING set to {cv_testing}')
     gridname = args.gridname
     iometadata = args.iometadata
 
@@ -99,10 +96,12 @@ def main(args):
 ##
     file_land_controls = grid_to_station_maps.find_land_control_points_from_map(gridname=gridname, mapfile=args.map_file) 
     file_water_controls = grid_to_station_maps.find_water_control_points_from_map(gridname=gridname, mapfile=args.map_file)
-## Find the secondary water controls for the island of PR
-    pr_file_water_controls = grid_to_station_maps.find_secondary_water_control_points_from_map(gridname=gridname, mapfile=args.map_file)
-    utilities.log.info(f'Fetched the clamp {file_land_controls}, and control node {file_water_controls} and secondary {pr_file_water_controls} files for grid {gridname}')
-    print(f' secondary file {pr_file_water_controls}')
+    utilities.log.info('Fetched the clamp {}, and control node {} files for grid {}'.format(file_land_controls,file_water_controls,gridname))
+
+# Get the data
+    df_slr_stations = interpolate_scaled_offset_field.get_station_values(fname=args.slr_file_errors, header_data='VAL')
+    df_mid_stations = interpolate_scaled_offset_field.get_station_values(fname=args.mid_file_errors, header_data='VAL')
+    df_vlf_stations = interpolate_scaled_offset_field.get_station_values(fname=args.vlf_file_errors, header_data='VAL')
 
 # Get the control points
     if file_water_controls is not None:
@@ -114,37 +113,27 @@ def main(args):
     else:
         df_water_controls=None
 
-    if pr_file_water_controls is not None:
-        df_water_controls_pr = interpolate_scaled_offset_field.get_lon_lat_control_values(fname=pr_file_water_controls)
-    else:
-        df_water_controls_pr=None
-
     utilities.log.info(f'Control points {df_water_controls.shape}')
     utilities.log.info(f'Control points data {df_water_controls}')
-    utilities.log.info(f'Secondary Control points data {df_water_controls_pr}')
-
-# Get the station estimation data
-    df_slr_stations = interpolate_scaled_offset_field.get_station_values(fname=args.slr_file_errors, header_data='VAL')
-    df_mid_stations = interpolate_scaled_offset_field.get_station_values(fname=args.mid_file_errors, header_data='VAL')
-    df_vlf_stations = interpolate_scaled_offset_field.get_station_values(fname=args.vlf_file_errors, header_data='VAL')
 
 ##
 ## Fetch the ADCIRC triangular grid file
 ##
-    griddir='/projects/prediction_work/EDSASTAPPS/reanalysis/ADCCOORDS'
-
+#   griddir='/projects/prediction_work/EDSASTAPPS/reanalysis/ec95d.v1/YEARLY-2019'
 #   adc_coord_file = f'{griddir}/adc_coord.json'
-
     # Use this for HSOFS
     #adc_coords = io_utilities.read_json_file(f'{topdir}/adc_coord.json')
+    #adc_grid_style = 'points' # Needed to guide the final interpolation
     #print(f' ADC_COORDS {adc_coords}')
 
-##Fetch the EC95D coordinates
-    #adc_coord_file = f'{griddir}/ec95d_adc_coord.json'
-    adc_coord_file = f'{griddir}/hsofs_adc_coord.json'
+
+
+    griddir='/projects/prediction_work/EDSASTAPPS/reanalysis/hsofs.V2/YEARLY-2020'
+    adc_coord_file = f'{griddir}/adc_coord.json'
     adc_coords = io_utilities.read_json_file(adc_coord_file)
     adc_grid_style = 'points' # Needed to guide the final interpolation
-    #print(f' READ DC_COORDS {adc_coord_file}, {adc_coords}')
+    print(f' EC95D ADC_COORDS {adc_coords}')
+
 
 ##
 ## Fetch station_coords for which ALL data sets will be interpolated PRIOR to SUMMING
@@ -156,135 +145,103 @@ def main(args):
     station_coords = {'LON':station_x[:].tolist(),'LAT':station_y[:].tolist()}
 
 ##
-## Prepare input data to have the same input stations 
-## No need to have CLAMPS for these model-specific interpolations
+## Prepare input data (SLR) to have the same input stations 
+## No need to have CLAMPS for theaes model-specific interpolations
 ##
-
     df_slr_stations_interpolated=station_list_interpolation(df_slr_stations, station_coords, station_list)
     df_mid_stations_interpolated=station_list_interpolation(df_mid_stations, station_coords, station_list)
     df_vlf_stations_interpolated=station_list_interpolation(df_vlf_stations, station_coords, station_list)
 
+    #model = interpolate_scaled_offset_field.interpolation_model_fit(df_slr_stations, interpolation_type='LinearRBF')
+    #df_slr_stations_interpolated = interpolate_scaled_offset_field.interpolation_model_transform(station_coords, model=model, input_grid_type='points',pathpoly=None)
+    #df_slr_stations_interpolated.index=df_vlf_stations.index
+
+    #print(f' SLR input {df_slr_stations}')
+    #print(f' SLR fit {df_slr_stations_interpolated}')
+
 ##
-## Build the SUM data sets as mid_vlf-slr
+## Build the SUM data sets as slr+mid_vlf
 ##
+    df_sum_stations_interpolated=df_vlf_stations_interpolated # MID and VLF always have the FINAL set of stations to keep
+    df_sum_stations_interpolated['VAL']=df_slr_stations_interpolated['VAL']+df_mid_stations_interpolated['VAL']+df_vlf_stations_interpolated['VAL']
 
-    df_sum_stations_interpolated=df_vlf_stations_interpolated.copy() # MID and VLF always have the FINAL set of stations to keep
-    df_sum_stations_interpolated['VAL']=df_mid_stations_interpolated['VAL']+df_vlf_stations_interpolated['VAL']-df_slr_stations_interpolated['VAL']
-
-##
-## Write out the ACTUAL SUM error data for use by other programs
-##
-
-    iosubdir='interpolated'
-    summed_interpolated_pkl = io_utilities.write_pickle(df_sum_stations_interpolated, rootdir=outputdir,subdir=iosubdir,fileroot='stationEstimationsSUM',iometadata=iometadata)
-    utilities.log.info('Wrote Actual SUMMED station estimated error data {}'.format(summed_interpolated_pkl))
-
-
-    print('Finished')
 ##
 ## Define new inteprolator function
 ##
-    def df_model_surface_interpolation(df_stations, adc_coords, station_list, dataname=None, df_land_controls=None, df_water_controls=None, df_secondary_water_controls=None, cv_testing=None):
+    def df_model_surface_interpolation(df_stations, adc_coords, station_list, dataname=None, df_land_controls=None, df_water_controls=None, cv_testing=None):
         """
         Dataname= (SLR,MID, or VLF)
         """
         in_interpolator='LinearRBF'
         set_of_dfs=list()
-        set_of_poly_clamp_dfs=list()
-        set_of_all_clamp_dfs=list()
+        set_of_clamp_dfs=list()
     
-        # This is not needed
-        ##set_of_dfs.append(df_stations.rename(columns = {dataname:'VAL'})) # Always need this
-        set_of_dfs.append(df_stations)
-
+        set_of_dfs.append(df_stations.rename(columns = {dataname:'VAL'})) # Always need this
         if df_water_controls is not None:
             set_of_dfs.append(df_water_controls)
-            set_of_all_clamp_dfs.append(df_water_controls)
-            set_of_poly_clamp_dfs.append(df_water_controls)
+            set_of_clamp_dfs.append(df_water_controls)
         if df_land_controls is not None:
             set_of_dfs.append(df_land_controls)
-            set_of_all_clamp_dfs.append(df_land_controls)
-            set_of_poly_clamp_dfs.append(df_land_controls)
-        if df_secondary_water_controls is not None:
-            set_of_dfs.append(df_secondary_water_controls)
-            # Not used here set_of__clamp_dfs.append(df_secondary_water_controls)
-
+            set_of_clamp_dfs.append(df_land_controls)
+            utilities.log.info(f'Final Land control results {df_land_controls}')
         utilities.log.info('construct_interpolation_model: Number of dfs to combine for interpolation is {}'.format(len(set_of_dfs)))
-        utilities.log.info('construct_interpolation_model: Number of dfs to combine for clamps polygon path building is {}'.format(len(set_of_all_clamp_dfs)))
+        utilities.log.info('construct_interpolation_model: Number of dfs to combine for clamps polygon path building is {}'.format(len(set_of_clamp_dfs)))
     
-        ## Use ALL data and clamps for interpoating and plotting
-        #df_all_ClampControl = pd.concat(set_of_clamp_dfs,axis=0)
-        #utilities.log.info(f'ClampControl {df_all_ClampControl}')
+        df_ClampControl = pd.concat(set_of_clamp_dfs,axis=0)
+        utilities.log.info(f'ClampControl {df_ClampControl}')
 
-        # Buid separate polygons
         # This can only be used with LinearRBF. More testing is required
-        df_poly_ClampControl=pd.concat(set_of_poly_clamp_dfs,axis=0)
-        df_poly_pr_ClampControl=df_secondary_water_controls
-
-        print('secondary {df_poly_pr_ClampControl}')
-        pathpoly = interpolate_scaled_offset_field.build_polygon_path(df_poly_ClampControl) 
-        pathpoly_pr = interpolate_scaled_offset_field.build_polygon_path(df_poly_pr_ClampControl)
+        pathpoly = interpolate_scaled_offset_field.build_polygon_path(df_ClampControl)
+    
         df_combined=interpolate_scaled_offset_field.combine_datasets_for_interpolation(set_of_dfs)
-
         model = interpolate_scaled_offset_field.interpolation_model_fit(df_combined, interpolation_type=in_interpolator)
 
         # Build new extrapolated surface onto the ADCIRC grid
-        df_interpolated_ADCIRC_GRID = interpolate_scaled_offset_field.interpolation_model_transform_dualpoly(adc_coords, model=model, input_grid_type='points',pathpoly=pathpoly, pathpoly2=pathpoly_pr)
+        df_interpolated_ADCIRC_GRID = interpolate_scaled_offset_field.interpolation_model_transform(adc_coords, model=model, input_grid_type='points',pathpoly=pathpoly)
 
-        combined_scoring=None
         if cv_testing:
-            dataname='VAL'
-            full_scores, best_scores = interpolate_scaled_offset_field.test_interpolation_fit(df_source=df_stations[['LON','LAT',dataname]], df_land_controls=None, df_water_controls=None, cv_splits=5)
+            full_scores, best_scores = interpolate_scaled_offset_field.test_interpolation_fit(df_source=df_stations[['LON','LAT',dataname]], df_land_controls=df_land_controls, df_water_controls=df_water_controls, cv_splits=10)
             print(best_scores)
             print(full_scores)
             combined_scoring={'best_scores':best_scores, 'full_scores':full_scores, 'Interpolator':in_interpolator}
             utilities.log.info('Performed a CV testing')
 
         # For subsequent data viewers change the VAL header back to the real data name
-        return model, df_interpolated_ADCIRC_GRID, combined_scoring
+        return model, df_interpolated_ADCIRC_GRID
 
 ##
 ## Process the four clamps Interpolation surfaces
 ##
 
-# NEED to send in the secondary water controls
+    model_slr,df_interpolated_ADCIRC_GRID_SLR=df_model_surface_interpolation(df_slr_stations_interpolated, adc_coords, station_list, dataname='SLR', df_land_controls=df_land_controls, df_water_controls=df_water_controls, cv_testing=None)
 
-    if not cv_testing: 
-        model_slr,df_interpolated_ADCIRC_GRID_SLR,dummy=df_model_surface_interpolation(df_slr_stations_interpolated, adc_coords, station_list, dataname=None, df_land_controls=df_land_controls, df_water_controls=df_water_controls, df_secondary_water_controls=df_water_controls_pr, cv_testing=cv_testing)
-        model_mid,df_interpolated_ADCIRC_GRID_MID,dummy=df_model_surface_interpolation(df_mid_stations_interpolated, adc_coords, station_list, dataname=None, df_land_controls=df_land_controls, df_water_controls=df_water_controls, df_secondary_water_controls=df_water_controls_pr, cv_testing=cv_testing) 
-        model_vlf,df_interpolated_ADCIRC_GRID_VLF,dummy=df_model_surface_interpolation(df_vlf_stations_interpolated, adc_coords, station_list, dataname=None, df_land_controls=df_land_controls, df_water_controls=df_water_controls, df_secondary_water_controls=df_water_controls_pr, cv_testing=cv_testing)
-        model_sum,df_interpolated_ADCIRC_GRID_SUM,combined_scoring=df_model_surface_interpolation(df_sum_stations_interpolated, adc_coords, station_list, dataname=None, df_land_controls=df_land_controls, df_water_controls=df_water_controls, df_secondary_water_controls=df_water_controls_pr, cv_testing=cv_testing)
-    else:
-        print(f' CV Testing only {df_sum_stations_interpolated}')
-        model_sum,df_interpolated_ADCIRC_GRID_SUM,combined_scoring=df_model_surface_interpolation(df_sum_stations_interpolated, adc_coords, station_list, dataname=None, df_land_controls=df_land_controls, df_water_controls=df_water_controls, df_secondary_water_controls=df_water_controls_pr, cv_testing=cv_testing)
+    model_mid,df_interpolated_ADCIRC_GRID_MID=df_model_surface_interpolation(df_mid_stations_interpolated, adc_coords, station_list, dataname='SLR', df_land_controls=df_land_controls, df_water_controls=df_water_controls, cv_testing=None)
 
-#        model_sum,df_interpolated_ADCIRC_GRID_SUM,combined_scoring=df_model_surface_interpolation(df_sum_stations_interpolated, adc_coords, station_list, dataname=None, df_land_controls=None, df_water_controls=None, df_secondary_water_controls=None, cv_testing=cv_testing)
+    model_vlf,df_interpolated_ADCIRC_GRID_VLF=df_model_surface_interpolation(df_vlf_stations_interpolated, adc_coords, station_list, dataname='SLR', df_land_controls=df_land_controls, df_water_controls=df_water_controls, cv_testing=None)
+
+    model_sum,df_interpolated_ADCIRC_GRID_SUM=df_model_surface_interpolation(df_sum_stations_interpolated, adc_coords, station_list, dataname='SLR', df_land_controls=df_land_controls, df_water_controls=df_water_controls, cv_testing=cv_testing)
+
+    print('After interpolations')
 
 ##
 ## Write out datafiles for the chgosen models
 ##
 
-    if not cv_testing:
-        print("No cv_testing specified")
-
-    if not cv_testing:
-        df_adcirc_store(df_interpolated_ADCIRC_GRID_SLR, outputdir, iometadata=f'{iometadata}_SLR')
-        df_adcirc_store(df_interpolated_ADCIRC_GRID_MID, outputdir, iometadata=f'{iometadata}_MID')
-        df_adcirc_store(df_interpolated_ADCIRC_GRID_VLF, outputdir, iometadata=f'{iometadata}_VLF')
-        model_store(model_slr, outputdir, iometadata=f'{iometadata}_SLR')
-        model_store(model_mid, outputdir, iometadata=f'{iometadata}_MID')
-        model_store(model_vlf, outputdir, iometadata=f'{iometadata}_VLF')
-
+    df_adcirc_store(df_interpolated_ADCIRC_GRID_SLR, outputdir, iometadata=f'{iometadata}_SLR')
+    df_adcirc_store(df_interpolated_ADCIRC_GRID_MID, outputdir, iometadata=f'{iometadata}_MID')
+    df_adcirc_store(df_interpolated_ADCIRC_GRID_VLF, outputdir, iometadata=f'{iometadata}_VLF')
     df_adcirc_store(df_interpolated_ADCIRC_GRID_SUM, outputdir, iometadata=f'{iometadata}_SUM')
+    model_store(model_slr, outputdir, iometadata=f'{iometadata}_SLR')
+    model_store(model_mid, outputdir, iometadata=f'{iometadata}_MID')
+    model_store(model_vlf, outputdir, iometadata=f'{iometadata}_VLF')
     model_store(model_sum, outputdir, iometadata=f'{iometadata}_SUM')
-
     print('HANDLED the IO')
 
     # If scoring CV, then write out that data as well.
-    iosubdir='interpolated'
-    if cv_testing:
-         score_filename=io_utilities.write_dict_to_json(combined_scoring, rootdir=outputdir,subdir=iosubdir,fileroot='reanalysis_CV_scoring',iometadata=iometadata)
-         utilities.log.info('Wrote CV scoring data to {}'.format(score_filename))
+    #iosubdir='interpolated'
+    #if cv_testing:
+    #     score_filename=io_utilities.write_dict_to_json(combined_scoring, rootdir=outputdir,subdir=iosubdir,fileroot='reanalysis_CV_scoring',iometadata=iometadata)
+    #     utilities.log.info('Wrote CV scoring data to {}'.format(score_filename))
 
     # For posterity also dump out the KNN values of the processed control nodes ( if provided)
 
@@ -299,18 +256,15 @@ def main(args):
 ##
 ## Optional. Apply the model to a 500x400 grid and plot, the extrapolated surface, stations, clamps
 ##
-## Just use the SUM for now
 
     # Test using the generic grid and plot to see the generated offset surface. Use the same model as previously generated
     #adc_plot_grid = interpolate_scaled_offset_field.generic_grid()
-    #df_plot_transformed = interpolate_scaled_offset_field.interpolation_model_transform_dualpoly(adc_plot_grid, model=model_sum, input_grid_type='grid', pathpoly=pathpoly, pathpoly2=pathpoly_pr)
+    #df_plot_transformed = interpolate_scaled_offset_field.interpolation_model_transform(adc_plot_grid, model=model, input_grid_type='grid', pathpoly=pathpoly)
+
     #iosubdir='images'
     #annotate = f'{gridname.upper()}_{iometadata}'
     #newfilename = io_utilities.get_full_filename_with_subdirectory_prepended(outputdir, iosubdir, 'interpolated_surface_plot_'+iometadata+'.png')
-    ##df_sum_stations_interpolated
-    #df_all_water_controls = pd,concat([df_water_controls,df_secondary_water_controls])
-
-    #plot_interpolation_errorset.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_stations=df_sum_stations, df_land_control=df_land_controls, df_all_water_control=df_all_water_controls, filename=newfilename, plot_now=False, annotation=annotate)
+    #plot_interpolation_errorset.save_plot_model( adc_plot_grid=adc_plot_grid, df_surface=df_plot_transformed, df_stations=df_stations_slr, df_land_control=df_land_controls, df_water_control=df_water_controls, filename=newfilename, plot_now=False, annotation=annotate)
     #utilities.log.info('Saved IMAGE file to {}'.format(newfilename))
     #utilities.log.info('Finished with interpolation')
 

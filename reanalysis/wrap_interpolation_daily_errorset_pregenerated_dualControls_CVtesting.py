@@ -18,12 +18,12 @@ def build_slurm(key,slrvalue, midvalue, vlfvalue, main_yamlname, input_directory
     slurm.append('#SBATCH -N 1')
     slurm.append('#SBATCH -n 1')
     slurm.append('#SBATCH -J Interpolate')
-    #slurm.append('#SBATCH -p lowpri')
+    slurm.append('#SBATCH -p lowpri')
     slurm.append('#SBATCH --mem-per-cpu 64000')
     slurm.append('echo "Begin the Interpolation phase" ')
     slurm.append('export PYTHONPATH=/projects/prediction_work/AST:/projects/prediction_work/EDSASTAPPS')
     slurm.append('dir="/projects/prediction_work/EDSASTAPPS/reanalysis"')
-    slurm.append('python -u $dir/interpolation_daily_errorset_pregenerated_dualControls.py --input_directory "'+input_directory+'" --output_directory "'+output_directory+'" --slr_file_errors "'+slrvalue+'" --mid_file_errors "'+midvalue+'" --vlf_file_errors "'+vlfvalue+'"  --main_yamlname "'+main_yamlname+'" --map_file "'+map_file+'" --iometadata "'+key+'" --gridname "'+gridname+'"' )
+    slurm.append('python -u $dir/interpolation_daily_errorset_pregenerated_dualControls.py --cv_testing --input_directory "'+input_directory+'" --output_directory "'+output_directory+'" --slr_file_errors "'+slrvalue+'" --mid_file_errors "'+midvalue+'" --vlf_file_errors "'+vlfvalue+'"  --main_yamlname "'+main_yamlname+'" --map_file "'+map_file+'" --iometadata "'+key+'" --gridname "'+gridname+'"' )
     try:
         os.makedirs('./tmp')
     except OSError as exc: # Python >2.5
