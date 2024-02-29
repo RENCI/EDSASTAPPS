@@ -74,8 +74,8 @@ PRODUCT={
          }
 
 # Currently supported broad scoped source providers # Need this for calling get_observations code
-SOURCES = ['NOAA','CONTRAILS','NDBC']
-DICT_SOURCES={'NOAA_STATIONS':'NOAAWEB','NDBC_BUOYS':'NDBC','CONTRAILS_COASTAL':'CONTRAILS','CONTRAILS_RIVERS':'CONTRAILS'}
+SOURCES = ['USGS','USGS_RIVERS','NOAA','CONTRAILS','NDBC']
+DICT_SOURCES={'USGS_RIVERS':'USGS_RIVERS','USGS':'USGS','NOAA_STATIONS':'NOAAWEB','NDBC_BUOYS':'NDBC','CONTRAILS_COASTAL':'CONTRAILS','CONTRAILS_RIVERS':'CONTRAILS'}
 
 ##
 def construct_root_filenames(data_source):
