@@ -190,8 +190,16 @@ def main(args):
         data_source_short = 'CONTRAILS' if 'CONTRAILS' in data_source_in else DICT_SOURCES[data_source_in]
         output_fileroot,output_metafileroot = construct_root_filenames(data_source_short)
         utilities.log.info(f'File rootnames are {output_fileroot} and {output_metafileroot}')
-
         for data_product in source_products:
+            if data_product=='predictions':
+                print(f' {data_product} type. Need to extend stop time by 120 hours')
+                ext_time_stop=time_stop+dt.timedelta(hours=120)
+                ext_starttime=dt.datetime.strftime(time_start, dformat)
+                ext_endtime=dt.datetime.strftime(ext_time_stop, dformat)
+                time_range_use=(ext_starttime,ext_endtime)
+                utilities.log.info('Force extended time range to {} and {}'.format(ext_starttime,ext_endtime))
+            else:
+                time_range_use=time_range
             metadata = construct_metadata(data_product, endt)
             utilities.log.info(f'Preparing to fetch {data_product} from {data_source}')
             obs = get_obs_stations.get_obs_stations(source=data_source_short.upper(), product=data_product,
@@ -199,7 +207,7 @@ def main(args):
 
             # Get data at highest resolution. Return at 15min intervals
             try: # DO this in case we got no data from any station
-                data,meta=obs.fetch_station_product(time_range, return_sample_min=15)
+                data,meta=obs.fetch_station_product(time_range_use, return_sample_min=15)
                 df_data = format_data_frames(data, data_product) # Melt data to support later database updates
                 dataf,metaf = write_data_todisk(rootdir,data_source_short,df_data,meta,metadata,output_fileroot,output_metafileroot)
             except Exception as e: # IndexError as e:
