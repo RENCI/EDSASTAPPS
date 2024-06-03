@@ -48,6 +48,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
+          file: ./run_harvester/deploy/Dockerfile
           build-args: |
             APP_VERSION=${{ steps.get_version.outputs.VERSION }}
           tags: |
