@@ -10,7 +10,7 @@
 
 if [ -z "${CONTRAILS_KEY:-}" ]; then
    echo "CONTRAILS_KEY is not set: Abort"
-   exit 1
+#   exit 1
 fi
 
 # Check input varibles
@@ -36,6 +36,10 @@ else
     NDAYSSET="--ndays $NDAYS"
 fi
 
+#stoptime="2021-09-05 00:00:00"
+#NDAYSSET="--ndays -11"
+
+
 # TEMP
 #nru@4292a7f1007b:~/repo/EDSASTAPPS/run_harvester$ export HTTP_PROXY=http://proxy.renci.org:8080
 #nru@4292a7f1007b:~/repo/EDSASTAPPS/run_harvester$ export HTTPS_PROXY=http://proxy.renci.org:8080
@@ -45,12 +49,12 @@ fi
 #
 # git clone the grid data. The underlying directory structure is implied within the provided grid_to_stationfile_maps.yml file
 #
-git clone https://github.com/RENCI/AST_gridstations.git
+#git clone https://github.com/RENCI/AST_gridstations.git
 
 #
 # Where is Contrails authentication yml. Grab the secrets key from $CONTRAILS_KEY. Update the local secrets file
 #
-sed -i 's/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/'"$CONTRAILS_KEY"'/g' ./secrets/contrails.yml
+#sed -i 's/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/'"$CONTRAILS_KEY"'/g' ./secrets/contrails.yml
 
 #
 # We only need to supply the proper URL to start the job
