@@ -74,8 +74,8 @@ PRODUCT={
          }
 
 # Currently supported broad scoped source providers # Need this for calling get_observations code
-SOURCES = ['USGS','USGS_RIVERS','NOAA','CONTRAILS','NDBC']
-DICT_SOURCES={'USGS_RIVERS':'USGS_RIVERS','USGS':'USGS','NOAA_STATIONS':'NOAAWEB','NDBC_BUOYS':'NDBC','CONTRAILS_COASTAL':'CONTRAILS','CONTRAILS_RIVERS':'CONTRAILS'}
+SOURCES = ['USGS','USGS_RIVERS','NOAA','CONTRAILS','NDBC','NDBC_HISTORIC']
+DICT_SOURCES={'USGS_RIVERS':'USGS_RIVERS','USGS':'USGS','NOAA_STATIONS':'NOAAWEB','NDBC_HISTORIC':'NDBC_HISTORIC','NDBC_BUOYS':'NDBC','CONTRAILS_COASTAL':'CONTRAILS','CONTRAILS_RIVERS':'CONTRAILS'}
 
 ##
 def construct_root_filenames(data_source):
@@ -186,6 +186,7 @@ def main(args):
         source_products = source_config[data_source_in]['SOURCES'].values() 
 
         station_file=source_config[data_source_in]['STATION_FILE']
+        print(f' station file {station_file}')
 
         data_source_short = 'CONTRAILS' if 'CONTRAILS' in data_source_in else DICT_SOURCES[data_source_in]
         output_fileroot,output_metafileroot = construct_root_filenames(data_source_short)
