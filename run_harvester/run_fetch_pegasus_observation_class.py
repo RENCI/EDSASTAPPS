@@ -107,8 +107,8 @@ class FetchObeservations(object):
         print(f'Full dict {self.source_config}')
 
         for data_source_in in self.list_sources():
-            dataf,metaf = self.fetch_data_products(data_source_in) #  self.source_config[data_source_in]['SOURCES'].values())
-            data_for_write[data_source_in]=[dataf,metaf]
+            datafs,metafs = self.fetch_data_products(data_source_in) #  self.source_config[data_source_in]['SOURCES'].values())
+            data_for_write[data_source_in]=[datafs,metafs]
         return data_for_write
 
     def fetch_data_products(self, data_source_in):
@@ -139,12 +139,11 @@ class FetchObeservations(object):
         datafs = list()
         metafs=list()
         for data_product in source_products:
+            print(f'Total list of products {source_products}')
             print(f'Preparing to fetch {data_product} from {data_source_in}')
-
             metadata = self.construct_metadata(data_product, endt)
             obs_get = get_obs_stations.get_obs_stations(source=data_source_short.upper(), product=data_product,
                 contrails_yamlname=self.contrails_auth, knockout_dict=None, station_list_file=station_file)
-
             ## Expose option to SMOOTH data to the desired window width
             ## If smooth is selected choose the full resolution to get raw data, smooth and then reset freq
             try: # Do this in case we got no data from any station
@@ -162,10 +161,11 @@ class FetchObeservations(object):
                 datafs.append(dataf)
                 metafs.append(metaf)
             except Exception as e: # IndexError as e:
-                print(f'Failed data products {data_product} for source {data_source_in}. Skip e={e}')
+                utilities.log.info(f'Failed data products {data_product} for source {data_source_in}. Skip e={e}')
                 pass
             utilities.log.info(f'Finished with data source {data_source_in}')
-            return dataf, metaf 
+            utilities.log.info(f'Datafs {datafs} {metafs}')
+        return datafs, metafs 
 
     def construct_metadata(self, data_product, endt):
         """   
@@ -201,7 +201,10 @@ def main(args):
     Then the STARTTIME is ndays on the past
     """
 
-    main_config = utilities.init_logging(subdir=None,config_file=os.path.join(os.path.dirname(__file__),'./config','main.yml'))
+    print('Begin execution of harvester')
+    print(f'IN RUN MAIN: Current local files are:  {os.listdir()}')
+
+    main_config = utilities.init_logging(subdir=None,config_file='./main.yml')
 
     print("Product Level Working in {}.".format(os.getcwd()))
 
@@ -233,6 +236,7 @@ def main(args):
     #finalDIR = args.finalDIR
 
     # Get local list of sources/products to process
+    print(f'YAML file {args.map_source_file}')
     source_config = utilities.load_config(args.map_source_file)['SOURCEMAP']
 
     # Get stoptime and infer starttime
@@ -257,6 +261,7 @@ def main(args):
 
     # Fetch the data
     data_for_write = obs.fetch_data_sources() # Aggregate of the data and where they should be written
+    utilities.log.info(f'Output datafiles {data_for_write}')
     print(data_for_write)
 
     ## Now write out the data 
