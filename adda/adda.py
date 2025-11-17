@@ -70,6 +70,9 @@ def main(args):
     else:
         stoptime=args.timeout
 
+    noaa_datum = args.noaa_datum.upper()
+    utilities.log.info(f'For NOAA runs use the datum: {noaa_datum}')
+
     #dt_starttime = dt.datetime.strptime(stoptime,'%Y-%m-%d %H:%M:%S')+dt.timedelta(days=args.ndays)
     total_hours = 0 if args.ndays==0 else abs(args.ndays*24) - 1 # Ensures the final list length INCLUDES the now time as a member and is a multiple of 24 hours
 
@@ -219,7 +222,7 @@ def main(args):
     #contrails_stations=fname=os.path.join(os.path.dirname(__file__),'./supporting_data','contrails_stations_rivers.csv')
 
     obs = get_obs_stations.get_obs_stations(source='NOAAWEB', product='water_level',
-                contrails_yamlname='None',
+                datum=noaa_datum, contrails_yamlname='None',
                 knockout_dict=None, station_list_file=station_file)
     # Get data at highest resolution
     data_obs,meta_obs=obs.fetch_station_product((obs_starttime,obs_endtime), return_sample_min=0)
@@ -232,6 +235,9 @@ def main(args):
     meta_thresholded = meta_obs.loc[meta]
     # Apply a moving average (smooth) the data performed the required resampling to the desired rate followed by interpolating
     data_obs_smoothed = obs.fetch_smoothed_station_product(data_thresholded, return_sample_min=60, window=11)
+
+    # Add datum metadata
+    iometadata = f'noaadatum_{noaa_datum}{iometadata}'
 
     # Write the data to disk in a way that mimics ADDA
     iosubdir='obspkl'
@@ -406,5 +412,7 @@ if __name__ == '__main__':
                         help='Boolean: Include the iometadata time range to all output files and dirs')
     parser.add_argument('--input_url', action='store', dest='input_url', default=None, type=str,
                         help='TDS url to fetch ADCIRC data')
+    parser.add_argument('--noaa_datum', action='store', dest='noaa_datum', default='MSL', type=str,
+                        help='Choose datum for NOAA only (STND,MHHW,MHW,MTL,MSL,MLW,MLLW,NAVD)')
     args = parser.parse_args()
     sys.exit(main(args))

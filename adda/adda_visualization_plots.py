@@ -45,7 +45,8 @@ def plot_model(adc_plot_grid=None, df_surface=None, df_stations=None, df_land_co
     Results:
         A plot in the USA East Coast region
     """
-    coastline=np.loadtxt('/projects/prediction_work/ADCIRCSupportTools-v2/test_data/coarse_us_coast.dat')
+    #coastline=np.loadtxt('/projects/prediction_work/ADCIRCSupportTools-v2/test_data/coarse_us_coast.dat')
+    coastline=np.loadtxt('/projects/prediction_work/EDSASTAPPS/adda/EXTRAS/coarse_us_coast.dat')
     #N=16
     #base_cmap='tab20c' # Or simply use None tab20c is also okay
     #cmap= plt.cm.get_cmap(base_cmap, N)
