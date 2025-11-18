@@ -42,3 +42,8 @@ python ../adda.py --instance_name hsofs-nam-bob-2021 --ndays -4  --return_sample
 # More examples
 
 python adda.py --input_url "http://tds.renci.org/thredds/dodsC/2022/al09/12/hsofs/hatteras.renci.org/hsofs-al09-bob/nowcast.nodwlc/fort.63.nc" --ndays -4 --gridname 'hsofs' --map_file ./AST_gridstations/interpolation_stationlist/grid_to_stationfile_maps.yml --ensemble 'nowcast.nodwlc' --fort63_style
+
+# 2025 examples with new datum specificstion
+
+URL="http://tds.renci.org/thredds/dodsC/2025/al09/07/NCSCv2.0/ht-ncfs.renci.org/NCSCv2.0_nhc_al09/ofcl/fort.63.nc"
+python adda.py --input_url "$URL" --ndays -4 --gridname 'NCSCv2.0'  --map_file ./AST_gridstations/interpolation_stationlist/grid_to_stationfile_maps.yml --ensemble 'ofcl'
