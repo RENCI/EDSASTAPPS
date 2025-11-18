@@ -77,6 +77,9 @@ def main(args):
     utilities.log.info("Product Level Working in {}.".format(os.getcwd()))
     rootdir=io_utilities.construct_base_rootdir(main_config['DEFAULT']['RDIR'], base_dir_extra='')
 
+    noaa_datum = args.noaa_datum.upper()
+    utilities.log.info(f'For NOAA runs, use the datum: {noaa_datum}')
+
     if args.sources:
          print('Return list of sources')
          return SOURCES
@@ -116,13 +119,14 @@ def main(args):
         station_file=os.path.join(os.path.dirname(__file__),'./supporting_data','noaa_stations.csv') if in_station_list is None else in_station_list
         output_fileroot='noaa_stationdata'
         output_metafileroot='noaa_stationdata_meta'
+        metadata = f'{noaa_datum}_{metadata}'
     if data_source.upper()=='NOAAWEB':
         utilities.log.info('Preparing for a NOAAWEB fetch')
         time_range=(starttime,endtime) # Can be directly used by NOAA 
         station_file=os.path.join(os.path.dirname(__file__),'./supporting_data','noaa_stations.csv') if in_station_list is None else in_station_list
         output_fileroot='noaa_stationdata'
         output_metafileroot='noaa_stationdata_meta'
-
+        metadata = f'{noaa_datum}_{metadata}'
     elif data_source.upper()=='CONTRAILS':
         utilities.log.info('Preparing for a CONTRAILS fetch')
         contrails_config = args.config_name # utilities.load_config(os.path.join(os.path.dirname(__file__),'./secrets','contrails.yml'))['DEFAULT']
@@ -143,10 +147,10 @@ def main(args):
         output_fileroot='ndbc_stationdata'
         output_metafileroot='ndbc_stationdata_meta'
     else:
-        utilities.log.error('Failed: Only NDBC, NDBC_HISTORIC, NOAAWEB, NOAA or CONTRAILS currently supported')
+        utilities.log.error(f'Failed: Only NDBC, NDBC_HISTORIC, NOAAWEB, NOAA or CONTRAILS currently supported. Got {data_source}')
         sys.exit(1)
 
-    obs = get_obs_stations.get_obs_stations(source=data_source.upper(), product=args.data_product,
+    obs = get_obs_stations.get_obs_stations(source=data_source.upper(), product=args.data_product, datum=noaa_datum, # Only applied to NOAA data
             contrails_yamlname=args.config_name, knockout_dict=None, station_list_file=station_file)
 
     # Get data at highest resolution. Return at 15min intervals
@@ -184,5 +188,7 @@ if __name__ == '__main__':
                         help='Choose a non-default contrails auth config_name')
     parser.add_argument('--finalDIR', action='store', dest='finalDIR', default=None,
                         help='String: Custom location for the output dicts, PNGs and logs')
+    parser.add_argument('--noaa_datum', action='store', dest='noaa_datum', default='MSL', type=str,
+                        help='Choose datum for NOAA only (STND,MHHW,MHW,MTL,MSL,MLW,MLLW,NAVD)')
     args = parser.parse_args()
     sys.exit(main(args))

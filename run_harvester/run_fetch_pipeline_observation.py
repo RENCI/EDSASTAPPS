@@ -127,6 +127,9 @@ def main(args):
     main_config = utilities.init_logging(subdir=None,config_file=os.path.join(os.path.dirname(__file__),'./config','main.yml'))
     utilities.log.info("Product Level Working in {}.".format(os.getcwd()))
 
+    noaa_datum = args.noaa_datum.upper()
+    utilities.log.info(f'For NOAA runs, use the datum: {noaa_datum}')
+
 ##
 ## Select where to write these files
 ##
@@ -202,8 +205,10 @@ def main(args):
             else:
                 time_range_use=time_range
             metadata = construct_metadata(data_product, endt)
+            if data_source in ['NOAA_STATIONS','NOAAWEB']:
+                metadata = f'{noaa_datum}_{metadata}'
             utilities.log.info(f'Preparing to fetch {data_product} from {data_source}')
-            obs = get_obs_stations.get_obs_stations(source=data_source_short.upper(), product=data_product,
+            obs = get_obs_stations.get_obs_stations(source=data_source_short.upper(), product=data_product, datum=noaa_datum, 
                 contrails_yamlname=args.contrails_auth, knockout_dict=None, station_list_file=station_file)
 
             # Get data at highest resolution. Return at 15min intervals
@@ -242,5 +247,7 @@ if __name__ == '__main__':
                         help='String: Custom location for the output dicts, PNGs and (potentially) logs')
     parser.add_argument('--finalLOG', action='store', dest='finalLOG', default=None,
                         help='String: Custom location logs. If not specified logs go to the datadir')
+    parser.add_argument('--noaa_datum', action='store', dest='noaa_datum', default='MSL', type=str,
+                        help='Choose datum for NOAA only (STND,MHHW,MHW,MTL,MSL,MLW,MLLW,NAVD)')
     args = parser.parse_args()
     sys.exit(main(args))
