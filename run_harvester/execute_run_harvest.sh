@@ -60,6 +60,6 @@ fi
 # We only need to supply the proper URL to start the job
 #
 
-python ./run_fetch_pipeline_observation.py --stoptime "$stoptime"  --finalLOG "$LOG_PATH" --finalDIR "$FINALDIR"  --map_source_file './AST_gridstations/harvester_stations/sources_map.yaml' --contrails_auth './secrets/contrails.yml' $NDAYSSET
+python ./run_fetch_pipeline_observation.py --stoptime "$stoptime"  --finalLOG "$LOG_PATH" --finalDIR "$FINALDIR"  --map_source_file './AST_gridstations/harvester_stations/sources_map.yaml' --contrails_auth './secrets/contrails.yml' $NDAYSSET --noaa_datum "NAVD"
 
 echo "Finished RUN_HARVESTER with status $?"
