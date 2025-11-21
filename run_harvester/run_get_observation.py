@@ -119,14 +119,12 @@ def main(args):
         station_file=os.path.join(os.path.dirname(__file__),'./supporting_data','noaa_stations.csv') if in_station_list is None else in_station_list
         output_fileroot='noaa_stationdata'
         output_metafileroot='noaa_stationdata_meta'
-        metadata = f'{noaa_datum}_{metadata}'
     if data_source.upper()=='NOAAWEB':
         utilities.log.info('Preparing for a NOAAWEB fetch')
         time_range=(starttime,endtime) # Can be directly used by NOAA 
         station_file=os.path.join(os.path.dirname(__file__),'./supporting_data','noaa_stations.csv') if in_station_list is None else in_station_list
         output_fileroot='noaa_stationdata'
         output_metafileroot='noaa_stationdata_meta'
-        metadata = f'{noaa_datum}_{metadata}'
     elif data_source.upper()=='CONTRAILS':
         utilities.log.info('Preparing for a CONTRAILS fetch')
         contrails_config = args.config_name # utilities.load_config(os.path.join(os.path.dirname(__file__),'./secrets','contrails.yml'))['DEFAULT']

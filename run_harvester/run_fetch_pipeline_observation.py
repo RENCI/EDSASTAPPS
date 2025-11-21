@@ -205,8 +205,6 @@ def main(args):
             else:
                 time_range_use=time_range
             metadata = construct_metadata(data_product, endt)
-            if data_source in ['NOAA_STATIONS','NOAAWEB']:
-                metadata = f'{noaa_datum}_{metadata}'
             utilities.log.info(f'Preparing to fetch {data_product} from {data_source}')
             obs = get_obs_stations.get_obs_stations(source=data_source_short.upper(), product=data_product, datum=noaa_datum, 
                 contrails_yamlname=args.contrails_auth, knockout_dict=None, station_list_file=station_file)
