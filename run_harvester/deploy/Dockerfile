@@ -17,6 +17,8 @@ LABEL maintainer="jtilson@renci.org"
 
 # # update conda and set the download channel. This will bost python to 3.10+ and update ssl certs code
 
+RUN conda create -y -n "apsviz" python=3.7.3 
+conda activate apsviz 
 RUN conda config --add channels conda-forge
 RUN conda update -y conda
 
@@ -38,7 +40,11 @@ RUN git clone https://github.com/RENCI/AST.git
 RUN git clone https://github.com/RENCI/EDSASTAPPS.git
 RUN git clone https://github.com/RENCI/buoypy.git
 
-# move to the deploy directory
+# Need to manually backtrack for adcirc methods
+pip install "setuptools<60"
+pip install "importlib-metadata<5"
+pip install netcdf4==1.5.7
+
 WORKDIR /home/nru/repo/EDSASTAPPS/run_harvester/deploy
 
 # install the pip requirements
