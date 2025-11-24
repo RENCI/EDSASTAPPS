@@ -58,7 +58,6 @@ WORKDIR /home/nru/repo
 # get the various source repos
 RUN git clone https://github.com/RENCI/AST.git
 RUN git clone https://github.com/RENCI/buoypy.git
-RUN git clone https://github.com/RENCI/AST_gridstations.git
 
 # note this will not get your local code into the image unless it has been pushed to GH first.
 # suggest copying in the needed files from the parent direcories instead.
@@ -77,19 +76,14 @@ RUN python setup.py install
 # Now remove some issues that get dropped in
 RUN pip uninstall -y protobuf
 
-# remove all intermediate pip files
-RUN pip cache purge
-
 # switch to the non-root user
 USER nru
 
 # set the app working directory
 WORKDIR /home/nru/repo/EDSASTAPPS/run_harvester
 
-# get the AST station data
-RUN git clone https://github.com/RENCI/AST_gridstations.git
-
 # testing only
+# RUN git clone https://github.com/RENCI/AST_gridstations.git
 #COPY main.yml .
 #ENV URL="http://tds.renci.org/thredds/dodsC/2025/gfs/2025112200/NCSCv2.0/ht-ncfs.renci.org/NCSCv2.0_gfs/gfsforecast/fort.61.nc"
 #ENV FINALDIR="./JUNK"
