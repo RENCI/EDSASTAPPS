@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-## This class expects to be execited as part of a loop over local yamls
+## This class expects to be executed as part of a loop over local yamls
 ## We expect but do not enforce a single SOURCE
 ## For each source we process all products
 
@@ -58,7 +58,7 @@ class FetchObeservations(object):
     data_products = None # A user may have multiple products specified, eg wind speed, air pressure, water level etc
 
     # --- Init ---------------------------------------------------------------------
-    def __init__(self, starttime, stoptime, source_config, finalDIR, sampling_min, contrails_auth, smooth, nwindow=11): # , dagfile="workflow.yml"):
+    def __init__(self, starttime, stoptime, source_config, finalDIR, sampling_min, contrails_auth, smooth, noaa_datum='MSL',nwindow=11): # , dagfile="workflow.yml"):
         """ 
             starttime: format '%Y-%m-%d %H:%M:%S': Eg --stoptime "2025-08-01 00:00:00".
             stoptime: format '%Y-%m-%d %H:%M:%S': Eg --stoptime "2025-08-01 00:00:00".
@@ -76,6 +76,7 @@ class FetchObeservations(object):
         self.do_smooth = smooth
         self.nwindow = nwindow 
         self.source_config = source_config
+        self.noaa_datum = noaa_datum
         data_for_write = dict()
 
     def get_timerange(self):
@@ -142,7 +143,7 @@ class FetchObeservations(object):
             print(f'Total list of products {source_products}')
             print(f'Preparing to fetch {data_product} from {data_source_in}')
             metadata = self.construct_metadata(data_product, endt)
-            obs_get = get_obs_stations.get_obs_stations(source=data_source_short.upper(), product=data_product,
+            obs_get = get_obs_stations.get_obs_stations(datum = self.noaa_datum, source=data_source_short.upper(), product=data_product,
                 contrails_yamlname=self.contrails_auth, knockout_dict=None, station_list_file=station_file)
             ## Expose option to SMOOTH data to the desired window width
             ## If smooth is selected choose the full resolution to get raw data, smooth and then reset freq
@@ -235,6 +236,9 @@ def main(args):
     map_source_file = args.map_source_file
     #finalDIR = args.finalDIR
 
+    noaa_datum = args.noaa_datum
+    print(f' Chosen NOAA datum is {noaa_datum}')
+
     # Get local list of sources/products to process
     print(f'YAML file {args.map_source_file}')
     source_config = utilities.load_config(args.map_source_file)['SOURCEMAP']
@@ -248,7 +252,7 @@ def main(args):
 
     ## Setup Job 
 
-    obs = FetchObeservations(starttime, endtime, source_config, finalDIR, sampling_min, contrails_auth, do_smooth, nwindow) 
+    obs = FetchObeservations(starttime, endtime, source_config, finalDIR, sampling_min, contrails_auth, do_smooth, nwindow=nwindow, noaa_datum=args.noaa_datum) 
     obs.summary_data()
 
     time_range=obs.get_timerange() # (starttime,endtime)
@@ -290,6 +294,7 @@ if __name__ == '__main__':
                         help='Boolean: Will inform Harvester to return smoothed data')
     parser.add_argument('--nwindow', action='store', dest='nwindow', default=11, type=int,
                         help='Rolling window width in steps of sapling_min units. If smooth is selecte: default 11')
-
+    parser.add_argument('--noaa_datum', action='store', dest='noaa_datum', default='MSL', type=str,
+                        help='Choose datum for NOAA only (STND,MHHW,MHW,MTL,MSL,MLW,MLLW,NAVD)')
     args = parser.parse_args()
     sys.exit(main(args))
