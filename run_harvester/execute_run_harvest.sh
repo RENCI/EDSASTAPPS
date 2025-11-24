@@ -49,12 +49,12 @@ fi
 #
 # git clone the grid data. The underlying directory structure is implied within the provided grid_to_stationfile_maps.yml file
 #
-#git clone https://github.com/RENCI/AST_gridstations.git
+git clone https://github.com/RENCI/AST_gridstations.git
 
 #
 # Where is Contrails authentication yml. Grab the secrets key from $CONTRAILS_KEY. Update the local secrets file
 #
-#sed -i 's/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/'"$CONTRAILS_KEY"'/g' ./secrets/contrails.yml
+sed -i 's/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/'"$CONTRAILS_KEY"'/g' ./secrets/contrails.yml
 
 #
 # We only need to supply the proper URL to start the job
