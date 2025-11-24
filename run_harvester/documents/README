@@ -1,6 +1,9 @@
 export PYTHONPATH=~/AST:~/EDSASTAPPS
 export RUNTIMEDIR=./JUNK
 
+export PYTHONPATH=/projects/prediction_work/AST:/projects/prediction_work/EDSASTAPPS
+export RUNTIMEDIR=./JUNK
+
 Interpretation and usage information
 
 The run_harvester codes use the AST/harvester classes to fetch observation and model data. These codes are generally designed to
@@ -84,6 +87,16 @@ python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'TDS'  --url
 python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'TDS'  --url 'http://tds.renci.org:80/thredds/dodsC/2022/nam/2022082306/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc' --ensemble='namforecast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --fort63_style
 
 python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'TDS'  --url 'http://tds.renci.org:80/thredds/dodsC/2022/nam/2022082306/NCSC_SAB_v1.23/hatteras.renci.org/ncsc123-nam-sbDNTKa/namforecast/fort.63.nc' --ensemble='nowcast' --map_file './supporting_data/grid_to_stationfile_maps.yml' --fort63_style
+
+##
+## Class version used by Pegasus
+## Note main.yml must be in the CWD which is how Pegasus gets setup
+##
+
+export PYTHONPATH=/projects/prediction_work/AST:/projects/prediction_work/EDSASTAPPS
+export RUNTIMEDIR=./JUNK
+python run_fetch_pegasus_observation_class.py --ndays -2 --stoptime '2025-11-01 00:00:00'  --map_source_file './sources_map.yaml' --contrails_auth './secrets/contrails.yml' --finalDIR  ./JUNK --noaa_datum 'NAVD'
+
 
 ##
 ## To launch these form the provided scripts, the pipline must set one or more ENVs and pass the finalDIR to each of the runs
