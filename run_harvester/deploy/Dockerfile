@@ -1,3 +1,6 @@
+##############
+# stage 1: create a compressed conda virtual environment
+##############
 FROM continuumio/miniconda3 AS build
 
 # author
@@ -59,8 +62,9 @@ WORKDIR /home/nru/repo
 RUN git clone https://github.com/RENCI/AST.git
 RUN git clone https://github.com/RENCI/buoypy.git
 
-# note this will not get your local code into the image unless it has been pushed to GH first.
-# suggest copying in the needed files from the parent direcories instead.
+# note this cloning will only get what has been pushed to GH:main and not anything in this local
+# environment (including this file). suggest pushing this project to a branch, and specifying
+# that branch in the git clone below.
 RUN git clone https://github.com/RENCI/EDSASTAPPS.git
 
 # move to the deploy directory
@@ -84,11 +88,11 @@ WORKDIR /home/nru/repo/EDSASTAPPS/run_harvester
 
 # testing only
 # RUN git clone https://github.com/RENCI/AST_gridstations.git
-#COPY main.yml .
-#ENV URL="http://tds.renci.org/thredds/dodsC/2025/gfs/2025112200/NCSCv2.0/ht-ncfs.renci.org/NCSCv2.0_gfs/gfsforecast/fort.61.nc"
-#ENV FINALDIR="./JUNK"
-#ENV LOG_PATH="./JUNK"
-#ENV RUNTIMEDIR=/tmp
+# COPY main.yml .
+# ENV URL="http://tds.renci.org/thredds/dodsC/2025/gfs/2025112200/NCSCv2.0/ht-ncfs.renci.org/NCSCv2.0_gfs/gfsforecast/fort.61.nc"
+# ENV FINALDIR="./JUNK"
+# ENV LOG_PATH="./JUNK"
+# ENV RUNTIMEDIR=/tmp
 # python run_fetch_pipeline_adcirc_data_multiprovider_url_template.py --data_source 'TDS' --url $URL --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --source_file './AST_gridstations/harvester_stations/sources_map.yaml'  --data_provider 'NOAA_STATIONS' --ensemble 'gfsforecast'
 # python run_fetch_pegasus_observation_class.py --stoptime '2025-11-01 00:00:00' --map_source_file './sources_map.yaml' --contrails_auth './secrets/contrails.yml' --finalDIR ./JUNKJUNE --noaa_datum 'NAVD'
 
