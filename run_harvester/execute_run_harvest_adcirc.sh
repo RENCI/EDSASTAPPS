@@ -41,13 +41,13 @@ git clone https://github.com/RENCI/AST_gridstations.git
 # Need to run the actual input URL first without changing the ensemble name
 
 echo "Begin ADCIRC Forecast fetch"
-python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'TDS'  --url "$URL" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH" 
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'TDS'  --url "$URL" --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH" 
 echo "Finished Forecast ADCIRC fetch"
 
 # Now we want to rerun the associated nowcast for thie input URL
 
 echo "Begin ADCIRC Nowcast fetch"
-python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'TDS'  --url "$URL" --ensemble='nowcast' --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --fort63_style  --finalLOG "$LOG_PATH"  --finalDIR "$FINALDIR" 
+python run_fetch_pipeline_adcirc_data_url_template.py --data_source 'TDS'  --url "$URL" --ensemble='nowcast' --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --finalLOG "$LOG_PATH"  --finalDIR "$FINALDIR" 
 echo "Finish ADCIRC Nowcast fetch"
 
 
