@@ -37,6 +37,7 @@ fi
 PROVIDER=$4
 
 # git clone the grid data. The underlying directory structure is implied within the provided grid_to_stationfile_maps.yml file
+
 git clone https://github.com/RENCI/AST_gridstations.git
 
 
