@@ -14,6 +14,7 @@ LABEL description="EDSASTAPPS Dockerfile."
 RUN conda update conda
 
 # get the environment file
+# if building locally change this line to: COPY ./environment.yml .
 COPY ./run_harvester/deploy/environment.yml .
 
 # Create the virtual environment
