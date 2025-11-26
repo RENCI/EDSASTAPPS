@@ -1,76 +1,100 @@
 ##############
-# Docker file for the creation of the adcirc support tools (AST).
+# stage 1: create a compressed conda virtual environment
 ##############
+FROM continuumio/miniconda3 AS build
 
-FROM conda/miniconda3-centos7
+# author
+LABEL author="Jeff Tilson"
 
-# As it reads
-RUN yum install -y git
-RUN yum -y update
-RUN yum install -y libxml2-devel
-RUN yum install -y libxslt-devel
-RUN yum install -y gcc
-#RUN yum install -y google-chrome-stable.x86_64 --nogpgcheck
+# extra metadata
+LABEL version="v0.0.0"
+LABEL description="EDSASTAPPS Dockerfile."
 
-# get some credit
-LABEL maintainer="jtilson@renci.org"
+# update conda
+RUN conda update conda
 
-# # update conda and set the download channel. This will bost python to 3.10+ and update ssl certs code
+# Create the virtual environment
+COPY environment.yml .
+RUN conda env create -f environment.yml
 
-RUN conda create -y -n "apsviz" python=3.7.3 
-conda activate apsviz 
-RUN conda config --add channels conda-forge
-RUN conda update -y conda
+# install conda pack to compress this stage
+RUN conda install -c conda-forge conda-pack
 
-# tell conda what the shell is
-RUN conda init bash
+# conpress the virtual environment
+RUN conda-pack -n edsastapps -o /tmp/env.tar && \
+  mkdir /venv && cd /venv && tar xf /tmp/env.tar && \
+  rm /tmp/env.tar
 
-## create the non-root user
-RUN useradd -m -d /home/nru -u 1000 nru
+# fix up the paths
+RUN /venv/bin/conda-unpack
 
-## make sure everything is read/write
-RUN chmod 777 -R /home/nru
+##############
+# stage 2: create a python implementation using the stage 1 virtual environment
+##############
+FROM python:3.13-slim
 
-# make a directory for the repos and go there
-RUN mkdir /home/nru/repo
+# update the environment
+RUN apt-get update
+
+# install git
+RUN apt-get -y install git
+
+# clear out the apt cache
+RUN apt-get clean
+
+# Copy /venv from the previous stage:
+COPY --from=build /venv /venv
+
+# make the virtual environment active
+ENV VIRTUAL_ENV=/venv
+ENV PATH=/venv/bin:$PATH
+
+# add user nru and switch to it
+RUN useradd --create-home -u 1000 nru
+
+# Copy in the rest of the code
+RUN mkdir -p /home/nru/repo
+
+# move the the code location
 WORKDIR /home/nru/repo
 
-# get the AST repo - needs to be made public first
+# get the various source repos
 RUN git clone https://github.com/RENCI/AST.git
-RUN git clone https://github.com/RENCI/EDSASTAPPS.git
 RUN git clone https://github.com/RENCI/buoypy.git
 
-# Need to manually backtrack for adcirc methods
-pip install "setuptools<60"
-pip install "importlib-metadata<5"
-pip install netcdf4==1.5.7
+# note this cloning will only get what has been pushed to GH:main and not anything in this local
+# environment (including this file). suggest pushing this project to a branch, and specifying
+# that branch in the git clone below.
+RUN git clone https://github.com/RENCI/EDSASTAPPS.git
 
+# move to the deploy directory
 WORKDIR /home/nru/repo/EDSASTAPPS/run_harvester/deploy
-
-# install the pip requirements
-RUN pip install -r pip_requirements.txt
 
 # # make sure everything is read/write
 RUN chmod 777 -R /home/nru
 
-# Build buoypy for the NDBC stuff
+# switch to the buoypy directory and build it for the NDBC stations
 WORKDIR /home/nru/repo/buoypy
 RUN python setup.py install
+
+# Now remove some issues that get dropped in
+RUN pip uninstall -y protobuf
 
 # switch to the non-root user
 USER nru
 
+# set the app working directory
 WORKDIR /home/nru/repo/EDSASTAPPS/run_harvester
 
-# This is just a reminder. SuperV will set these in k8s at launch time 
-#export http_proxy=http://proxy.renci.org:8080
-#export https_proxy=http://proxy.renci.org:8080
-#export HTTP_PROXY=http://proxy.renci.org:8080
-#export HTTPS_PROXY=http://proxy.renci.org:8080
+# testing only
+# RUN git clone https://github.com/RENCI/AST_gridstations.git
+# COPY main.yml .
+# ENV URL="http://tds.renci.org/thredds/dodsC/2025/gfs/2025112200/NCSCv2.0/ht-ncfs.renci.org/NCSCv2.0_gfs/gfsforecast/fort.61.nc"
+# ENV FINALDIR="./JUNK"
+# ENV LOG_PATH="./JUNK"
+# ENV RUNTIMEDIR=/tmp
+# python run_fetch_pipeline_adcirc_data_multiprovider_url_template.py --data_source 'TDS' --url $URL --map_file './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml' --source_file './AST_gridstations/harvester_stations/sources_map.yaml'  --data_provider 'NOAA_STATIONS' --ensemble 'gfsforecast'
+# python run_fetch_pegasus_observation_class.py --stoptime '2025-11-01 00:00:00' --map_source_file './sources_map.yaml' --contrails_auth './secrets/contrails.yml' --finalDIR ./JUNKJUNE --noaa_datum 'NAVD'
 
 ## set the python path
 ENV PYTHONPATH=/home/nru/repo/AST:/home/nru/repo/EDSASTAPPS
-
-##########
-# The container is ready to accept the launch commands.
-##########
