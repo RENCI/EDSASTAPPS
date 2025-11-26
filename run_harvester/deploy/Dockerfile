@@ -14,7 +14,7 @@ LABEL description="EDSASTAPPS Dockerfile."
 RUN conda update conda
 
 # get the environment file
-# if building locally change this line to: COPY ./environment.yml .
+# if building locally make sure that the command line argument "BUILD_PATH=." is set
 ARG BUILD_PATH=$(BUILD_PATH)
 COPY $BUILD_PATH/environment.yml .
 
