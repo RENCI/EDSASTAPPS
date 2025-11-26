@@ -16,8 +16,6 @@ RUN conda update conda
 # get the build path, default to being in the deploy directory
 ARG BUILD_PATH="./environment.yml"
 
-RUN echo $BUILD_PATH
-
 # get the environment file
 COPY $BUILD_PATH .
 
