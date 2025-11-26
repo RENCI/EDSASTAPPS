@@ -13,15 +13,14 @@ LABEL description="EDSASTAPPS Dockerfile."
 # update conda
 RUN conda update conda
 
-# get the build path, default to the deploy directory
+# get the build path, default to being in the deploy directory
 ARG BUILD_PATH="./environment.yml"
-ENV BUILD_PATH=$BUILD_PATH
 
 # get the environment file
-COPY ${BUILD_PATH} .
+COPY $BUILD_PATH .
 
 # Create the virtual environment
-RUN conda env create -f "$BUILD_PATH"
+RUN conda env create -f $BUILD_PATH
 
 # install conda pack to compress this stage
 RUN conda install -c conda-forge conda-pack
