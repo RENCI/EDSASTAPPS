@@ -48,10 +48,10 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          file: ./run_harvester/deploy/Dockerfile
+          file: ./run_harvester/deploy/Dockerfile/environment.yml
           build-args: |
             APP_VERSION=${{ steps.get_version.outputs.VERSION }}
-            BUILD_PATH=./run_harvester/deploy
+            BUILD_PATH=./run_harvester/deploy/environment.yml
           tags: |
             ${{ env.REGISTRY }}:latest
             ${{ env.REGISTRY }}:${{ steps.get_version.outputs.VERSION }}
