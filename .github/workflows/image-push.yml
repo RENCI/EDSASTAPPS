@@ -51,7 +51,7 @@ jobs:
           file: ./run_harvester/deploy/Dockerfile
           build-args: |
             APP_VERSION=${{ steps.get_version.outputs.VERSION }}
-            BUILD_PATH=run_harvester/deploy
+            BUILD_PATH=./run_harvester/deploy
           tags: |
             ${{ env.REGISTRY }}:latest
             ${{ env.REGISTRY }}:${{ steps.get_version.outputs.VERSION }}
