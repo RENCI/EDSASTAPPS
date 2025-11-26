@@ -21,7 +21,7 @@ ENV BUILD_PATH=$BUILD_PATH
 COPY ${BUILD_PATH} .
 
 # Create the virtual environment
-RUN conda env create -f $(BUILD_PATH)
+RUN conda env create -f "$BUILD_PATH"
 
 # install conda pack to compress this stage
 RUN conda install -c conda-forge conda-pack
