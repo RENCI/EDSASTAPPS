@@ -36,6 +36,11 @@ import datetime as dt
 import harvester.get_observations_stations as get_obs_stations
 from utilities.utilities import utilities as utilities
 import io_utilities.io_utilities as io_utilities
+import warnings
+
+# Suppress warnings
+warnings.filterwarnings('ignore')
+
 
 #$PHOME/python  "$SRC"/fetch_data.py --data_source 'NOAA' --data_product 'water_level' --stoptime "$stoptime" --station_list "$STATIONDIR"/noaa_stations.csv --ofile "$RUNTIMEDIR" --ometafile "$RUNTIMEDIR" 
 
@@ -127,9 +132,6 @@ def main(args):
     main_config = utilities.init_logging(subdir=None,config_file=os.path.join(os.path.dirname(__file__),'./config','main.yml'))
     utilities.log.info("Product Level Working in {}.".format(os.getcwd()))
 
-    noaa_datum = args.noaa_datum.upper()
-    utilities.log.info(f'For NOAA runs, use the datum: {noaa_datum}')
-
 ##
 ## Select where to write these files
 ##
@@ -189,6 +191,16 @@ def main(args):
         source_products = source_config[data_source_in]['SOURCES'].values() 
 
         station_file=source_config[data_source_in]['STATION_FILE']
+
+        # THis is only used by NOAA related calls. All other sources ignore it. All other sources are always NAVD or HEIGHT
+
+        try:
+            noaa_datum = source_config[data_source_in]['DATUM'] 
+        except Exception as e: # IndexError as e:
+            noaa_datum = 'MSL'
+            print(noaa_datum)
+            utilities.log.info(f'No DATUM in config file. Setting to MSL:{noaa_datum}')
+
         print(f' station file {station_file}')
 
         data_source_short = 'CONTRAILS' if 'CONTRAILS' in data_source_in else DICT_SOURCES[data_source_in]
@@ -245,7 +257,5 @@ if __name__ == '__main__':
                         help='String: Custom location for the output dicts, PNGs and (potentially) logs')
     parser.add_argument('--finalLOG', action='store', dest='finalLOG', default=None,
                         help='String: Custom location logs. If not specified logs go to the datadir')
-    parser.add_argument('--noaa_datum', action='store', dest='noaa_datum', default='MSL', type=str,
-                        help='Choose datum for NOAA only (STND,MHHW,MHW,MTL,MSL,MLW,MLLW,NAVD)')
     args = parser.parse_args()
     sys.exit(main(args))
