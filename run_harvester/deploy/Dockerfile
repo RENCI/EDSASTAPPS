@@ -15,7 +15,8 @@ RUN conda update conda
 
 # get the environment file
 # if building locally change this line to: COPY ./environment.yml .
-COPY ./run_harvester/deploy/environment.yml .
+ARG BUILD_PATH=$(BUILD_PATH)
+COPY $BUILD_PATH/environment.yml .
 
 # Create the virtual environment
 RUN conda env create -f environment.yml
