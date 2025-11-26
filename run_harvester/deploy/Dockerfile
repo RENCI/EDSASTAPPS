@@ -13,8 +13,10 @@ LABEL description="EDSASTAPPS Dockerfile."
 # update conda
 RUN conda update conda
 
+# get the environment file
+COPY ./environment.yml .
+
 # Create the virtual environment
-COPY environment.yml .
 RUN conda env create -f environment.yml
 
 # install conda pack to compress this stage
