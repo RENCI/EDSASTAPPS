@@ -3,6 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - python=3.13
+  - pandas=2.3.3
   - netCDF4=1.7.3
   - xarray
   - pyyaml
