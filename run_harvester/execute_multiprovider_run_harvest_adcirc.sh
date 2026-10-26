@@ -1,4 +1,5 @@
-#/bin/bash -l
+#!/bin/bash -l
+set -euo pipefail
 #
 # launcher adcirc harvester script. This script is intended to be used by our k8s apsviz2 pipeline
 #
@@ -25,6 +26,7 @@ if [ -z "${LOG_PATH:-}" ]; then
    echo "LOG_PATH is not set: logs will be sent to $FINALDIR"
    LOG_PATH="$FINALDIR"
 fi
+export LOG_PATH
 
 INSTANCEID=$3
 if [ -z "$INSTANCEID" ]
@@ -44,13 +46,13 @@ git clone https://github.com/RENCI/AST_gridstations.git
 # Run the actual input URL first without changing the ensemble name
 
 echo "Begin ADCIRC Forecast fetch"
-python run_fetch_pipeline_adcirc_data_multiprovider_url_template.py --data_source 'TDS'  --url "$URL" --map_file  './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml'  --source_file './AST_gridstations/harvester_stations/sources_map.yaml' --data_provider "$PROVIDER" --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH" --modelid "$INSTANCEID"
+python run_fetch_pipeline_adcirc_data_multiprovider_url_template.py --data_source 'TDS'  --url "$URL" --map_file  './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml'  --source_file './AST_gridstations/harvester_stations/sources_map.yaml' --data_provider "$PROVIDER" --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH" --modelid "$INSTANCEID" --station_mismatch_policy fail
 echo "Finished Forecast ADCIRC fetch"
 
 # Now we want to rerun the associated nowcast for thie input URL
 
 echo "Begin ADCIRC Nowcast fetch"
-python run_fetch_pipeline_adcirc_data_multiprovider_url_template.py --data_source 'TDS'  --url "$URL" --map_file  './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml'  --source_file './AST_gridstations/harvester_stations/sources_map.yaml' --data_provider "$PROVIDER" --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH" --ensemble "nowcast" --modelid "$INSTANCEID"
+python run_fetch_pipeline_adcirc_data_multiprovider_url_template.py --data_source 'TDS'  --url "$URL" --map_file  './AST_gridstations/full_stationlist/grid_to_stationfile_maps.yml'  --source_file './AST_gridstations/harvester_stations/sources_map.yaml' --data_provider "$PROVIDER" --finalDIR "$FINALDIR" --finalLOG "$LOG_PATH" --ensemble "nowcast" --modelid "$INSTANCEID" --station_mismatch_policy warn
 echo "Finish ADCIRC Nowcast fetch"
 
 echo "Finished FETCH ADCIRC $URL with status $?"
