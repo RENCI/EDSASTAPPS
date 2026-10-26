@@ -29,6 +29,7 @@ import gridmap.grid_to_station_maps as grid_to_station_maps
 
 from utilities.utilities import utilities as utilities
 import io_utilities.io_utilities as io_utilities
+from station_validation import archived_log_name, log_identity, requested_station_ids, validate_station_sets
 
 varnamedict={}
 varnamedict['fort.63']='zeta'
@@ -104,7 +105,14 @@ def main(args):
     Then the STARTTIME is ndays on the past
     """
 
-    main_config = utilities.init_logging(subdir=None,config_file=os.path.join(os.path.dirname(__file__),'./config','main.yml'))
+    requested_cast=args.ensemble or 'forecast'
+    pod_identity=os.environ.get('HOSTNAME', 'nopod')
+    job_log_identity=log_identity(args.modelid, args.data_provider, requested_cast, pod_identity)
+    main_config = utilities.init_logging(
+        subdir=None,
+        config_file=os.path.join(os.path.dirname(__file__),'./config','main.yml'),
+        log_file_metadata=job_log_identity,
+    )
 
     fort63_style=args.fort63_style
 
@@ -195,7 +203,7 @@ def main(args):
         utilities.log.info(f'Station file determined to be {station_file}')
     except Exception as e:
         utilities.log.error(f' Problem with getting station file list:{e}')
-        sys.exit(0)
+        raise
 
     # Fetch the provider specific variable name
     try:
@@ -203,7 +211,7 @@ def main(args):
         utilities.log.debug(f' Fetched variable name {variable_name}')
     except Exception as e:
         utilities.log.critical(f' Problem with getting variable name:{e}')
-        sys.exit(0)
+        raise
 
 ##
 ## Start processing and manipulating the input URL
@@ -221,7 +229,7 @@ def main(args):
             input_url=get_adcirc_stations.convert_urls_to_61style([url])[0]
         else:
             utilities.log.critical("No fort61_style approach for data other than fort63/61.nc")
-            sys.exit(0)
+            return 1
 
     utilities.log.info(input_url)
     urls=[input_url]
@@ -236,8 +244,8 @@ def main(args):
                 station_list_file=station_file, fort63_style=fort63_style )
         data_adc,meta_adc=rpl.fetch_station_product(urls, return_sample_min=return_sample_min, fort63_style=fort63_style, variable_name=variable_name )
     except Exception as e:
-        utilities.log.error(f'Hard fail on fetching APS data for url {urls}: Abort quietly {e}')
-        sys.exit(0)
+        utilities.log.error(f'Hard fail on fetching APS data for url {urls}: {e}')
+        raise
 
 ##
 ## Prepare metadata for output filenames needed by ingesting
@@ -258,6 +266,29 @@ def main(args):
 
     # Look inside meta and see what kind of data this is NOWCAST/FORECAST
     cast_type = find_cast_status(meta_adc)
+
+    requested_ids=requested_station_ids(rpl.station_list)
+    try:
+        station_report=validate_station_sets(
+            data_adc,
+            meta_adc,
+            requested=requested_ids,
+            policy=args.station_mismatch_policy,
+        )
+    except RuntimeError as error:
+        utilities.log.error(
+            f'ADCIRC output station-set failure: provider={data_provider}, '
+            f'cast={cast_type}, policy={args.station_mismatch_policy}, error={error}'
+        )
+        raise
+    log_station_report=(
+        f'ADCIRC output station sets: provider={data_provider}, cast={cast_type}, '
+        f'policy={args.station_mismatch_policy}, report={station_report}'
+    )
+    if station_report['has_mismatch']:
+        utilities.log.warning(log_station_report)
+    else:
+        utilities.log.info(log_station_report)
 
     # Output the data files for subsequent ingesting
     df_adcirc_data = format_data_frames(data_adc)
@@ -338,10 +369,16 @@ def main(args):
     #log_time_meta = dt.datetime.strptime(rpl.Tmax,'%Y%m%d%H').strftime("%Y%m%d%H%M%S")
 
     # Handle the final log file
-    utilities.log.debug('Copy log file')
-    shutil.copy(utilities.LogFile,'/'.join([logdir,f'run_harvester_adcirc_{log_time_meta}.log'])) 
     utilities.log.debug('Finished with data source {}'.format(data_source))
     utilities.log.info('Finished')
+    os.makedirs(logdir, exist_ok=True)
+    final_log_name=archived_log_name(
+        log_time_meta,
+        provider,
+        cast_type,
+        pod_identity,
+    )
+    shutil.copy(utilities.LogFile, os.path.join(logdir, final_log_name))
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
@@ -370,5 +407,7 @@ if __name__ == '__main__':
                         help='String: Custom location logs. If not specified logs go to the datadir')
     parser.add_argument('--modelid', action='store', dest='modelid', default=None,
                         help='Optional information to include in the output data and metadata filenames')
+    parser.add_argument('--station_mismatch_policy', choices=['fail', 'warn'], default='fail',
+                        help='Fail or warn when metadata and emitted data station sets differ')
     args = parser.parse_args()
     sys.exit(main(args))

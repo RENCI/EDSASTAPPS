@@ -66,3 +66,16 @@ python run_get_observation.py --stoptime '2022-02-20 00:00:00' --data_source 'NO
 
 
 
+ADCIRC multiprovider reliability
+================================
+
+`run_fetch_pipeline_adcirc_data_multiprovider_url_template.py` validates the
+source-confirmed metadata station set against the emitted data station set
+before writing provider CSV files. Use `--station_mismatch_policy fail` to stop
+on a mismatch or `--station_mismatch_policy warn` to emit a warning and
+continue.
+
+`execute_multiprovider_run_harvest_adcirc.sh` uses `fail` for forecasts and
+`warn` for nowcasts. It stops before the nowcast when the forecast fails. Log
+filenames include model ID, provider, cast, and pod identity so concurrent and
+sequential jobs do not overwrite one another.
