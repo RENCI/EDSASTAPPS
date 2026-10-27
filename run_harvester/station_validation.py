@@ -25,6 +25,8 @@ def validate_station_sets(data, metadata, requested=None, policy='fail'):
     Metadata is the source-confirmed station set. Requested stations absent from
     both source metadata and data are reported but are not treated as an output
     mismatch because Fort61 station lists may intentionally be supersets.
+    Source-confirmed all-fill columns are reported as data warnings because dry
+    ADCIRC nodes are valid, but they are not structural station-set mismatches.
     """
     if policy not in {'fail', 'warn'}:
         raise ValueError(f'Unknown station mismatch policy: {policy}')
@@ -48,11 +50,14 @@ def validate_station_sets(data, metadata, requested=None, policy='fail'):
         'data_without_metadata': sorted(data_ids-metadata_ids),
         'stations_without_valid_data': no_valid_data,
     }
+    # A column that is present in both data and metadata can legitimately be
+    # all fill (for example, an ADCIRC station on a dry node). Keep that
+    # condition visible without treating it as structural station loss.
     report['has_mismatch']=bool(
         report['metadata_without_data']
         or report['data_without_metadata']
-        or report['stations_without_valid_data']
     )
+    report['has_data_warning']=bool(report['stations_without_valid_data'])
     if report['has_mismatch'] and policy == 'fail':
         raise RuntimeError(f'ADCIRC station-set validation failed: {report}')
     return report

@@ -73,7 +73,10 @@ ADCIRC multiprovider reliability
 source-confirmed metadata station set against the emitted data station set
 before writing provider CSV files. Use `--station_mismatch_policy fail` to stop
 on a mismatch or `--station_mismatch_policy warn` to emit a warning and
-continue.
+continue. A source-confirmed station whose emitted column contains only fill
+values is reported as a data warning but is not a structural station-set
+mismatch. This permits expected dry-node output while retaining fatal forecast
+handling when metadata and data station sets disagree.
 
 `execute_multiprovider_run_harvest_adcirc.sh` uses `fail` for forecasts and
 `warn` for nowcasts. It stops before the nowcast when the forecast fails. Log
