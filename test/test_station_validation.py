@@ -38,14 +38,42 @@ class StationValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'CTIN7'):
             validate_station_sets(data, self.metadata, policy='fail')
 
-    def test_warn_policy_reports_missing_and_all_fill_stations(self):
+    def test_all_fill_station_warns_without_structural_mismatch(self):
         data=pd.DataFrame(
             {'CONTROL': [1.0, 2.0], 'CTIN7': [-99999, -99999]},
             index=self.index,
         )
+        report=validate_station_sets(data, self.metadata, policy='fail')
+        self.assertFalse(report['has_mismatch'])
+        self.assertTrue(report['has_data_warning'])
+        self.assertEqual(['CTIN7'], report['stations_without_valid_data'])
+
+    def test_warn_policy_reports_structural_mismatch(self):
+        data=pd.DataFrame({'CONTROL': [1.0, 2.0]}, index=self.index)
         report=validate_station_sets(data, self.metadata, policy='warn')
         self.assertTrue(report['has_mismatch'])
-        self.assertEqual(['CTIN7'], report['stations_without_valid_data'])
+        self.assertFalse(report['has_data_warning'])
+        self.assertEqual(['CTIN7'], report['metadata_without_data'])
+
+    def test_structural_mismatch_still_fails_when_another_station_is_all_fill(self):
+        data=pd.DataFrame({'CONTROL': [-99999, -99999]}, index=self.index)
+        with self.assertRaisesRegex(RuntimeError, 'CTIN7'):
+            validate_station_sets(data, self.metadata, policy='fail')
+
+    def test_requested_station_absent_from_source_metadata_is_nonfatal(self):
+        data=pd.DataFrame(
+            {'CONTROL': [1.0, 2.0], 'CTIN7': [3.0, 4.0]},
+            index=self.index,
+        )
+        report=validate_station_sets(
+            data,
+            self.metadata,
+            requested={'CONTROL', 'CTIN7', 'OUTSIDE_SOURCE'},
+            policy='fail',
+        )
+        self.assertFalse(report['has_mismatch'])
+        self.assertFalse(report['has_data_warning'])
+        self.assertEqual(['OUTSIDE_SOURCE'], report['requested_without_metadata'])
 
     def test_log_name_contains_job_identity(self):
         name=archived_log_name(

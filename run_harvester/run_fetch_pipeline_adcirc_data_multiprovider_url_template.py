@@ -285,7 +285,7 @@ def main(args):
         f'ADCIRC output station sets: provider={data_provider}, cast={cast_type}, '
         f'policy={args.station_mismatch_policy}, report={station_report}'
     )
-    if station_report['has_mismatch']:
+    if station_report['has_mismatch'] or station_report['has_data_warning']:
         utilities.log.warning(log_station_report)
     else:
         utilities.log.info(log_station_report)
